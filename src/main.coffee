@@ -93,22 +93,14 @@ limit = ( n, iterator ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @_descriptor_from_arguments = ( me, ic_entry, Q ) ->
-  if Q?
-    throw new Error "µ83476 positional arguments not supported" unless CND.isa_pod Q
-    arity = ( Object.keys Q ).length
-  else
-    arity = 0
-  #.........................................................................................................
-  if arity is 0 then  R  = ic_entry.arity[ 0 ] ? ic_entry.arity[ 'null' ]
-  else                R  = ic_entry.arity[ arity ]
-  R                     ?= ic_entry.arity[ 'null' ]
-  #.........................................................................................................
-  ### TAINT should devise a way to efficiently make sure keys of Q match signature ###
-  # debug '27276', xrpr Q
-  # debug '27276', xrpr R.signature
+  [ signature, kenning, ]         = IC.get_signature_and_kenning Q
+  is_void_signature               = kenning in [ '()', 'null', ]
+  if is_void_signature  then  R   = ic_entry[ '()'    ] ? ic_entry[ 'null' ]
+  else                        R   = ic_entry[ kenning ]
+  R                              ?= ic_entry[ 'null'  ]
   #.........................................................................................................
   unless R?
-    throw new Error "µ93832 calling method #{rpr ic_entry.name} with #{arity} arguments not implemented"
+    throw new Error "µ93832 calling method with arguments #{ic_entry.name} with signature #{kenning} not implemented"
   return R
 
 #-----------------------------------------------------------------------------------------------------------
