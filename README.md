@@ -18,7 +18,7 @@ ICQL takes **three pieces**: **(1) a database adapter** (which currently must be
 [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3) or something with a compatible API), **(2)
 a path to an SQLite DB file**, and **(2) a path to an ICQL source file** with statement definitions; it then
 binds together these three pieces to produce an object where the statement definitions have been turned into
-methods that execute queries against the DB.
+methods that perform queries against the DB.
 
 
 ## ICQL Installation
