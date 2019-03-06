@@ -13,7 +13,30 @@ Usage](#icql-usage).
 
 ## ICQL Installation
 
+```bash
+npm install icql
+```
+
 ## ICQL Usage
+
+ICQL is specifically geared towards using **(1)** [the SQLite Relational DB](http://sqlite.org/) by way of
+**(2)** [the `better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3) library for NodeJS. While it
+should be not too difficult to (fork and) adapt ICQL to work with other DB engines such as PostgreSQL, no
+concrete plans exist at the time of this writing. Understand that ICQL is still in its inceptive stage and,
+as such, may lack important features, contain bugs and experience breaking changes in the future.
+
+> FTTB all code examples below will be given in CoffeeScript. JavaScript users will have to mentally supply
+> some parentheses and semicolons.
+
+To use ICQL in your code, import the library and instantiate a `db` object:
+
+```coffee
+settings = {
+	connector:		require 'better-sqlite3' 	# optional, see below
+  db_path:      'path/to/my.sqlitedb' 		# must indicate where your database file is / will be created
+  icql_path: 		'path/to/my.icql' } 			# must indicate where your SQL statements file is
+```
+
 
 
 
@@ -33,7 +56,8 @@ Mismatch](http://wiki.c2.com/?ObjectRelationalImpedanceMismatch), namely [Object
 (ORMs)](https://en.wikipedia.org/wiki/Object-relational_mapping), are often a pain to work with, especially
 when queries grow beyond the level of complexity of `select * from products order by price limit 10;`.
 
-### Why You Don't Want to Use an ORM
+
+### Aside: Why You Don't Want to Use an ORM
 
 Anyone who has tried an ORM before knows that **an ORM will not save you from having to know and to write
 SQL; instead, you will have to learn a new dialect of SQL that comes with significantly more punctuation to
