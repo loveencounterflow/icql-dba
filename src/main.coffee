@@ -28,7 +28,7 @@ echo                      = CND.echo.bind CND
 xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infinity, maxArrayLength: Infinity, depth: Infinity, }
 #...........................................................................................................
 IC                        = require 'intercourse'
-Sqlite_db                 = require 'better-sqlite3'
+
 
 #===========================================================================================================
 # LOCAL METHODS
@@ -55,11 +55,14 @@ local_methods =
 #
 #-----------------------------------------------------------------------------------------------------------
 @bind = ( settings ) ->
+  ### TAINT should check connector API compatibility ###
+  throw new Error "µ94721 need settings.connector"  unless settings.connector?
   throw new Error "µ94721 need settings.db_path"    unless settings.db_path?
   throw new Error "µ94721 need settings.icql_path"  unless settings.icql_path?
   R                 = { $: {}, }
   R.$.settings      = assign {}, settings
-  R.$.db            = new Sqlite_db R.$.settings.db_path, R.$.settings.db_settings ? {}
+  ### TAINT consider to use `new`-less call convention (should be possible acc. to bsql3 docs) ###
+  R.$.db            = new connector R.$.settings.db_path, R.$.settings.db_settings ? {}
   R.$.sql           = await IC.read_definitions R.$.settings.icql_path
   @_bind_definitions R
   return R
