@@ -94,7 +94,7 @@ without promises / callbacks / whatever async. That's great (and works out fine 
 single-thread, in-process DB engine, so asynchronicity doesn't buy you anything within a single-threaded
 event-based VM like NodeJS).
 
-Queries return an iterator, so you can use a `for-of` loop in JavaScript or a `for-from` loop in
+Queries return an iterator, so you can use a `for`/`of` loop in JavaScript or a `for`/`from` loop in
 CoffeeScript to iterate over all results:
 
 ```js
@@ -109,10 +109,42 @@ for row from db.fetch_products { price_max: 400, }
   do_something_with row
 ```
 
+### `db.$`, the 'Special' Attribute
+
+The `db` object as constructed above will have a an attribute, `db.$`, called 'special', which in turn
+contains a number of members that are used internally and may be occasionally be useful for the user:
+
+* `db.$.query()` allows to perform ad-hoc queries against the database.
+
+* `db.$.limit()`, `db.$.single_row()`, `db.$.first_row()`, `db.$.all_rows()`, `db.$.first_value()` are
+  discussed in [Query Modifiers](#query-modifiers), below.
+
 
 ### Writing ICQL Statements
 
 TBW; see [the demo]() and the [InterCourse docs](https://github.com/loveencounterflow/intercourse).
+
+
+#### Definition Types
+
+* **`procedure`**—does not return anything and may contain any number of SQL statements.
+
+* **`query`**—returns a [JS
+  iterator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators) (to be
+  used in a JS `for`/`of` or CS `for`/`from` loop). These can be used with any kind of `select` statement
+  (trivially including those statements that return no rows at all).
+
+* **`single_row`**—returns a single row (not wrapped in an array). Currently, single-row queries *must*
+  return exactly one row (not zero rows and not more than one row); in the future, we may implement default
+  values and/or implement a `first_row` directive.
+
+* **`single_value`**—returns a single value (not wrapped in an array). Currently, single-value queries
+  *must* return exactly one row (not zero rows and not more than one row) with a single field; in the
+  future, we may implement default values and/or implement a `first_value` directive.
+
+#### Query Modifiers
+
+Query modifiers are convenience methods
 
 ## A Short Intro to YeSQL
 
