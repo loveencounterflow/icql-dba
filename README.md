@@ -32,9 +32,9 @@ To use ICQL in your code, import the library and instantiate a `db` object:
 
 ```coffee
 settings = {
-	connector:		require 'better-sqlite3' 	# optional, see below
-  db_path:      'path/to/my.sqlitedb' 		# must indicate where your database file is / will be created
-  icql_path: 		'path/to/my.icql' } 			# must indicate where your SQL statements file is
+  connector:    require 'better-sqlite3'  # optional, see below
+  db_path:      'path/to/my.sqlitedb'     # must indicate where your database file is / will be created
+  icql_path:    'path/to/my.icql' }       # must indicate where your SQL statements file is
 ```
 
 
@@ -72,14 +72,14 @@ statement ...
 
 ```sql
 select
-	users.fullname || ', ' || addresses.email_address as title
+  users.fullname || ', ' || addresses.email_address as title
 from
-	users,
-	addresses
-	where true
-		and ( users.id = addresses.user_id )
-		and ( users.name between 'm' and 'z' )
-		and ( addresses.email_address like '%@aol.com' or addresses.email_address like '%@msn.com' );
+  users,
+  addresses
+  where true
+    and ( users.id = addresses.user_id )
+    and ( users.name between 'm' and 'z' )
+    and ( addresses.email_address like '%@aol.com' or addresses.email_address like '%@msn.com' );
 ```
 
 ... into this contraption:
@@ -88,15 +88,15 @@ from
 select([(users.c.fullname + ", " + addresses.c.email_address).
     label('title')]).\
   where(
-		and_(
-	  	users.c.id == addresses.c.user_id,
-	  	users.c.name.between('m', 'z'),
-	  	or_(
-	  	  addresses.c.email_address.like('%@aol.com'),
-	  	  addresses.c.email_address.like('%@msn.com')
-	  		)
-			)
-  	)
+    and_(
+      users.c.id == addresses.c.user_id,
+      users.c.name.between('m', 'z'),
+      or_(
+        addresses.c.email_address.like('%@aol.com'),
+        addresses.c.email_address.like('%@msn.com')
+        )
+      )
+    )
 ```
 
 Observe how all those `A and B` terms have to be re-written as `and_( A, B )`, how the SQL keywords
