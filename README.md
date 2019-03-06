@@ -10,6 +10,16 @@ those readers who are unaware of YeSQL, there is a short [Intro to YeSQL](#a-sho
 may want to dive right into the sections on [ICQL Installation](#icql-installation) and [ICQL
 Usage](#icql-usage).
 
+ICQL is implemented on top of [InterCourse](https://github.com/loveencounterflow/intercourse) which is an
+SQL-agnostic library that does the parsing and cataloguing of 'functionality hunks' (i.e. named blocks of
+code that define how to accomplish tasks).
+
+ICQL takes **three pieces**: **(1) a database adapter** (which currently must be
+[`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3) or something with a compatible API), **(2)
+a path to an SQLite DB file**, and **(2) a path to an ICQL source file** with statement definitions; it then
+binds together these three pieces to produce an object where the statement definitions have been turned into
+methods that execute queries against the DB.
+
 
 ## ICQL Installation
 
@@ -47,13 +57,27 @@ db = await ICQL.bind settings             # NB that the `ICQL.bind()` function i
 
 ### Qerying
 
-The `db` object now contains all the methods you defined in your `*icql` file. Each method will be
-either a `procedure` or a `query`, the difference being that
+After doing `db = await ICQL.bind settings` the new `db` object contains all the methods you defined in your
+`*icql` file. Each method will be either a `procedure` or a `query`, the difference being that
 
 * **procedures consists of any number of SQL statements that do not produce any output**; these may be used
   to create, modify and drop tables and views, insert and delete data and so on; on the other hand,
 
 * **queries consist of a single SQL `select` statement with any number of resulting records**.
+
+Here are two simple ICQL definitions:
+
+```sql
+procedure drop_tables:
+  drop table if exists foo;
+  drop table if exists bar;
+
+query fetch_products( price_max ):
+  select * from products where price <= $price_max;
+
+query fetch_products( price_min, price_max ):
+  select * from products where price between price_min and $price_max;
+```
 
 Owing to the [synchronous nature of
 BetterSQLite](https://github.com/JoshuaWise/better-sqlite3#why-should-i-use-this-instead-of-node-sqlite3),
@@ -61,8 +85,7 @@ BetterSQLite](https://github.com/JoshuaWise/better-sqlite3#why-should-i-use-this
 
 ```coffee
 db = ...
-db.drop_table_foo()
-db.drop_table_bar()
+db.drop_tables()
 db.create_table_bar()
 db.populate_table_bar()
 ```
@@ -89,6 +112,7 @@ for row from db.fetch_products { price_max: 400, }
 
 ### Writing ICQL Statements
 
+TBW; see [the demo]() and the [InterCourse docs](https://github.com/loveencounterflow/intercourse).
 
 ## A Short Intro to YeSQL
 
