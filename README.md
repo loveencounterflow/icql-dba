@@ -10,6 +10,13 @@ those readers who are unaware of YeSQL, there is a short [Intro to YeSQL](#a-sho
 may want to dive right into the sections on [ICQL Installation](#icql-installation) and [ICQL
 Usage](#icql-usage).
 
+
+## ICQL Installation
+
+## ICQL Usage
+
+
+
 ## A Short Intro to YeSQL
 
 YeSQL originated, I believe, at some point in time in the 2010s as a reaction on the then-viral
@@ -25,10 +32,19 @@ implemented on top of a relational DB, and **(2)** one popular responses to the 
 Mismatch](http://wiki.c2.com/?ObjectRelationalImpedanceMismatch), namely [Object/Relational Mappers
 (ORMs)](https://en.wikipedia.org/wiki/Object-relational_mapping), are often a pain to work with, especially
 when queries grow beyond the level of complexity of `select * from products order by price limit 10;`.
+
+### Why You Don't Want to Use an ORM
+
 Anyone who has tried an ORM before knows that **an ORM will not save you from having to know and to write
 SQL; instead, you will have to learn a new dialect of SQL that comes with significantly more punctuation to
 write, more edge cases to be aware of, and more complexities in setting up, configuring and using it** when
-compared to the traditional sending-strings-of-SQL-to-the-DB approach.
+compared to the traditional sending-strings-of-SQL-to-the-DB approach. For those who insist that 'but I want
+to write my queries in my day-to-day programming language' I say that sure, you can totally do that, but
+then you'll have to use the syntax of that language as a matter of course, too. Turns out it's hard to come
+up with a way to express SQL-ish statements in C-like syntaxes in a way that does not look like willfully
+obfuscated code. Below is one (I find: typical) example from [a leading ORM project for
+Python](https://www.sqlalchemy.org). If you insist on using an ORM, you will have to turn this simple SQL
+statement ...
 
 ```sql
 select
@@ -42,6 +58,7 @@ from
 		and ( addresses.email_address like '%@aol.com' or addresses.email_address like '%@msn.com' );
 ```
 
+... into this contraption:
 
 ```py
 select([(users.c.fullname + ", " + addresses.c.email_address).
@@ -58,9 +75,19 @@ select([(users.c.fullname + ", " + addresses.c.email_address).
   	)
 ```
 
+Observe how all those `A and B` terms have to be re-written as `and_( A, B )`, how the SQL keywords
+`between` and `like` get suddenly turned into method calls on columns (wat?). In this particular framework,
+you will have to dot-chain every term to the preceding one, producing one long spaghetti of code. Frankly,
+no gains to be seen, and it only gets worse and worse from down here. For this particular query, the SQL
+`from` clause is proudly auto-supplied by the ORM; in case you have to make that it explicit, though, you
+have to tack on something like
+
+```py
+(...).select_from(table('users')).select_from(table('addresses'))
+```
+
+How this is any better than `from users, addresses` totally escapes me.
 
 
 
-## ICQL Installation
 
-## ICQL Usage
