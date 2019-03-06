@@ -19,6 +19,8 @@ npm install icql
 
 ## ICQL Usage
 
+### Instantiation
+
 ICQL is specifically geared towards using **(1)** [the SQLite Relational DB](http://sqlite.org/) by way of
 **(2)** [the `better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3) library for NodeJS. While it
 should be not too difficult to (fork and) adapt ICQL to work with other DB engines such as PostgreSQL, no
@@ -31,13 +33,61 @@ as such, may lack important features, contain bugs and experience breaking chang
 To use ICQL in your code, import the library and instantiate a `db` object:
 
 ```coffee
+ICQL          = require 'icql'
+Better_sqlite = require 'better-sqlite3'
+
 settings = {
-  connector:    require 'better-sqlite3'  # optional, see below
+  connector:    Better_sqlite             # optional, see below
   db_path:      'path/to/my.sqlitedb'     # must indicate where your database file is / will be created
   icql_path:    'path/to/my.icql' }       # must indicate where your SQL statements file is
+
+# create an object with methods to query against your SQLite DB:
+db = await ICQL.bind settings             # NB that the `ICQL.bind()` function is currently asynchronous
+```
+
+### Qerying
+
+The `db` object now contains all the methods you defined in your `*icql` file. Each method will be
+either a `procedure` or a `query`, the difference being that
+
+* **procedures consists of any number of SQL statements that do not produce any output**; these may be used
+  to create, modify and drop tables and views, insert and delete data and so on; on the other hand,
+
+* **queries consist of a single SQL `select` statement with any number of resulting records**.
+
+Owing to the [synchronous nature of
+BetterSQLite](https://github.com/JoshuaWise/better-sqlite3#why-should-i-use-this-instead-of-node-sqlite3),
+**all procedures and queries are synchronous**; that means you can simply write stuff like
+
+```coffee
+db = ...
+db.drop_table_foo()
+db.drop_table_bar()
+db.create_table_bar()
+db.populate_table_bar()
+```
+
+without promises / callbacks / whatever async. That's great (and works out fine because SQLite is a
+single-thread, in-process DB engine, so asynchronicity doesn't buy you anything within a single-threaded
+event-based VM like NodeJS).
+
+Queries return an iterator, so you can use a `for-of` loop in JavaScript or a `for-from` loop in
+CoffeeScript to iterate over all results:
+
+```js
+// JS
+for ( row of db.fetch_products { price_max: 400, } ) {
+  do_something_with( row ); }
+```
+
+```coffee
+# CS
+for row from db.fetch_products { price_max: 400, }
+  do_something_with row
 ```
 
 
+### Writing ICQL Statements
 
 
 ## A Short Intro to YeSQL
