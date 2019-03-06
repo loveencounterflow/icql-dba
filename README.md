@@ -114,11 +114,17 @@ for row from db.fetch_products { price_max: 400, }
 The `db` object as constructed above will have a an attribute, `db.$`, called 'special', which in turn
 contains a number of members that are used internally and may be occasionally be useful for the user:
 
-* `db.$.query()` allows to perform ad-hoc queries against the database.
+* `db.$.limit()`, `db.$.single_row()`, `db.$.first_row()`, `db.$.single_value()`, `db.$.first_value()`,
+  `db.$.all_rows()` are discussed in [Query Modifiers](#query-modifiers), below.
 
-* `db.$.limit()`, `db.$.single_row()`, `db.$.first_row()`, `db.$.all_rows()`, `db.$.first_value()` are
-  discussed in [Query Modifiers](#query-modifiers), below.
-
+* **`db.$.load    path`**—load an extension.
+* **`db.$.prepare sql`**—prepare a statement. Returns a `better-sqlite3` `statement` instance.
+* **`db.$.execute sql`**—execute any number of SQL statements.
+* **`db.$.query   sql, P...`**—perform a single `select` statement. Returns an iterator over the result set's
+  rows. When the `sql` text has placeholders, accepts additional values.
+* **`db.$.settings`**—the settings that the `db` object was instantiated with.
+* **`db.$.db`**—the underlying `better-sqlite3` object that is used to implement all functionality.
+* **`db.$.sql`**—an object with metadata that describes the result of parsing the definition source file.
 
 ### Writing ICQL Statements
 
@@ -134,17 +140,24 @@ TBW; see [the demo]() and the [InterCourse docs](https://github.com/loveencounte
   used in a JS `for`/`of` or CS `for`/`from` loop). These can be used with any kind of `select` statement
   (trivially including those statements that return no rows at all).
 
-* **`single_row`**—returns a single row (not wrapped in an array). Currently, single-row queries *must*
-  return exactly one row (not zero rows and not more than one row); in the future, we may implement default
-  values and/or implement a `first_row` directive.
+* **`single_row`**—returns a single row (not wrapped in an array). An error is thrown in case query did not
+  return any rows.
 
-* **`single_value`**—returns a single value (not wrapped in an array). Currently, single-value queries
-  *must* return exactly one row (not zero rows and not more than one row) with a single field; in the
-  future, we may implement default values and/or implement a `first_value` directive.
+* **`single_value`**—returns a single value (not wrapped in an array). An error is thrown in case query did
+  not return any rows.
 
 #### Query Modifiers
 
-Query modifiers are convenience methods
+Query modifiers are convenience methods to transform the result set. Because they exhaust the iterator
+that is returned from a `query`, only a single method may be used; if you have to iterate more than once
+over a given result set, use `db.$.all_rows db.my_query ...`.
+
+* **`db.$.limit         n, iterator`**—returns an iterator over the first `n` rows;
+* **`db.$.all_rows      iterator`**—returns a list of all rows;
+* **`db.$.single_row    iterator`**—like `first_row`, but throws on `undefined`;
+* **`db.$.first_row     iterator`**—returns first row, or `undefined`;
+* **`db.$.single_value  iterator`**—like `first_value`, but throws on `undefined`;
+* **`db.$.first_value   iterator`**—returns first field of first row, or `undefined`.
 
 ## A Short Intro to YeSQL
 
