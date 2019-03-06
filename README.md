@@ -13,11 +13,12 @@ Usage](#icql-usage).
 ## A Short Intro to YeSQL
 
 YeSQL originated, I believe, at some point in time in the 2010s as a reaction on the then-viral
-[NoSQL](https://duckduckgo.com/?q=NoSQL&t=lm&ia=software) fad. The claims of the NoSQL people basically was
-(and is) that classical (read 'mainframe', 'dinosaur', 'dusty') Relational Database Management Systems
-(RDBMSs) (and the premises they were built on) is outmoded in a day and age where horizontal scaling of data
-sources and agility is everything (I'm shortcutting this a lot, but this is not a primer on the Relational
-Model or NoSQL).
+[NoSQL](https://duckduckgo.com/?q=NoSQL&t=lm&ia=software) fad (see [the `yesql` library for Clojure from
+2013 which may or may not have started the 'YeSQL' meme](https://github.com/krisajenkins/yesql)). The claims
+of the NoSQL people basically was (and is) that classical (read 'mainframe', 'dinosaur', 'dusty') Relational
+Database Management Systems (RDBMSs) (and the premises they were built on) is outmoded in a day and age
+where horizontal scaling of data sources and agility is everything (I'm shortcutting this a lot, but this is
+not a primer on the Relational Model or NoSQL).
 
 Where NoSQL was right is where they claimed that **(1)** key/value stores are not necessarily best
 implemented on top of a relational DB, and **(2)** one popular responses to the [Object-Relational Impedance
@@ -29,11 +30,36 @@ SQL; instead, you will have to learn a new dialect of SQL that comes with signif
 write, more edge cases to be aware of, and more complexities in setting up, configuring and using it** when
 compared to the traditional sending-strings-of-SQL-to-the-DB approach.
 
+```sql
+select
+	users.fullname || ', ' || addresses.email_address as title
+from
+	users,
+	addresses
+	where true
+		and ( users.id = addresses.user_id )
+		and ( users.name between 'm' and 'z' )
+		and ( addresses.email_address like '%@aol.com' or addresses.email_address like '%@msn.com' );
+```
 
 
-nodes that live somewhere in the network
+```py
+select([(users.c.fullname + ", " + addresses.c.email_address).
+    label('title')]).\
+  where(
+		and_(
+	  	users.c.id == addresses.c.user_id,
+	  	users.c.name.between('m', 'z'),
+	  	or_(
+	  	  addresses.c.email_address.like('%@aol.com'),
+	  	  addresses.c.email_address.like('%@msn.com')
+	  		)
+			)
+  	)
+```
 
-https://github.com/krisajenkins/yesql
+
+
 
 ## ICQL Installation
 
