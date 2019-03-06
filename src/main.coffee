@@ -30,35 +30,37 @@ xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infi
 IC                        = require 'intercourse'
 Sqlite_db                 = require 'better-sqlite3'
 
+#===========================================================================================================
+# LOCAL METHODS
 #-----------------------------------------------------------------------------------------------------------
-limit = ( n, iterator ) ->
-  count = 0
-  for x from iterator
-    return if count >= n
-    count += +1
-    yield x
-  return
+local_methods =
 
-# #-----------------------------------------------------------------------------------------------------------
-# @get_settings = ->
-#   ### TAINT path within node_modules might differ ###
-#   ### TAINT extensions should conceivably be configured in `*.icql` file or similar ###
-#   # R.db_path   = join_path __dirname, '../../db/data.db'
-#   R                 = {}
-#   R.sqlitemk_path   = join_path __dirname, '../../../../sqlite-for-mingkwai-ime'
-#   R.db_path         = join_path __dirname, '../../src/experiments/demo-using-intercourse.db'
-#   R.icql_path       = join_path __dirname, '../../src/experiments/using-intercourse-with-sqlite.icql'
-#   return R
+  #---------------------------------------------------------------------------------------------------------
+  limit: ( me, n, iterator ) ->
+    count = 0
+    for x from iterator
+      return if count >= n
+      count += +1
+      yield x
+    return
 
+  #---------------------------------------------------------------------------------------------------------
+  load:     ( me, path      ) -> me.$.db.loadExtension  path
+  prepare:  ( me, sql       ) -> me.$.db.prepare        sql
+  execute:  ( me, sql       ) -> me.$.db.exec           sql
+  query:    ( me, sql, P... ) -> ( @prepare sql ).iterate P...
+
+
+#===========================================================================================================
+#
 #-----------------------------------------------------------------------------------------------------------
 @bind = ( settings ) ->
-  throw new Error "µ94721 need settings.db_path" unless settings.db_path?
-  throw new Error "µ94721 need settings.icql_path" unless settings.icql_path?
-  R                 = {}
-  R.settings        = assign {}, settings
-  R.db              = new Sqlite_db R.settings.db_path, R.settings.db_settings ? {}
-  R.sql             = await IC.read_definitions R.settings.icql_path
-  # debug '22233', R.sql; xxx
+  throw new Error "µ94721 need settings.db_path"    unless settings.db_path?
+  throw new Error "µ94721 need settings.icql_path"  unless settings.icql_path?
+  R                 = { $: {}, }
+  R.$.settings      = assign {}, settings
+  R.$.db            = new Sqlite_db R.$.settings.db_path, R.$.settings.db_settings ? {}
+  R.$.sql           = await IC.read_definitions R.$.settings.icql_path
   @_bind_definitions R
   return R
 
@@ -67,12 +69,13 @@ limit = ( n, iterator ) ->
   check_unique = ( name ) ->
     throw new Error "µ11292 name collision: #{rpr name} already defined" if me[ name ]?
   #.........................................................................................................
-  for name in 'load prepare execute query'.split /\s+/
-    check_unique name
-    do ( name ) =>
-      me[ name ] = ( P... ) => @[ name ] me, P...
+  for name, local_method of local_methods
+    do ( name, local_method ) ->
+      check_unique name
+      local_method = local_method.bind me.$
+      me.$[ name ] = ( ( P... ) -> local_method me, P... ).bind me.$
   #.........................................................................................................
-  for name, ic_entry of me.sql
+  for name, ic_entry of me.$.sql
     ### TAINT fix in intercourse ###
     ic_entry.name = name
     check_unique name
@@ -83,13 +86,13 @@ limit = ( n, iterator ) ->
 #-----------------------------------------------------------------------------------------------------------
 @_method_from_ic_entry = ( me, ic_entry ) ->
   endpoint = switch ic_entry.type
-    when 'procedure'  then @execute
-    when 'query'      then @query
+    when 'procedure'  then me.$.execute
+    when 'query'      then me.$.query
     else throw new Error "µ11109 unknown icSQL type #{rpr ic_entry.type}"
   return ( Q ) =>
     descriptor = @_descriptor_from_arguments me, ic_entry, Q
-    return endpoint me, descriptor.text, Q if Q?
-    return endpoint me, descriptor.text
+    return endpoint descriptor.text, Q if Q?
+    return endpoint descriptor.text
 
 #-----------------------------------------------------------------------------------------------------------
 @_descriptor_from_arguments = ( me, ic_entry, Q ) ->
@@ -103,49 +106,6 @@ limit = ( n, iterator ) ->
     throw new Error "µ93832 calling method with arguments #{ic_entry.name} with signature #{kenning} not implemented"
   return R
 
-#-----------------------------------------------------------------------------------------------------------
-@load     = ( me, path      ) => me.db.loadExtension path
-@prepare  = ( me, sql       ) => me.db.prepare sql
-@execute  = ( me, sql       ) => me.db.exec    sql
-@query    = ( me, sql, P... ) => ( @prepare me, sql ).iterate P...
-
-
-#-----------------------------------------------------------------------------------------------------------
-@demo = ->
-  settings  = @get_settings()
-  db        = await ICQL.bind settings
-  db.load join_path settings.sqlitemk_path, 'extensions/amatch.so'
-  db.load join_path settings.sqlitemk_path, 'extensions/csv.so'
-  # R.db.exec """select load_extension( 'fts5' );"""
-  db.import_table_texnames()
-  db.create_token_tables()
-  db.populate_token_tables()
-  # # whisper '-'.repeat 108
-  # # info row for row from db.fetch_texnames()
-  whisper '-'.repeat 108
-  urge 'fetch_texnames';        info xrpr row for row from db.fetch_texnames { limit: 100, }
-  # urge 'fetch_rows_of_txftsci'; info xrpr row for row from db.fetch_rows_of_txftsci { limit: 5, }
-  # urge 'fetch_rows_of_txftscs'; info xrpr row for row from db.fetch_rows_of_txftscs { limit: 5, }
-  urge 'fetch_stats'; info xrpr row for row from db.fetch_stats()
-  whisper '-'.repeat 108
-  urge 'fetch_token_matches'
-  whisper '-'.repeat 108
-  info ( xrpr row ) for row from db.fetch_token_matches { q: 'Iota', limit: 10, }
-  whisper '-'.repeat 108
-  info ( xrpr row ) for row from db.fetch_token_matches { q: 'acute', limit: 10, }
-  whisper '-'.repeat 108
-  info ( xrpr row ) for row from db.fetch_token_matches { q: 'u', limit: 10, }
-  whisper '-'.repeat 108
-  info ( xrpr row ) for row from limit 3, db.fetch_token_matches { q: 'mathbb', limit: 10, }
-  # debug ( k for k of iterator )
-  return null
-
-
-
-
-############################################################################################################
-unless module.parent?
-  @demo()
 
 
 
