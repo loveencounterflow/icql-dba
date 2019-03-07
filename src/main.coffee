@@ -45,32 +45,87 @@ local_methods =
     return
 
   #---------------------------------------------------------------------------------------------------------
-  load:     ( me, path      ) -> me.$.db.loadExtension  path
-  prepare:  ( me, sql       ) -> me.$.db.prepare        sql
-  execute:  ( me, sql       ) -> me.$.db.exec           sql
-  query:    ( me, sql, P... ) -> ( @prepare sql ).iterate P...
+  single_row:   ( me, iterator ) ->
+    throw new Error "µ33833 expected at least one row, got none" if ( R = @first_row iterator ) is undefined
+    return R
 
+  #---------------------------------------------------------------------------------------------------------
+  all_first_values: ( me, iterator ) ->
+    R = []
+    for row from iterator
+      for key, value of row
+        R.push value
+        break
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  first_row:    ( me, iterator ) -> return row for row from iterator
+  ### TAINT must ensure order of keys in row is same as order of fields in query ###
+  single_value: ( me, iterator ) -> return value for key, value of @single_row iterator
+  first_value:  ( me, iterator ) -> return value for key, value of @first_row iterator
+  all_rows:     ( me, iterator ) -> [ iterator..., ]
+  #---------------------------------------------------------------------------------------------------------
+  load:     ( me, path      ) -> me.$.db.loadExtension  path
+
+  #---------------------------------------------------------------------------------------------------------
+  prepare:  ( me, sql       ) ->
+    info '33983-1', ( sql )
+    return me.$.db.prepare        sql
+    # try
+    #   return me.$.db.prepare        sql
+    # catch error
+    #   debug '33763', ( k for k of error )
+    #   throw error
+    # return null
+
+  #---------------------------------------------------------------------------------------------------------
+  query:    ( me, sql, P... ) ->
+    info '33983-2', ( sql ), P
+    statement = @prepare sql
+    return statement.iterate P...
+    # try
+    #   statement = @prepare sql
+    # catch error
+    #   debug '33983-3', ( k for k of error )
+    # try
+    #   return statement.iterate P...
+    # catch error
+    #   debug '33983-4', ( k for k of error )
+    #   throw error
+    # return null
+
+  #---------------------------------------------------------------------------------------------------------
+  execute:  ( me, sql       ) -> me.$.db.exec           sql
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
 @bind = ( settings ) ->
-  ### TAINT should check connector API compatibility ###
   throw new Error "µ94721 need settings.connector"  unless settings.connector?
   throw new Error "µ94721 need settings.db_path"    unless settings.db_path?
   throw new Error "µ94721 need settings.icql_path"  unless settings.icql_path?
-  R                 = { $: {}, }
-  R.$.settings      = assign {}, settings
-  ### TAINT consider to use `new`-less call convention (should be possible acc. to bsql3 docs) ###
-  R.$.db            = new settings.connector R.$.settings.db_path, R.$.settings.db_settings ? {}
-  R.$.sql           = IC.read_definitions R.$.settings.icql_path
-  @_bind_definitions R
-  return R
+  me            = { $: {}, }
+  # me.$.settings = assign {}, settings
+  @connect                    me, settings.connector, settings.db_path, settings.db_settings
+  @definitions_from_path_sync me, me.$.settings.icql_path
+  @bind_definitions           me
+  return me
 
 #-----------------------------------------------------------------------------------------------------------
-@_bind_definitions = ( me ) ->
+### TAINT should check connector API compatibility ###
+### TAINT consider to use `new`-less call convention (should be possible acc. to bsql3 docs) ###
+@connect = ( me, connector, db_path, db_settings = {} ) ->
+  return ( me.$ ?= {} ).db  = new connector db_path, db_settings
+
+#-----------------------------------------------------------------------------------------------------------
+@definitions_from_path_sync = ( me, icql_path ) ->
+  return ( me.$ ?= {} ).sql = IC.definitions_from_path_sync icql_path
+
+#-----------------------------------------------------------------------------------------------------------
+@bind_definitions = ( me ) ->
   check_unique = ( name ) ->
     throw new Error "µ11292 name collision: #{rpr name} already defined" if me[ name ]?
+  me.$ ?= {}
   #.........................................................................................................
   for name, local_method of local_methods
     do ( name, local_method ) ->
