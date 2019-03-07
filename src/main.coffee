@@ -107,7 +107,7 @@ local_methods =
   me            = { $: {}, }
   # me.$.settings = assign {}, settings
   @connect                    me, settings.connector, settings.db_path, settings.db_settings
-  @definitions_from_path_sync me, me.$.settings.icql_path
+  @definitions_from_path_sync me, settings.icql_path
   @bind_definitions           me
   return me
 
