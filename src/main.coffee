@@ -62,8 +62,8 @@ local_methods =
   R                 = { $: {}, }
   R.$.settings      = assign {}, settings
   ### TAINT consider to use `new`-less call convention (should be possible acc. to bsql3 docs) ###
-  R.$.db            = new connector R.$.settings.db_path, R.$.settings.db_settings ? {}
-  R.$.sql           = await IC.read_definitions R.$.settings.icql_path
+  R.$.db            = new settings.connector R.$.settings.db_path, R.$.settings.db_settings ? {}
+  R.$.sql           = IC.read_definitions R.$.settings.icql_path
   @_bind_definitions R
   return R
 

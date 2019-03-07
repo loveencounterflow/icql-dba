@@ -44,20 +44,18 @@ To use ICQL in your code, import the library and instantiate a `db` object:
 
 ```coffee
 ICQL          = require 'icql'
-Better_sqlite = require 'better-sqlite3'
 
 settings = {
-  connector:    Better_sqlite             # optional, see below
+  connector:    require 'better-sqlite3'  # must give a `better-sqlite3`-compatible object
   db_path:      'path/to/my.sqlitedb'     # must indicate where your database file is / will be created
   icql_path:    'path/to/my.icql' }       # must indicate where your SQL statements file is
 
-# create an object with methods to query against your SQLite DB:
-db = await ICQL.bind settings             # NB that the `ICQL.bind()` function is currently asynchronous
+db = ICQL.bind settings                   # create an object with methods to query against your SQLite DB
 ```
 
 ### Qerying
 
-After doing `db = await ICQL.bind settings` the new `db` object contains all the methods you defined in your
+After doing `db = ICQL.bind settings` the new `db` object contains all the methods you defined in your
 `*icql` file. Each method will be either a `procedure` or a `query`, the difference being that
 
 * **procedures consists of any number of SQL statements that do not produce any output**; these may be used
