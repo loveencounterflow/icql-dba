@@ -113,7 +113,7 @@ The `db` object as constructed above will have a an attribute, `db.$`, called 's
 contains a number of members that are used internally and may be occasionally be useful for the user:
 
 * `db.$.limit()`, `db.$.single_row()`, `db.$.first_row()`, `db.$.single_value()`, `db.$.first_value()`,
-  `db.$.all_rows()` are discussed in [Query Modifiers](#query-modifiers), below.
+  `db.$.all_rows()`, `db.$.all_first_values()` are discussed in [Query Modifiers](#query-modifiers), below.
 
 * **`db.$.load    path`**—load an extension.
 * **`db.$.prepare sql`**—prepare a statement. Returns a `better-sqlite3` `statement` instance.
@@ -138,11 +138,12 @@ TBW; see [the demo]() and the [InterCourse docs](https://github.com/loveencounte
   used in a JS `for`/`of` or CS `for`/`from` loop). These can be used with any kind of `select` statement
   (trivially including those statements that return no rows at all).
 
-* **`single_row`**—returns a single row (not wrapped in an array). An error is thrown in case query did not
+<!-- * **`single_row`**—returns a single row (not wrapped in an array). An error is thrown in case query did not
   return any rows.
 
 * **`single_value`**—returns a single value (not wrapped in an array). An error is thrown in case query did
   not return any rows.
+ -->
 
 #### Query Modifiers
 
@@ -150,12 +151,15 @@ Query modifiers are convenience methods to transform the result set. Because the
 that is returned from a `query`, only a single method may be used; if you have to iterate more than once
 over a given result set, use `db.$.all_rows db.my_query ...`.
 
-* **`db.$.limit         n, iterator`**—returns an iterator over the first `n` rows;
-* **`db.$.all_rows      iterator`**—returns a list of all rows;
-* **`db.$.single_row    iterator`**—like `first_row`, but throws on `undefined`;
-* **`db.$.first_row     iterator`**—returns first row, or `undefined`;
-* **`db.$.single_value  iterator`**—like `first_value`, but throws on `undefined`;
-* **`db.$.first_value   iterator`**—returns first field of first row, or `undefined`.
+* **`db.$.limit             n, iterator`**—returns an iterator over the first `n` rows;
+* **`db.$.all_rows          iterator`**—returns a list of all rows;
+* **`db.$.single_row        iterator`**—like `first_row`, but throws on `undefined`;
+* **`db.$.first_row         iterator`**—returns first row, or `undefined`;
+* **`db.$.single_value      iterator`**—like `first_value`, but throws on `undefined`;
+* **`db.$.first_value       iterator`**—returns first field of first row, or `undefined`.
+* **`db.$.all_first_values  iterator`**—returns a list with the values of the first field of each row.
+  Useful to turn queries like `select product_id from products order by price desc limit 100` into a flat
+  list of values.
 
 ## A Short Intro to YeSQL
 
@@ -189,14 +193,14 @@ statement ...
 
 ```sql
 select
-  users.fullname || ', ' || addresses.email_address as title
-from
-  users,
-  addresses
-  where true
-    and ( users.id = addresses.user_id )
-    and ( users.name between 'm' and 'z' )
-    and ( addresses.email_address like '%@aol.com' or addresses.email_address like '%@msn.com' );
+    users.fullname || ', ' || addresses.email_address as title
+  from
+    users,
+    addresses
+    where true
+      and ( users.id = addresses.user_id )
+      and ( users.name between 'm' and 'z' )
+      and ( addresses.email_address like '%@aol.com' or addresses.email_address like '%@msn.com' );
 ```
 
 ... into this contraption:
