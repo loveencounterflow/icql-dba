@@ -27,6 +27,6 @@
   },
   "dependencies": {
     "cnd": "^4.5.0",
-    "intercourse": "^2.0.3"
+    "intercourse": "^3.0.0"
   }
 }
