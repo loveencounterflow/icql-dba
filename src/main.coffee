@@ -130,8 +130,15 @@ local_methods =
   for name, local_method of local_methods
     do ( name, local_method ) ->
       check_unique name
-      local_method = local_method.bind me.$
-      me.$[ name ] = ( ( P... ) -> local_method me, P... ).bind me.$
+      local_method  = local_method.bind me.$
+      method        = ( P... ) ->
+        try
+          local_method me, P...
+        catch error
+          warn "when trying to call method #{name} with #{xrpr P}"
+          warn "an error occurred: #{error.message}"
+          throw error
+      me.$[ name ]  = method.bind me.$
   #.........................................................................................................
   for name, ic_entry of me.$.sql
     ### TAINT fix in intercourse ###
