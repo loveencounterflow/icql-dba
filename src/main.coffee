@@ -59,43 +59,50 @@ local_methods =
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  first_row:    ( me, iterator ) -> return row for row from iterator
+  first_values: ( me, iterator ) ->
+    R = []
+    for row from iterator
+      for key, value of row
+        yield value
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  first_row:    ( me, iterator  ) -> return row for row from iterator
   ### TAINT must ensure order of keys in row is same as order of fields in query ###
-  single_value: ( me, iterator ) -> return value for key, value of @single_row iterator
-  first_value:  ( me, iterator ) -> return value for key, value of @first_row iterator
-  all_rows:     ( me, iterator ) -> [ iterator..., ]
-  #---------------------------------------------------------------------------------------------------------
-  load:     ( me, path      ) -> me.$.db.loadExtension  path
+  single_value: ( me, iterator  ) -> return value for key, value of @single_row iterator
+  first_value:  ( me, iterator  ) -> return value for key, value of @first_row iterator
+  all_rows:     ( me, iterator  ) -> [ iterator..., ]
 
   #---------------------------------------------------------------------------------------------------------
-  prepare:  ( me, sql       ) ->
-    info '33983-1', ( sql )
-    return me.$.db.prepare        sql
-    # try
-    #   return me.$.db.prepare        sql
-    # catch error
-    #   debug '33763', ( k for k of error )
-    #   throw error
-    # return null
-
-  #---------------------------------------------------------------------------------------------------------
-  query:    ( me, sql, P... ) ->
-    info '33983-2', ( sql ), P
+  query: ( me, sql, P... ) ->
     statement = @prepare sql
     return statement.iterate P...
-    # try
-    #   statement = @prepare sql
-    # catch error
-    #   debug '33983-3', ( k for k of error )
-    # try
-    #   return statement.iterate P...
-    # catch error
-    #   debug '33983-4', ( k for k of error )
-    #   throw error
-    # return null
 
   #---------------------------------------------------------------------------------------------------------
-  execute:  ( me, sql       ) -> me.$.db.exec           sql
+  prepare:        ( me, P...  ) -> me.$.db.prepare          P...
+  aggregate:      ( me, P...  ) -> me.$.db.aggregate        P...
+  backup:         ( me, P...  ) -> me.$.db.backup           P...
+  checkpoint:     ( me, P...  ) -> me.$.db.checkpoint       P...
+  close:          ( me, P...  ) -> me.$.db.close            P...
+  execute:        ( me, P...  ) -> me.$.db.exec             P...
+  function:       ( me, P...  ) -> me.$.db.function         P...
+  load:           ( me, P...  ) -> me.$.db.loadExtension    P...
+  pragma:         ( me, P...  ) -> me.$.db.pragma           P...
+  transaction:    ( me, P...  ) -> me.$.db.transaction      P...
+  #.........................................................................................................
+  as_identifier:  ( me, text  ) -> '"' + ( text.replace /"/g, '""' ) + '"'
+  ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
+  primary key index in SQLite) ###
+  catalog:        ( me        ) -> @query "select * from sqlite_master order by type desc, name;"
+
+  #---------------------------------------------------------------------------------------------------------
+  clear: ( me ) ->
+    count = 0
+    for { type, name, } in @all_rows @catalog()
+      statement = "drop #{type} if exists #{@as_identifier name};"
+      me.$.execute statement
+      count += +1
+    return count
 
 #===========================================================================================================
 #
@@ -115,11 +122,13 @@ local_methods =
 ### TAINT should check connector API compatibility ###
 ### TAINT consider to use `new`-less call convention (should be possible acc. to bsql3 docs) ###
 @connect = ( me, connector, db_path, db_settings = {} ) ->
-  return ( me.$ ?= {} ).db  = new connector db_path, db_settings
+  ( me.$ ?= {} ).db  = new connector db_path, db_settings
+  return me
 
 #-----------------------------------------------------------------------------------------------------------
 @definitions_from_path_sync = ( me, icql_path ) ->
-  return ( me.$ ?= {} ).sql = IC.definitions_from_path_sync icql_path
+  ( me.$ ?= {} ).sql = IC.definitions_from_path_sync icql_path
+  return me
 
 #-----------------------------------------------------------------------------------------------------------
 @bind_definitions = ( me ) ->
@@ -146,7 +155,7 @@ local_methods =
     check_unique name
     me[ name ] = @_method_from_ic_entry me, ic_entry
   #.........................................................................................................
-  return null
+  return me
 
 #-----------------------------------------------------------------------------------------------------------
 @_method_from_ic_entry = ( me, ic_entry ) ->
@@ -168,7 +177,7 @@ local_methods =
   R                              ?= ic_entry[ 'null'  ]
   #.........................................................................................................
   unless R?
-    throw new Error "µ93832 calling method with arguments #{ic_entry.name} with signature #{kenning} not implemented"
+    throw new Error "µ93832 calling method #{rpr ic_entry.name} with signature #{kenning} not implemented"
   return R
 
 
