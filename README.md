@@ -107,13 +107,30 @@ for row from db.fetch_products { price_max: 400, }
   do_something_with row
 ```
 
+Under the hood, the equivalent of the following is performed:
+
+```coffee
+query_entry = db.$.sql.fetch_products[ 'price_max' ]
+query_text  = query_entry.text
+#............................................................
+# In case of statements without results:
+db.$.execute query_text
+#............................................................
+# In case of statements with results:
+statement   = db.$.prepare query_text
+iterator    = statement.iterate { price_max: 400, }
+for row from iterator: ...
+```
+
+
 ### `db.$`, the 'Special' Attribute
 
 The `db` object as constructed above will have a an attribute, `db.$`, called 'special', which in turn
 contains a number of members that are used internally and may be occasionally be useful for the user:
 
 * `db.$.limit()`, `db.$.single_row()`, `db.$.first_row()`, `db.$.single_value()`, `db.$.first_value()`,
-  `db.$.all_rows()`, `db.$.all_first_values()` are discussed in [Query Modifiers](#query-modifiers), below.
+  `db.$.all_rows()`, `db.$.all_first_values()` and `db.$.first_values()` are discussed in [Query
+  Modifiers](#query-modifiers), below.
 
 * **`db.$.load    path`**—load an extension.
 * **`db.$.prepare sql`**—prepare a statement. Returns a `better-sqlite3` `statement` instance.
@@ -123,6 +140,12 @@ contains a number of members that are used internally and may be occasionally be
 * **`db.$.settings`**—the settings that the `db` object was instantiated with.
 * **`db.$.db`**—the underlying `better-sqlite3` object that is used to implement all functionality.
 * **`db.$.sql`**—an object with metadata that describes the result of parsing the definition source file.
+* **`as_identifier  text`**—format a string so that it can be used as an identifier in an SQL statement
+  (even when it contains spaces or qutes).
+* **`catalog()`**—return an iterator over all entries in `sqlite_master`; allows to inspect the database
+  for all tables, views, and indexes.
+* **`clear()`**—drop all tables, views and indexes from the database.
+
 
 ### Writing ICQL Statements
 
@@ -157,6 +180,7 @@ over a given result set, use `db.$.all_rows db.my_query ...`.
 * **`db.$.first_row         iterator`**—returns first row, or `undefined`;
 * **`db.$.single_value      iterator`**—like `first_value`, but throws on `undefined`;
 * **`db.$.first_value       iterator`**—returns first field of first row, or `undefined`.
+* **`db.$.first_values      iterator`**—returns an iterator over the first field of all rows.
 * **`db.$.all_first_values  iterator`**—returns a list with the values of the first field of each row.
   Useful to turn queries like `select product_id from products order by price desc limit 100` into a flat
   list of values.
