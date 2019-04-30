@@ -133,6 +133,7 @@ contains a number of members that are used internally and may be occasionally be
   Modifiers](#query-modifiers), below.
 
 * **`db.$.load    path`**—load an extension.
+* **`db.$.read    path`**—execute SQL statements in a file.
 * **`db.$.prepare sql`**—prepare a statement. Returns a `better-sqlite3` `statement` instance.
 * **`db.$.execute sql`**—execute any number of SQL statements.
 * **`db.$.query   sql, P...`**—perform a single `select` statement. Returns an iterator over the result set's

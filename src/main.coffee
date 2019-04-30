@@ -27,6 +27,7 @@ echo                      = CND.echo.bind CND
 { inspect, }              = require 'util'
 xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infinity, maxArrayLength: Infinity, depth: Infinity, }
 #...........................................................................................................
+FS                        = require 'fs'
 IC                        = require 'intercourse'
 
 
@@ -85,6 +86,7 @@ local_methods =
   checkpoint:     ( me, P...  ) -> me.$.db.checkpoint       P...
   close:          ( me, P...  ) -> me.$.db.close            P...
   execute:        ( me, P...  ) -> me.$.db.exec             P...
+  read:           ( me, path  ) -> me.$.db.exec FS.readFileSync path, { encoding: 'utf-8', }
   function:       ( me, P...  ) -> me.$.db.function         P...
   load:           ( me, P...  ) -> me.$.db.loadExtension    P...
   pragma:         ( me, P...  ) -> me.$.db.pragma           P...
@@ -103,6 +105,7 @@ local_methods =
       me.$.execute statement
       count += +1
     return count
+
 
 #===========================================================================================================
 #
