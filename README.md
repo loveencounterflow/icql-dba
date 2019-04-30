@@ -16,7 +16,7 @@ code that define how to accomplish tasks).
 
 ICQL takes **three pieces**: **(1) a database adapter** (which currently must be
 [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3) or something with a compatible API), **(2)
-a path to an SQLite DB file**, and **(2) a path to an ICQL source file** with statement definitions; it then
+a path to an SQLite DB file**, and **(3) a path to an ICQL source file** with statement definitions; it then
 binds together these three pieces to produce an object where the statement definitions have been turned into
 methods that perform queries against the DB.
 
@@ -43,7 +43,7 @@ as such, may lack important features, contain bugs and experience breaking chang
 To use ICQL in your code, import the library and instantiate a `db` object:
 
 ```coffee
-ICQL          = require 'icql'
+ICQL = require 'icql'
 
 settings = {
   connector:    require 'better-sqlite3'  # must give a `better-sqlite3`-compatible object
@@ -53,7 +53,7 @@ settings = {
 db = ICQL.bind settings                   # create an object with methods to query against your SQLite DB
 ```
 
-### Qerying
+### Querying
 
 After doing `db = ICQL.bind settings` the new `db` object contains all the methods you defined in your
 `*icql` file. Each method will be either a `procedure` or a `query`, the difference being that
@@ -140,11 +140,11 @@ contains a number of members that are used internally and may be occasionally be
 * **`db.$.settings`**—the settings that the `db` object was instantiated with.
 * **`db.$.db`**—the underlying `better-sqlite3` object that is used to implement all functionality.
 * **`db.$.sql`**—an object with metadata that describes the result of parsing the definition source file.
-* **`as_identifier  text`**—format a string so that it can be used as an identifier in an SQL statement
-  (even when it contains spaces or qutes).
-* **`catalog()`**—return an iterator over all entries in `sqlite_master`; allows to inspect the database
-  for all tables, views, and indexes.
-* **`clear()`**—drop all tables, views and indexes from the database.
+* **`db.$.as_identifier  text`**—format a string so that it can be used as an identifier in an SQL statement
+  (even when it contains spaces or quotes).
+* **`db.$.catalog()`**—return an iterator over all entries in `sqlite_master`; allows to inspect the
+  database for all tables, views, and indexes.
+* **`db.$.clear()`**—drop all tables, views and indexes from the database.
 
 
 ### Writing ICQL Statements
