@@ -97,6 +97,12 @@ local_methods =
   primary key index in SQLite) ###
   catalog:        ( me        ) -> @query "select * from sqlite_master order by type desc, name;"
 
+  #-----------------------------------------------------------------------------------------------------------
+  type_of: ( me, name ) ->
+    for row from me.$.catalog()
+      return row.type if row.name is name
+    return null
+
   #---------------------------------------------------------------------------------------------------------
   clear: ( me ) ->
     count = 0
