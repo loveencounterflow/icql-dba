@@ -26,7 +26,8 @@
     "guy-test": "^1.4.0"
   },
   "dependencies": {
+    "better-sqlite3": "^5.4.0",
     "cnd": "^4.5.0",
-    "intercourse": "^4.0.0"
+    "intercourse": "^5.0.1"
   }
 }
