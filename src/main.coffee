@@ -87,6 +87,43 @@ local_methods =
     return statement.iterate P...
 
   #---------------------------------------------------------------------------------------------------------
+  run: ( me, sql, P... ) ->
+    statement = @prepare sql
+    return statement.run P...
+
+  #---------------------------------------------------------------------------------------------------------
+  run_or_query: ( me, sql, Q, discard ) ->
+    ### Try to `run()` the statement given as `sql`; should that fail because the statement returns
+    values, return an iterater over the results instead. When `discard` is true, make sure
+    the iterator will be exhausted so the DB connector is not blocked anymore. ###
+    statement = @prepare sql
+    try
+      return if Q? then ( statement.run Q ) else statement.run()
+    catch error
+      if error.name is 'TypeError' and error.message.startsWith 'This statement returns data.'
+        if discard
+          return if Q? then ( statement.all Q ) else statement.all()
+        else
+          return if Q? then ( statement.iterate Q ) else statement.iterate()
+      throw error
+
+  #---------------------------------------------------------------------------------------------------------
+  query_or_run: ( me, sql, Q, discard ) ->
+    ### Try to return an iterator over the results of the statement given as `sql`; should that fail because
+    the statement returns no values, `run()` the statement instead. When `discard` is true, make sure
+    the iterator will be exhausted so the DB connector is not blocked anymore. ###
+    statement = @prepare sql
+    try
+      if discard
+        return if Q? then ( statement.all Q ) else statement.all()
+      else
+        return if Q? then ( statement.iterate Q ) else statement.iterate()
+    catch error
+      if error.name is 'TypeError' and error.message.startsWith 'This statement does not return data.'
+        return ( statement.run Q )
+      throw error
+
+  #---------------------------------------------------------------------------------------------------------
   prepare:        ( me, P...  ) -> me.$.db.prepare          P...
   aggregate:      ( me, P...  ) -> me.$.db.aggregate        P...
   backup:         ( me, P...  ) -> me.$.db.backup           P...
@@ -175,14 +212,17 @@ local_methods =
 
 #-----------------------------------------------------------------------------------------------------------
 @_method_from_ic_entry = ( me, ic_entry ) ->
-  endpoint = switch ic_entry.type
-    when 'procedure'  then me.$.execute
-    when 'query'      then me.$.query
-    else throw new Error "µ11109 unknown icSQL type #{rpr ic_entry.type}"
+  validate.ic_entry_type ic_entry.type
+  switch ic_entry.type
+    when 'procedure'  then endpoint = me.$.run_or_query
+    when 'query'      then endpoint = me.$.query_or_run
+  #.........................................................................................................
   return ( Q ) =>
-    descriptor = @_descriptor_from_arguments me, ic_entry, Q
-    return endpoint descriptor.text, Q if Q?
-    return endpoint descriptor.text
+    descriptor  = @_descriptor_from_arguments me, ic_entry, Q
+    last_idx    = descriptor.parts.length - 1
+    for part, idx in descriptor.parts
+      R = endpoint part, Q, idx isnt last_idx
+    return R
 
 #-----------------------------------------------------------------------------------------------------------
 @_descriptor_from_arguments = ( me, ic_entry, Q ) ->

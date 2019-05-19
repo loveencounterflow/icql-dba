@@ -23,6 +23,7 @@ xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infi
 xrpr2                     = ( x ) -> inspect x, { colors: yes, breakLength: 20, maxArrayLength: Infinity, depth: Infinity, }
 #...........................................................................................................
 ICQL                      = require '../..'
+require '../exception-handler'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "oneliners" ] = ( T, done ) ->
@@ -46,6 +47,65 @@ ICQL                      = require '../..'
     ["procedure foobar( first, second ): some text",{"foobar":{"type":"procedure","(first,second)":{"text":"some text\n","location":{"line_nr":1},"kenning":"(first,second)","type":"procedure","signature":["first","second"]}}},null]
     ["procedure foobar( first, second, ): some text",{"foobar":{"type":"procedure","(first,second)":{"text":"some text\n","location":{"line_nr":1},"kenning":"(first,second)","type":"procedure","signature":["first","second"]}}},null]
     ]
+  #.........................................................................................................
+  # for [ probe, matcher, error, ] in probes_and_matchers
+  #   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+  #     # try
+  #     result = await IC.read_definitions_from_text probe
+  #     # catch error
+  #     #   return resolve error
+  #     # debug '29929', xrpr2 result
+  #     resolve result
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "parameters are expanded in procedures" ] = ( T, done ) ->
+  PATH              = require 'path'
+  get_icql_settings = ->
+    R                 = {}
+    R.connector       = require 'better-sqlite3'
+    R.db_path         = '/tmp/icql.db'
+    R.icql_path       = PATH.resolve PATH.join __dirname, '../../src/tests/test.icql'
+    return R
+  db                = ICQL.bind get_icql_settings()
+  # debug 'µ44433', db; process.exit 1
+  db.create_demo_table()
+  #.........................................................................................................
+  db.$.function 'echo', { deterministic: false, varargs: true  }, ( P... ) -> urge ( CND.grey 'DB' ), P...;  null
+  db.$.function 'e',    { deterministic: false, varargs: false }, ( x    ) -> urge ( CND.grey 'DB' ), rpr x; x
+  #.........................................................................................................
+  debug db.$.all_rows db.read_demo_rows()
+  debug db.$.all_rows db.select_by_rowid { rowid: 2, }
+  try
+    db.update_by_rowid { rowid: 2, status: 'bar', }
+  catch error
+    debug 'µ33555', error.code
+    debug 'µ33555', error.name
+    debug 'µ33555', ( k for k of error )
+    debug 'µ33555', error.message
+    # TypeError
+    process.exit 1
+  debug db.$.all_rows db.select_by_rowid { rowid: 2, }
+  #.........................................................................................................
+  # statement = db.$.prepare "select rowid, * from demo where rowid = $rowid;"
+  # info 'µ00908', [ ( statement.iterate { rowid: 2, } )..., ]
+  # # statement = db.$.prepare "select 42; select rowid, * from demo where rowid = $rowid;"
+  # # statement = db.$.prepare "update demo set status = 'yes!' where rowid = $rowid;"
+  # # info 'µ00908', statement.run { rowid: 2, }
+  # info 'µ00908', db.$.run "update demo set status = 'yes!' where rowid = $rowid;", { rowid: 2, extra: true, }
+  # debug db.$.all_rows db.select_by_rowid { rowid: 2, }
+
+  # probes_and_matchers = [
+  #   # ["procedure foobar:  some text\n  illegal line",null,'illegal follow-up after one-liner']
+  #   ["procedure foobar: some text",{"foobar":{"type":"procedure","null":{"text":"some text\n","location":{"line_nr":1},"kenning":"null","type":"procedure"}}},null]
+  #   ["procedure foobar(): some text",{"foobar":{"type":"procedure","()":{"text":"some text\n","location":{"line_nr":1},"kenning":"()","type":"procedure","signature":[]}}},null]
+  #   ["procedure foobar( first ): some text",{"foobar":{"type":"procedure","(first)":{"text":"some text\n","location":{"line_nr":1},"kenning":"(first)","type":"procedure","signature":["first"]}}},null]
+  #   ["procedure foobar(first): some text",{"foobar":{"type":"procedure","(first)":{"text":"some text\n","location":{"line_nr":1},"kenning":"(first)","type":"procedure","signature":["first"]}}},null]
+  #   ["procedure foobar( first, ): some text",{"foobar":{"type":"procedure","(first)":{"text":"some text\n","location":{"line_nr":1},"kenning":"(first)","type":"procedure","signature":["first"]}}},null]
+  #   ["procedure foobar(first,): some text",{"foobar":{"type":"procedure","(first)":{"text":"some text\n","location":{"line_nr":1},"kenning":"(first)","type":"procedure","signature":["first"]}}},null]
+  #   ["procedure foobar( first, second ): some text",{"foobar":{"type":"procedure","(first,second)":{"text":"some text\n","location":{"line_nr":1},"kenning":"(first,second)","type":"procedure","signature":["first","second"]}}},null]
+  #   ["procedure foobar( first, second, ): some text",{"foobar":{"type":"procedure","(first,second)":{"text":"some text\n","location":{"line_nr":1},"kenning":"(first,second)","type":"procedure","signature":["first","second"]}}},null]
+  #   ]
   #.........................................................................................................
   # for [ probe, matcher, error, ] in probes_and_matchers
   #   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
@@ -97,7 +157,9 @@ ICQL                      = require '../..'
 
 ############################################################################################################
 unless module.parent?
-  test @
+  # test @
+  test @[ "parameters are expanded in procedures" ]
+  # @[ "parameters are expanded in procedures" ]()
   # test @[ "x" ]
   # test @[ "basic 1" ]
   # test @[ "signatures" ]

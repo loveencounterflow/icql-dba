@@ -1,0 +1,145 @@
+
+-- -- ---------------------------------------------------------------------------------------------------------
+-- fragment create_table_main_first():
+--   drop table if exists main;
+--   create table main (
+--       vlnr      json unique primary key,
+--       stamped   boolean default false,
+--       line      text );
+--   insert into main ( vlnr, line ) values
+
+-- -- ---------------------------------------------------------------------------------------------------------
+-- fragment create_table_main_first():
+--   ;
+
+-- -- ---------------------------------------------------------------------------------------------------------
+-- fragment create_table_main_first( comma, vlnr, line ):
+--   $comma ( $vlnr, $line )
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure create_demo_table():
+  drop table if exists demo;
+  create table demo (
+    key     text,
+    value   text,
+    status  text );
+  insert into demo values
+    ( '123', 'helo world',  'foo' ),
+    ( '126', 'lore',        'foo' ),
+    ( '129', 'ipsum',       'foo' ),
+    ( '132', 'voluntur',    'foo' );
+
+-- ---------------------------------------------------------------------------------------------------------
+query select_by_rowid( rowid ):
+  select * from demo where rowid = e( $rowid );
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure update_by_rowid( rowid, status ):
+  select echo( 'µ33231', '$status', $status );
+  -- select echo( 'µ33231', '$rowid',  $rowid  );
+  update demo
+    set status = e( $status )
+    where rowid = e( $rowid) ;
+
+-- ---------------------------------------------------------------------------------------------------------
+query read_demo_rows():
+  select
+      rowid,
+      *
+    from demo
+    order by rowid;
+
+-- ---------------------------------------------------------------------------------------------------------
+query read_lines():
+  select
+      rowid,
+      *
+    from main
+    order by vidx_encode( vlnr );
+
+-- ---------------------------------------------------------------------------------------------------------
+query read_unstamped_lines():
+  select
+      rowid,
+      *
+    from main
+    where not stamped
+    order by vidx_encode( vlnr );
+
+-- ---------------------------------------------------------------------------------------------------------
+query count_lines():
+  select count(*) from main;
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure insert_line( next_vlnr ):
+
+-- ---------------------------------------------------------------------------------------------------------
+query xxx_select( rowid ):
+  select * from main where rowid = e( $rowid );
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure stamp_line( rowid ):
+  select e( $rowid );
+  update main
+    set stamped = true
+    where rowid = $rowid;
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure vidx_create_and_populate_tables():
+  drop table if exists vidx_1;
+  drop table if exists vidx_2;
+  -- .......................................................................................................
+  create table vidx_1 (
+    vidx          json,
+    vidx_encoded  blob );
+  -- .......................................................................................................
+  create trigger vidx_1_on_after_insert after insert on vidx_1 begin
+    update vidx_1
+      set vidx_encoded = vidx_encode( new.vidx )
+      where rowid = new.rowid;
+    end;
+  -- .......................................................................................................
+  create table vidx_2 (
+    vidx          json,
+    vidx_bin      blob );
+  -- .......................................................................................................
+  insert into vidx_1 ( vidx ) values
+    ( "[42,10,10]"   ),
+    ( "[42,10,1]"    ),
+    ( "[42,10,11]"   ),
+    ( "[42,3]"       ),
+    ( "[42,2]"       ),
+    ( "[120]"        ),
+    ( "[12]"         ),
+    ( "[1]"          ),
+    ( "[2]"          ),
+    ( "[10]"         ),
+    ( "[11]"         ),
+    ( "[42,0]"       ),
+    ( "[42]"         ),
+    ( "[42,null]"    ),
+    ( "[42,10]"      ),
+    ( "[42,1]"       ),
+    ( "[42,1,1]"       ),
+    ( "[42,1,1,1]"       ),
+    ( "[42,1,1,100,1]"       ),
+    ( "[42,1,1,-1,1]"       ),
+    ( "[42,11]"      ),
+    ( "[42,1,10]"    ),
+    ( "[42,1,1]"     ),
+    ( "[42,1,11]"    );
+
+-- ---------------------------------------------------------------------------------------------------------
+query vidx_list_unordered():
+  select * from vidx_1;
+
+-- ---------------------------------------------------------------------------------------------------------
+query vidx_list_ordered_with_call():
+  select * from vidx_1 order by vidx_encode( vidx );
+
+-- ---------------------------------------------------------------------------------------------------------
+query vidx_list_ordered_with_cached():
+  select * from vidx_1 order by vidx_encoded;
+
+
+
