@@ -1,6 +1,6 @@
 {
   "name": "icql",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "YeSQL meets SQLite: A SQLite Adapter built with InterCourse and BetterSQLite ",
   "main": "lib/main.js",
   "scripts": {
