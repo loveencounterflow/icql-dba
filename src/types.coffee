@@ -20,6 +20,16 @@ Intertype                 = ( require 'intertype' ).Intertype
 intertype                 = new Intertype module.exports
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'icql_settings',
+  tests:
+    "x is a object":                          ( x ) -> @isa.object          x
+    "x has key 'connector'":                  ( x ) -> @has_key             x, 'connector'
+    "x has key 'db_path'":                    ( x ) -> @has_key             x, 'db_path'
+    "x has key 'icql_path'":                  ( x ) -> @has_key             x, 'icql_path'
+    "x.db_path is a nonempty text":           ( x ) -> @isa.nonempty_text x.db_path
+    "x.icql_path is a nonempty text":         ( x ) -> @isa.nonempty_text x.icql_path
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'ic_entry_type',
   tests:
     "? is a text":                      ( x ) -> @isa.text    x
