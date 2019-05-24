@@ -157,8 +157,8 @@ require '../exception-handler'
 
 ############################################################################################################
 unless module.parent?
-  # test @
-  test @[ "parameters are expanded in procedures" ]
+  test @
+  # test @[ "parameters are expanded in procedures" ]
   # @[ "parameters are expanded in procedures" ]()
   # test @[ "x" ]
   # test @[ "basic 1" ]
