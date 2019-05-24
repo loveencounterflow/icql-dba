@@ -30,12 +30,12 @@ xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infi
 FS                        = require 'fs'
 IC                        = require 'intercourse'
 #...........................................................................................................
-types                     = require './types'
+@types                    = require './types'
 { isa
   validate
   declare
   size_of
-  type_of }               = types
+  type_of }               = @types
 
 
 #===========================================================================================================
