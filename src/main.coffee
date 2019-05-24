@@ -145,21 +145,23 @@ local_methods =
 #
 #-----------------------------------------------------------------------------------------------------------
 @bind = ( settings ) ->
-  throw new Error "µ94721 need settings.connector"  unless settings.connector?
-  throw new Error "µ94721 need settings.db_path"    unless settings.db_path?
-  throw new Error "µ94721 need settings.icql_path"  unless settings.icql_path?
-  me            = { $: {}, }
+  validate.icql_settings settings
+  me = { $: {}, }
   # me.$.settings = assign {}, settings
   @connect                    me, settings.connector, settings.db_path, settings.db_settings
   @definitions_from_path_sync me, settings.icql_path
   @bind_definitions           me
+  me.icql_path = settings.icql_path
   return me
 
 #-----------------------------------------------------------------------------------------------------------
 ### TAINT should check connector API compatibility ###
 ### TAINT consider to use `new`-less call convention (should be possible acc. to bsql3 docs) ###
 @connect = ( me, connector, db_path, db_settings = {} ) ->
-  ( me.$ ?= {} ).db  = new connector db_path, db_settings
+  me.$     ?= {}
+  me.$.db   = new connector db_path, db_settings
+  # me.$.dbr  = me.$.db
+  # me.$.dbw  = new connector db_path, db_settings
   return me
 
 #-----------------------------------------------------------------------------------------------------------
