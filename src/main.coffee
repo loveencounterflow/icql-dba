@@ -140,6 +140,39 @@ local_methods =
       count += +1
     return count
 
+  #---------------------------------------------------------------------------------------------------------
+  escape_text: ( me, x ) ->
+    validate.text x
+    x.replace /'/g, "''"
+
+  #---------------------------------------------------------------------------------------------------------
+  list_as_json: ( me, x ) ->
+    validate.list x
+    return "[]" if x.length is 0
+    return "[ #{( jr xx for xx in x ).join ', '} ]"
+
+  #---------------------------------------------------------------------------------------------------------
+  as_sql: ( me, x ) ->
+    switch type = type_of x
+      when 'text'     then return "'#{me.$.escape_text x}'"
+      when 'number'   then return x.toString()
+      when 'boolean'  then return ( if x then '1' else '0' )
+      when 'list'     then return me.$.list_as_json x
+      when 'null'     then return 'null'
+      when 'undefined'
+        throw new Error "µ12341 unable to express 'undefined' as SQL literal"
+    throw new Error "µ12342 unable to express a #{type} as SQL literal, got #{rpr x}"
+
+  #---------------------------------------------------------------------------------------------------------
+  interpolate: ( me, sql, Q ) ->
+    return sql.replace @_interpolation_pattern, ( $0, $1 ) =>
+      try
+        return me.$.as_sql Q[ $1 ]
+      catch error
+        throw new Error \
+          "µ55563 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
+  _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
+
 
 #===========================================================================================================
 #
@@ -178,15 +211,18 @@ local_methods =
   for name, local_method of local_methods
     do ( name, local_method ) ->
       check_unique name
-      local_method  = local_method.bind me.$
-      method        = ( P... ) ->
-        try
-          local_method me, P...
-        catch error
-          warn "when trying to call method #{name} with #{xrpr P}"
-          warn "an error occurred: #{error.message}"
-          throw error
-      me.$[ name ]  = method.bind me.$
+      if ( isa.function local_method )
+        local_method  = local_method.bind me.$
+        method = ( P... ) ->
+          try
+            local_method me, P...
+          catch error
+            warn "when trying to call method #{name} with #{xrpr P}"
+            warn "an error occurred: #{error.message}"
+            throw error
+        me.$[ name ]  = method.bind me.$
+      else
+        me.$[ name ]  = local_method
   #.........................................................................................................
   for name, ic_entry of me.$.sql
     ### TAINT fix in intercourse ###
@@ -199,6 +235,11 @@ local_methods =
 #-----------------------------------------------------------------------------------------------------------
 @_method_from_ic_entry = ( me, ic_entry ) ->
   validate.ic_entry_type ic_entry.type
+  #.........................................................................................................
+  if ic_entry.type is 'fragment' then return ( Q ) =>
+    descriptor  = @_descriptor_from_arguments me, ic_entry, Q
+    sql         = descriptor.parts.join '\n'
+    return me.$.interpolate sql, Q
   #.........................................................................................................
   return ( Q ) =>
     descriptor  = @_descriptor_from_arguments me, ic_entry, Q

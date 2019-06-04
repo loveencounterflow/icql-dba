@@ -32,8 +32,8 @@ intertype                 = new Intertype module.exports
 #-----------------------------------------------------------------------------------------------------------
 @declare 'ic_entry_type',
   tests:
-    "? is a text":                      ( x ) -> @isa.text    x
-    "? is in 'procedure', 'query'":     ( x ) -> x in [ 'procedure', 'query', ]
+    "? is a text":                              ( x ) -> @isa.text    x
+    "? is in 'procedure', 'query', 'fragment'": ( x ) -> x in [ 'procedure', 'query', 'fragment', ]
 
 # #-----------------------------------------------------------------------------------------------------------
 # @declare 'ic_toplevel_entry',

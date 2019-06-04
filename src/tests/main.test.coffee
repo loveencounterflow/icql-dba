@@ -23,7 +23,16 @@ xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infi
 xrpr2                     = ( x ) -> inspect x, { colors: yes, breakLength: 20, maxArrayLength: Infinity, depth: Infinity, }
 #...........................................................................................................
 ICQL                      = require '../..'
+PATH                      = require 'path'
 require '../exception-handler'
+
+#-----------------------------------------------------------------------------------------------------------
+get_icql_settings = ->
+  R                 = {}
+  R.connector       = require 'better-sqlite3'
+  R.db_path         = '/tmp/icql.db'
+  R.icql_path       = PATH.resolve PATH.join __dirname, '../../src/tests/test.icql'
+  return R
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "oneliners" ] = ( T, done ) ->
@@ -35,6 +44,7 @@ require '../exception-handler'
   db                = {}
   ICQL.definitions_from_path_sync db, demo_path
   debug '33442', db
+  return done()
   throw new Error "sorry no tests as yet"
   probes_and_matchers = [
     # ["procedure foobar:  some text\n  illegal line",null,'illegal follow-up after one-liner']
@@ -60,15 +70,8 @@ require '../exception-handler'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "parameters are expanded in procedures" ] = ( T, done ) ->
-  PATH              = require 'path'
-  get_icql_settings = ->
-    R                 = {}
-    R.connector       = require 'better-sqlite3'
-    R.db_path         = '/tmp/icql.db'
-    R.icql_path       = PATH.resolve PATH.join __dirname, '../../src/tests/test.icql'
-    return R
   db                = ICQL.bind get_icql_settings()
-  # debug 'µ44433', db; process.exit 1
+  # debug 'µ44433', db
   db.create_demo_table()
   #.........................................................................................................
   db.$.function 'echo', { deterministic: false, varargs: true  }, ( P... ) -> urge ( CND.grey 'DB' ), P...;  null
@@ -118,6 +121,58 @@ require '../exception-handler'
   done()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "as_sql" ] = ( T, done ) ->
+  PATH              = require 'path'
+  db                = ICQL.bind get_icql_settings()
+  probes_and_matchers = [
+    [true,'1',]
+    [false,'0',]
+    [42,'42',]
+    ['text',"'text'",]
+    ["text with 'quotes'","'text with ''quotes'''",]
+    [[1,2,3],"[ 1, 2, 3 ]",]
+    [[],"[]",]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      resolve db.$.as_sql probe
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "interpolate" ] = ( T, done ) ->
+  PATH              = require 'path'
+  db                = ICQL.bind get_icql_settings()
+  probes_and_matchers = [
+    [["foo, $bar, baz",{bar:42,}],"foo, 42, baz"]
+    [["select * from t where d = $d;",{bar:42,}],null,"unable to express 'undefined' as SQL literal"]
+    [["select * from t where d = $d;",{d:true,}],"select * from t where d = 1;"]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      [ sql, Q, ] = probe
+      resolve db.$.interpolate sql, Q
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "fragments return interpolated source text" ] = ( T, done ) ->
+  db                = ICQL.bind get_icql_settings()
+  # debug 'µ44430', db
+  # debug 'µ44430', db.$.sql
+  # debug 'µ44430', db.create_demo_table_middle
+  key     = 'somekey'
+  value   = 'somevalue'
+  status  = 'somestatus'
+  first   = db.create_demo_table_first()
+  middle  = db.create_demo_table_middle { key, value, status, }
+  last    = db.create_demo_table_last()
+  T.eq first,   "drop table if exists demo;\ncreate table demo (\n  key     text,\n  value   text,\n  status  text );\ninsert into demo values"
+  T.eq middle,  "( 'somekey', 'somevalue', 'somestatus' )"
+  T.eq last,    ";"
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "_demo 2" ] = ( T, done ) ->
   settings  = @get_settings()
   db        = await ICQL.bind settings
@@ -158,6 +213,9 @@ require '../exception-handler'
 ############################################################################################################
 unless module.parent?
   test @
+  # test @[ "as_sql" ]
+  # test @[ "interpolate" ]
+  # test @[ "fragments return interpolated source text" ]
   # test @[ "parameters are expanded in procedures" ]
   # @[ "parameters are expanded in procedures" ]()
   # test @[ "x" ]

@@ -30,6 +30,19 @@ procedure create_demo_table():
     ( '132', 'voluntur',    'foo' );
 
 -- ---------------------------------------------------------------------------------------------------------
+fragment create_demo_table_first():
+  drop table if exists demo;
+  create table demo (
+    key     text,
+    value   text,
+    status  text );
+  insert into demo values
+fragment create_demo_table_middle( key, value, status ):
+    ( $key, $value, $status )
+fragment create_demo_table_last():
+  ;
+
+-- ---------------------------------------------------------------------------------------------------------
 query select_by_rowid( rowid ):
   select * from demo where rowid = e( $rowid );
 
