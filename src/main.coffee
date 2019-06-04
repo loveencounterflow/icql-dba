@@ -155,9 +155,9 @@ local_methods =
   as_sql: ( me, x ) ->
     switch type = type_of x
       when 'text'     then return "'#{me.$.escape_text x}'"
+      when 'list'     then return "'#{me.$.list_as_json x}'"
       when 'number'   then return x.toString()
       when 'boolean'  then return ( if x then '1' else '0' )
-      when 'list'     then return me.$.list_as_json x
       when 'null'     then return 'null'
       when 'undefined'
         throw new Error "µ12341 unable to express 'undefined' as SQL literal"
