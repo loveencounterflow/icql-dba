@@ -4,7 +4,8 @@
   "description": "YeSQL meets SQLite: A SQLite Adapter built with InterCourse and BetterSQLite ",
   "main": "lib/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "coffee --map -o lib -c src",
+    "test": "npm run build && node lib/tests/main.test.js"
   },
   "repository": {
     "type": "git",
