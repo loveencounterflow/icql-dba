@@ -147,10 +147,25 @@ contains a number of members that are used internally and may be occasionally be
   database for all tables, views, and indexes.
 * **`db.$.clear()`**—drop all tables, views and indexes from the database.
 
+* **`db.$.escape_text   x`**—turn text `x` into an SQL string literal.
+* **`db.$.list_as_json  x`**—turn list `x` into a JSON array literal.
+* **`db.$.as_sql        x`**—express value `x` as SQL literal.
+* **`db.$.interpolate   sql, Q`**—interpolate values found in object `Q` into string `sql`.
+
 
 ### Writing ICQL Statements
 
 TBW; see [the demo]() and the [InterCourse docs](https://github.com/loveencounterflow/intercourse).
+
+### SQL Fragments
+
+Possible to define fragments, i.e. possibly incomplete SQL snippets that may contain placeholders. For each
+fragment, a namesake method will be created that accepts an object with named values where applicable; when
+called, method does not execute a statement but returns that SQL snippet with values filled out as literals.
+Observe that the SQL interpolation routine differs a little from what `better-sqlite3` offers; in
+particular, booleans `true`, `false` will be turned into integers `0`, `1`, and lists will be expressed as
+JSON array literals. In the future, we will try to align ICQL and Sqlite3 value interpolation and allow to
+define custom conversions.
 
 
 #### Definition Types
