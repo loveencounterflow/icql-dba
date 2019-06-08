@@ -29,6 +29,7 @@ xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infi
 #...........................................................................................................
 FS                        = require 'fs'
 IC                        = require 'intercourse'
+HOLLERITH                 = require 'hollerith-codec'
 #...........................................................................................................
 @types                    = require './types'
 { isa
@@ -131,6 +132,15 @@ local_methods =
       return row.type if row.name is name
     return null
 
+  #-----------------------------------------------------------------------------------------------------------
+  column_types: ( me, table_name ) ->
+    R = {}
+    ### TAINT we apparently have to call the pragma in this roundabout fashion since SQLite refuses to
+    accept placeholders in that statement: ###
+    for row from me.$.query me.$.interpolate "pragma table_info( $table_name );", { table_name, }
+      R[ row.name ] = row.type
+    return R
+
   #---------------------------------------------------------------------------------------------------------
   clear: ( me ) ->
     count = 0
@@ -172,18 +182,23 @@ local_methods =
           "µ55563 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
   _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
 
+  #---------------------------------------------------------------------------------------------------------
+  as_hollerith:   ( x ) -> HOLLERITH.encode x
+  from_hollerith: ( x ) -> HOLLERITH.decode x
+
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
 @bind = ( settings ) ->
   validate.icql_settings settings
-  me = { $: {}, }
-  # me.$.settings = assign {}, settings
-  @connect                    me, settings.connector, settings.db_path, settings.db_settings
+  me            = { $: {}, }
+  connector     = settings.connector ? require 'better-sqlite3'
+  me.icql_path  = settings.icql_path
+  @connect                    me, connector, settings.db_path, settings.db_settings
   @definitions_from_path_sync me, settings.icql_path
   @bind_definitions           me
-  me.icql_path = settings.icql_path
+  @bind_udfs                  me
   return me
 
 #-----------------------------------------------------------------------------------------------------------
@@ -229,6 +244,12 @@ local_methods =
     check_unique name
     me[ name ] = @_method_from_ic_entry me, ic_entry
   #.........................................................................................................
+  return me
+
+#-----------------------------------------------------------------------------------------------------------
+@bind_udfs = ( me ) ->
+  me.$.function 'as_hollerith',   { deterministic: true, varargs: false }, ( x ) -> HOLLERITH.encode x
+  me.$.function 'from_hollerith', { deterministic: true, varargs: false }, ( x ) -> HOLLERITH.decode x
   return me
 
 #-----------------------------------------------------------------------------------------------------------

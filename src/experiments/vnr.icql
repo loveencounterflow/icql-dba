@@ -1,0 +1,80 @@
+
+-- -- ---------------------------------------------------------------------------------------------------------
+-- procedure create_trigger_on_master():
+--   drop trigger if exists master_trigger;
+--   create trigger master_trigger before insert on sqlite_master
+--     begin
+--       select notify( new.tbl_name );
+--       end;
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure read_sqlite_master():
+  select * from sqlite_master;
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure create_demo_table():
+  drop table if exists mytable;
+  create table mytable (
+    vnr         vnr,
+    bytes       blob,
+    n           integer,
+    is_great    boolean,
+    something   json );
+  insert into mytable values
+    ( '123', x'01', 1, 'helo world',  '["foo"]' ),
+    ( '126', x'02', 2, 'lore',        '["foo"]' ),
+    ( '129', x'03', 3, 'ipsum',       '["foo"]' ),
+    ( '129', x'61', 4, 'ipsum',       '["foo"]' ),
+    ( '132', x'ff', 5, 'voluntur',    '["foo"]' );
+
+-- ---------------------------------------------------------------------------------------------------------
+-- procedure insert_into_mytable( vnr, bytes, n, is_great::boolean.number, something ):
+procedure insert_into_mytable( vnr, bytes, n, is_great, something ):
+  insert into mytable (  vnr,  bytes,  n,  is_great,  something )
+              values  ( $vnr, $bytes, $n, $is_great, $something );
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure create_myview():
+  drop view if exists myview;
+  create view myview as
+    select
+        vnr                                         as vnr,
+        n * 2                                       as n2,
+        something                                   as something,
+        '*' || something || '*'                     as something_else,
+        cast( '*' || something || '*' as text )     as foo
+      from mytable where false;
+
+-- ---------------------------------------------------------------------------------------------------------
+query read_mytable():
+  select * from mytable order by vnr;
+-- cast create_myview():
+--   cast.
+
+-- ---------------------------------------------------------------------------------------------------------
+query read_myview():
+  select * from myview order by vnr;
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure create_vnrtable():
+  drop table if exists vnrtable;
+  create table vnrtable (
+    vnr         json,
+    vnr_blob    blob,
+    is_stamped  boolean,
+    text        text );
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure _insert_into_vnrtable( vnr, vnr_blob, is_stamped, text ):
+  insert into vnrtable (  vnr,  vnr_blob,  is_stamped,  text )
+              values   ( $vnr, $vnr_blob, $is_stamped, $text );
+
+-- ---------------------------------------------------------------------------------------------------------
+query _read_vnrtable():
+  select
+      vnr,
+      vnr_blob,
+      is_stamped,
+      text
+    from vnrtable order by vnr_blob;
+
