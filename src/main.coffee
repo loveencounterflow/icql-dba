@@ -29,7 +29,7 @@ xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infi
 #...........................................................................................................
 FS                        = require 'fs'
 IC                        = require 'intercourse'
-HOLLERITH                 = require 'hollerith-codec'
+@HOLLERITH                = HOLLERITH = require 'hollerith-codec'
 #...........................................................................................................
 @types                    = require './types'
 { isa
@@ -183,8 +183,8 @@ local_methods =
   _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
 
   #---------------------------------------------------------------------------------------------------------
-  as_hollerith:   ( x ) -> HOLLERITH.encode x
-  from_hollerith: ( x ) -> HOLLERITH.decode x
+  as_hollerith:   ( me, x ) -> HOLLERITH.encode x
+  from_hollerith: ( me, x ) -> HOLLERITH.decode x
 
 
 #===========================================================================================================
@@ -248,8 +248,8 @@ local_methods =
 
 #-----------------------------------------------------------------------------------------------------------
 @bind_udfs = ( me ) ->
-  me.$.function 'as_hollerith',   { deterministic: true, varargs: false }, ( x ) -> HOLLERITH.encode x
-  me.$.function 'from_hollerith', { deterministic: true, varargs: false }, ( x ) -> HOLLERITH.decode x
+  me.$.function 'as_hollerith',   { deterministic: true, varargs: false }, ( x ) => HOLLERITH.encode x
+  me.$.function 'from_hollerith', { deterministic: true, varargs: false }, ( x ) => HOLLERITH.decode x
   return me
 
 #-----------------------------------------------------------------------------------------------------------
