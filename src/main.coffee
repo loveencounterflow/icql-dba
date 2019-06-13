@@ -142,6 +142,10 @@ local_methods =
     return R
 
   #---------------------------------------------------------------------------------------------------------
+  _dependencies_of: ( me, table_name ) -> me.$.query "pragma foreign_key_list( #{me.$.as_sql table_name} )"
+  dependencies_of:  ( me, table_name ) -> ( row.table for row from me.$._dependencies_of table_name )
+
+  #---------------------------------------------------------------------------------------------------------
   clear: ( me ) ->
     count = 0
     for { type, name, } in @all_rows @catalog()
