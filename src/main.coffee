@@ -144,11 +144,29 @@ local_methods =
   #---------------------------------------------------------------------------------------------------------
   _dependencies_of: ( me, table_name ) -> me.$.query "pragma foreign_key_list( #{me.$.as_sql table_name} )"
   dependencies_of:  ( me, table_name ) -> ( row.table for row from me.$._dependencies_of table_name )
+  get_toposort: ( me ) ->
+    LTSORT  = require 'ltsort'
+    g       = LTSORT.new_graph()
+    indexes = []
+    types   = {}
+    for x from me.$.catalog()
+      types[ x.name ] = x.type
+      unless x.type is 'table'
+        indexes.push x.name
+        continue
+      dependencies = me.$.dependencies_of x.name
+      if dependencies.length is 0
+        LTSORT.add g, x.name
+      else
+        for dependency in dependencies
+          LTSORT.add g, x.name, dependency
+    R = [ ( LTSORT.linearize g )..., indexes..., ]
+    return ( { name, type: types[ name ], } for name in R )
 
   #---------------------------------------------------------------------------------------------------------
   clear: ( me ) ->
     count = 0
-    for { type, name, } in @all_rows @catalog()
+    for { type, name, } in me.$.get_toposort()
       statement = "drop #{type} if exists #{@as_identifier name};"
       me.$.execute statement
       count += +1

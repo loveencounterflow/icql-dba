@@ -27,11 +27,16 @@ PATH                      = require 'path'
 require '../exception-handler'
 
 #-----------------------------------------------------------------------------------------------------------
-get_icql_settings = ->
+get_icql_settings = ( remove_db = false ) ->
   R                 = {}
   R.connector       = require 'better-sqlite3'
   R.db_path         = '/tmp/icql.db'
   R.icql_path       = PATH.resolve PATH.join __dirname, '../../src/tests/test.icql'
+  if remove_db
+    try
+      ( require 'fs' ).unlinkSync R.db_path
+    catch error
+      throw error unless ( error.code is 'ENOENT' )
   return R
 
 #-----------------------------------------------------------------------------------------------------------
@@ -209,11 +214,35 @@ get_icql_settings = ->
 #   done()
 #   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "foreign keys" ] = ( T, done ) ->
+  settings        = get_icql_settings true
+  db              = ICQL.bind settings
+  db.create_tables_with_foreign_key()
+  db.populate_tables_with_foreign_key()
+  rows            = db.$.all_rows db.select_from_tables_with_foreign_key()
+  T.eq rows, [{"id":"id1","key":"foo"},{"id":"id2","key":"foo"},{"id":"id3","key":"other"},{"id":"id4","key":"bar"}]
+  db.drop_tables_with_foreign_key()
+  #---------------------------------------------------------------------------------------------------------
+  db              = ICQL.bind settings
+  db.create_tables_with_foreign_key()
+  T.eq [],        db.$.dependencies_of 't1'
+  T.eq [ 't1' ],  db.$.dependencies_of 't2'
+  #---------------------------------------------------------------------------------------------------------
+  T.eq db.$.get_toposort(), [{"name":"t2","type":"table"},{"name":"t1","type":"table"},{"name":"sqlite_autoindex_t1_1","type":"index"},{"name":"sqlite_autoindex_t2_1","type":"index"}]
+  #---------------------------------------------------------------------------------------------------------
+  db.populate_tables_with_foreign_key()
+  T.eq rows, [{"id":"id1","key":"foo"},{"id":"id2","key":"foo"},{"id":"id3","key":"other"},{"id":"id4","key":"bar"}]
+  db.$.clear()
+  T.eq db.$.get_toposort(), []
+  # db.drop_tables_with_foreign_key()
+  done()
+
 
 ############################################################################################################
 unless module.parent?
-  test @
-  # test @[ "as_sql" ]
+  # test @
+  test @[ "foreign keys" ]
   # test @[ "interpolate" ]
   # test @[ "fragments return interpolated source text" ]
   # test @[ "parameters are expanded in procedures" ]

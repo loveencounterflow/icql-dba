@@ -154,5 +154,40 @@ query vidx_list_ordered_with_call():
 query vidx_list_ordered_with_cached():
   select * from vidx_1 order by vidx_encoded;
 
+-- ---------------------------------------------------------------------------------------------------------
+procedure create_tables_with_foreign_key():
+  create table t1 (
+    key     text  not null  unique primary key );
+  create table t2 (
+    id      text  not null  unique primary key,
+    key     text  not null         references t1 ( key ) );
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure populate_tables_with_foreign_key():
+  insert into t1 values
+    ( 'foo'   ),
+    ( 'bar'   ),
+    ( 'other' );
+  insert into t2 ( id, key ) values
+    ( 'id1', 'foo'    ),
+    ( 'id2', 'foo'    ),
+    ( 'id3', 'other'  ),
+    ( 'id4', 'bar'    );
+
+-- ---------------------------------------------------------------------------------------------------------
+query select_from_tables_with_foreign_key():
+  select * from t2 order by id;
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure drop_tables_with_foreign_key():
+  -- pragma foreign_keys = OFF;
+  drop table if exists t2;
+  drop table if exists t1;
+  -- pragma foreign_keys = ON;
+
+
+
+
+
 
 
