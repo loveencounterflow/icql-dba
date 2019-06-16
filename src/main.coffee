@@ -253,8 +253,8 @@ local_methods =
           try
             local_method me, P...
           catch error
-            warn "when trying to call method #{name} with #{xrpr P}"
-            warn "an error occurred: #{error.message}"
+            warn "µ40991 when trying to call method #{name} with #{xrpr P}"
+            warn "µ40991 an error occurred: #{error.message}"
             throw error
         me.$[ name ]  = method.bind me.$
       else
@@ -286,9 +286,17 @@ local_methods =
   return ( Q ) =>
     descriptor  = @_descriptor_from_arguments me, ic_entry, Q
     last_idx    = descriptor.parts.length - 1
-    for part, idx in descriptor.parts
-      is_last = idx is last_idx
-      R       = me.$._run_or_query ic_entry.type, is_last, part, Q
+    try
+      for part, idx in descriptor.parts
+        is_last = idx is last_idx
+        R       = me.$._run_or_query ic_entry.type, is_last, part, Q
+    catch error
+      name      = ic_entry.name
+      type      = ic_entry.type
+      kenning   = descriptor.kenning
+      line_nr   = descriptor.location.line_nr
+      location  = "line #{line_nr}, #{type} #{name}#{kenning}"
+      throw new Error "µ11123 At *.icql #{location}: #{error.message}"
     return R
 
 #-----------------------------------------------------------------------------------------------------------
