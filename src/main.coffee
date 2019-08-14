@@ -37,7 +37,7 @@ IC                        = require 'intercourse'
   declare
   size_of
   type_of }               = @types
-max_excerpt_length        = 1000
+max_excerpt_length        = 10000
 
 
 #===========================================================================================================
