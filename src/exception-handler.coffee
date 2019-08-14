@@ -7,7 +7,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = '明快打字机/exception-handler'
+badge                     = 'ICQL/exception-handler'
 log                       = CND.get_logger 'plain',     badge
 debug                     = CND.get_logger 'debug',     badge
 info                      = CND.get_logger 'info',      badge

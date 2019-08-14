@@ -37,6 +37,7 @@ IC                        = require 'intercourse'
   declare
   size_of
   type_of }               = @types
+max_excerpt_length        = 1000
 
 
 #===========================================================================================================
@@ -253,8 +254,12 @@ local_methods =
           try
             local_method me, P...
           catch error
-            warn "µ40991 when trying to call method #{name} with #{xrpr P}"
-            warn "µ40991 an error occurred: #{error.message}"
+            excerpt = rpr P
+            if excerpt.length > max_excerpt_length
+              x       = max_excerpt_length / 2
+              excerpt = excerpt[ .. x ] + ' ... ' + excerpt[ excerpt.length - x .. ]
+            warn "^icql#15543^ when trying to call method #{name} with #{excerpt}"
+            warn "^icql#15544^ an error occurred: #{error.name ? error.code}: #{error.message}"
             throw error
         me.$[ name ]  = method.bind me.$
       else
