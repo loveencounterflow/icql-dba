@@ -239,7 +239,7 @@ get_icql_settings = ( remove_db = false ) ->
   done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "error messages" ] = ( T, done ) ->
+@[ "_error messages" ] = ( T, done ) ->
   ### demo to show that printout gets limited for long statements ###
   settings        = get_icql_settings true
   db              = ICQL.bind settings
