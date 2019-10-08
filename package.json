@@ -24,10 +24,10 @@
   },
   "homepage": "https://github.com/loveencounterflow/icql#readme",
   "devDependencies": {
-    "guy-test": "^1.4.0"
+    "guy-test": "^1.4.1"
   },
   "dependencies": {
-    "better-sqlite3": "^5.4.0",
+    "better-sqlite3": "^5.4.3",
     "cnd": "^4.6.0",
     "hollerith-codec": "^2.0.0",
     "intercourse": "^6.1.0",
