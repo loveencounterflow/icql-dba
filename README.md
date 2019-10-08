@@ -274,5 +274,11 @@ have to tack on something like
 How this is any better than `from users, addresses` totally escapes me.
 
 
+## Todo
 
+* [ ] provide a way to use JS arrays for SQL values tuples, as in `select * from t where x in ( 2, 3, 5 );`
+* [ ] provide a way to notate formats, use raw SQL strings with placeholders, ex. `select * from t where x
+  in $tuple:mylist;`, `select * from $name:mytable;`
+* [ ] reduce boilerplate for `insert` procedures and fragments, etc.
+* [ ] implement inheritance for ICQL declarations
 
