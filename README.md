@@ -278,7 +278,29 @@ How this is any better than `from users, addresses` totally escapes me.
 
 * [ ] provide a way to use JS arrays for SQL values tuples, as in `select * from t where x in ( 2, 3, 5 );`
 * [ ] provide a way to notate formats, use raw SQL strings with placeholders, ex. `select * from t where x
-  in $tuple:mylist;`, `select * from $name:mytable;`
+  in $tuple:mylist;`, `select * from $name:mytable;`. This could also be used to provide special behavior
+  e.g. for the `limit` clause: in PostgreSQL, when `$x` in `select + from t limit $x` is `null`, no limit is
+  enforced; however, in SQLite, one has to provide `-1` (or another negative integer) to achieve the same.
+  Likewise, `true` and `false` have to be converted to `1` and `0` in SQLite, names in dynamic queries have
+  to be quoted and escaped, &c. See https://www.npmjs.com/package/puresql for some ideas for formats; we'll
+  probably favor English names over symbols since so many SQLish dialects already use so many conflicting
+  sigils like `@` and so on. Named formats could also be provided by user.
+* [ ] user defined functions?
+* [ ] pragmas?
+* [ ] services like the not-entirely obvious way to get table names with columns out of SQLite (which
+  relies on `join`ing rows from `sqlite_master` with rows from `pragma_table_info(...)`)?
+* [ ] provide a path to build dynamic SQL; see https://github.com/ianstormtaylor/pg-sql-helpers for some
+  ideas.
+* [ ] ??? introduce single-level namespaces for constructs ???
+* [ ] allow default values for parameters so we can avoid to always having to define 1 method for a query
+  *with* a `$limit` and another 1 method for another query that looks exactly the same except for the
+  missing `$limit`.—How does that work with method overloading as implemented, if at all? Any precedences in
+  existing languages?
 * [ ] reduce boilerplate for `insert` procedures and fragments, etc.
 * [ ] implement inheritance for ICQL declarations
+* [ ] remove `better-sqlite3` dependency, consumers will have to pass in a DB instance
+
+
+
+
 
