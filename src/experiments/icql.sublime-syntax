@@ -1,0 +1,119 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+file_extensions:
+  - icql
+scope: source.icql
+
+variables:
+  script_close_lookahead: (?i:(?=^\s*%%%))
+
+contexts:
+  # The prototype context is prepended to all contexts but those setting
+  # meta_include_prototype: false.
+  prototype:
+    - include: comments
+
+  main:
+    # The main context is the initial starting point of our syntax.
+    # Include other contexts from here (or specify them directly).
+    - include: source_debug
+    - include: keywords
+    - include: numbers
+    - include: strings
+    - include: script-javascript
+    - include: script-coffeescript
+    - include: script-pgsql
+    # - include: script-type-decider
+
+  source_debug:
+    - match: 'debug'
+      scope: source.debug
+
+  keywords:
+    # Keywords are if, else for and while.
+    # Note that blackslashes don't need to be escaped within single quoted
+    # strings in YAML. When using single quoted strings, only single quotes
+    # need to be escaped: this is done by using two single quotes next to each
+    # other.
+    - match: '\b(if|else|for|while)\b'
+      scope: keyword.control.icql
+
+  numbers:
+    - match: '\b(-)?[0-9.]+\b'
+      scope: constant.numeric.icql
+
+  strings:
+    # Strings begin and end with quotes, and use backslashes as an escape
+    # character.
+    - match: '"'
+      scope: punctuation.definition.string.begin.icql
+      push: inside_string
+
+  inside_string:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.double.icql
+    - match: '\.'
+      scope: constant.character.escape.icql
+    - match: '"'
+      scope: punctuation.definition.string.end.icql
+      pop: true
+
+  comments:
+    # Comments begin with a '#' and finish at the end of the line.
+    - match: '#'
+      scope: punctuation.definition.comment.icql
+      push:
+        # This is an anonymous context push for brevity.
+        - meta_scope: comment.line.double-slash.icql
+        - match: $\n?
+          pop: true
+
+  #---------------------------------------------------------------------------------------------------------
+  script-javascript:
+    - match: (^\s*%%%.js\s+[-=#]*$)
+      captures:
+        0: language-marker.icql
+      # meta_scope: language-marker.icql
+      scope: embed.javascript.icql
+      embed: scope:source.js
+      escape: '{{script_close_lookahead}}'
+  #     push: inside_javascript
+
+  # inside_javascript:
+  #   - match: '^%%%.+\s*$'
+  #     pop: true
+
+  #---------------------------------------------------------------------------------------------------------
+  script-coffeescript:
+    - match: (^\s*%%%.coffee\s+[-=#]*$)
+      captures:
+        0: language-marker.icql
+      scope: embed.coffeescript.icql
+      embed: scope:source.coffee
+      escape: '{{script_close_lookahead}}'
+      # push: inside_coffeescript
+
+  # inside_coffeescript:
+  #   - match: '^%%%.+\s*$'
+  #     pop: true
+
+  #---------------------------------------------------------------------------------------------------------
+  script-pgsql:
+    - match: (^\s*%%%.sql\s+[-=#]*$)
+      captures:
+        0: language-marker.icql
+      scope: embed.pgsql.icql
+      embed: scope:source.pgsql
+      escape: '{{script_close_lookahead}}'
+  #     push: inside_pgsql
+
+  # inside_pgsql:
+  #   - match: '^%%%.+\s*$'
+  #     pop: true
+
+  #   - match: (%%%.js)
+  #     set:
+  #       - script-javascript
+  #       # - tag-generic-attribute-meta
+  #       # - tag-generic-attribute-value

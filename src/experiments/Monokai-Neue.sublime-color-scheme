@@ -1,0 +1,36 @@
+{
+	// http://www.sublimetext.com/docs/3/color_schemes.html
+	"variables": {
+		// "green": "#FF0000",
+	},
+	"globals": {
+		// "foreground": "var(green)",
+	},
+	"rules": [
+		{
+			"scope": "string.quoted.double.icql",
+			"foreground": "#ff0000",
+		},
+		{
+			"scope": "source.js",
+			"background": "#ffff0027",
+		},
+		{
+			"scope": "source.pgsql",
+			"background": "#113",
+		},
+		{
+			"scope": "source.coffee",
+			"background": "#20202d",
+		},
+		{
+			"scope": "source.debug",
+			"background": "yellow",
+		},
+		{
+			"scope": "language-marker.icql",
+			"background": "rgba(0, 221, 0, 0.125)",
+			"foreground": "yellow"
+		},
+	],
+}
