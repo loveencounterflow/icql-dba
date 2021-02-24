@@ -275,7 +275,7 @@ get_icql_settings = ( remove_db = false ) ->
 ############################################################################################################
 unless module.parent?
   test @
-  # test @[ "error messages" ]
+  # test @[ "as_sql" ]
   # test @[ "foreign keys" ]
   # test @[ "interpolate" ]
   # test @[ "fragments return interpolated source text" ]
