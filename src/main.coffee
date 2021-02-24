@@ -188,7 +188,7 @@ local_methods =
     switch type = type_of x
       when 'text'     then return "'#{me.$.escape_text x}'"
       when 'list'     then return "'#{me.$.list_as_json x}'"
-      when 'number'   then return x.toString()
+      when 'float'    then return x.toString()
       when 'boolean'  then return ( if x then '1' else '0' )
       when 'null'     then return 'null'
       when 'undefined'
