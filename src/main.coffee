@@ -85,17 +85,17 @@ local_methods =
 
   #---------------------------------------------------------------------------------------------------------
   query: ( me, sql, P... ) ->
-    statement = @prepare sql
+    statement = ( me.$._statements[ sql ] ?= me.$.db.prepare sql )
     return statement.iterate P...
 
   #---------------------------------------------------------------------------------------------------------
   run: ( me, sql, P... ) ->
-    statement = @prepare sql
+    statement = ( me.$._statements[ sql ] ?= me.$.db.prepare sql )
     return statement.run P...
 
   #---------------------------------------------------------------------------------------------------------
   _run_or_query: ( me, entry_type, is_last, sql, Q ) ->
-    statement     = @prepare sql
+    statement     = ( me.$._statements[ sql ] ?= me.$.db.prepare sql )
     returns_data  = statement.reader
     #.......................................................................................................
     ### Always use `run()` method if statement does not return data: ###
@@ -215,7 +215,7 @@ local_methods =
 #-----------------------------------------------------------------------------------------------------------
 @bind = ( settings ) ->
   validate.icql_settings settings
-  me            = { $: {}, }
+  me            = { $: { _statements: {}, }, }
   connector     = settings.connector ? require 'better-sqlite3'
   me.icql_path  = settings.icql_path
   @connect                    me, connector, settings.db_path, settings.db_settings
