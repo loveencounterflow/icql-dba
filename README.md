@@ -1,3 +1,23 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [ICQL](#icql)
+  - [ICQL Installation](#icql-installation)
+  - [ICQL Usage](#icql-usage)
+    - [Instantiation](#instantiation)
+    - [Querying](#querying)
+    - [`db.$`, the 'Special' Attribute](#db-the-special-attribute)
+    - [Writing ICQL Statements](#writing-icql-statements)
+    - [SQL Fragments](#sql-fragments)
+      - [Definition Types](#definition-types)
+      - [Query Modifiers](#query-modifiers)
+  - [A Short Intro to YeSQL](#a-short-intro-to-yesql)
+    - [Aside: Why You Don't Want to Use an ORM](#aside-why-you-dont-want-to-use-an-orm)
+  - [Todo](#todo)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 
 
@@ -151,6 +171,7 @@ contains a number of members that are used internally and may be occasionally be
 * **`db.$.list_as_json  x`**—turn list `x` into a JSON array literal.
 * **`db.$.as_sql        x`**—express value `x` as SQL literal.
 * **`db.$.interpolate   sql, Q`**—interpolate values found in object `Q` into string `sql`.
+* **`db.$.close()`**—close DB.
 
 
 ### Writing ICQL Statements
