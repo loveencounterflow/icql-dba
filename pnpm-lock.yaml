@@ -4,7 +4,7 @@ dependencies:
   hollerith-codec: 3.0.0
   intercourse: 7.0.0
   intertype: 7.6.3
-  ltsort: 1.2.4
+  ltsort: 1.3.0
 devDependencies:
   guy-test: 4.0.1
 lockfileVersion: 5.2
@@ -15,23 +15,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Yil6Z4phfYBHneLK5aimQ4AtVleorcTRuy0TzJrhFx4OEdbGUQ8haLQklQUOhaFJbaeu20VGishz/kLWzQiiTg==
-  /after-all-results/2.0.0:
-    dev: false
-    resolution:
-      integrity: sha1-asL8ICtQD4jaj09VMM+hAPTGotA=
   /ansi-regex/2.1.1:
     dev: false
     engines:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-w7M6te42DYbg5ijwRorn7yfWVN8=
-  /ansi-styles/1.1.0:
-    dev: false
-    engines:
-      node: '>=0.10.0'
-    optional: true
-    resolution:
-      integrity: sha1-6uy/Zs1waIJ2Cy9GkVgrj1XXp94=
   /aproba/1.2.0:
     dev: false
     resolution:
@@ -43,12 +32,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-5hYdAkZlcG8tOLujVDTgCT+uPX0VnpAH28gWsLfzpXYm7wP6mp5Q/gYyR7YQ0cKVJcXJnl3j2kpBan13PtQf6w==
-  /async-cache/1.1.0:
-    dependencies:
-      lru-cache: 4.1.5
-    dev: false
-    resolution:
-      integrity: sha1-SppaidBl7F2OUlS9nulrp2xTK1o=
   /async/3.2.0:
     dev: true
     resolution:
@@ -97,15 +80,6 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
-  /cnd/4.9.0:
-    dependencies:
-      mkdirp: 0.5.5
-      stackman: 4.0.1
-      trycatch: 1.5.21
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha512-87P86V5a2/PKQ1FU6weIXA1jcj2D/hlhY1TBrqgqciJFbXlaMhFKMIjSdUmV0U1BHFY9l+/hBUuTZHVeyHdPFQ==
   /cnd/9.2.1:
     hasBin: true
     resolution:
@@ -154,19 +128,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-vKLmQvQ3UMV7wfLBilFUrq74kQBTeahsw4FQa3drBXLpRYAM08TWDH4QXOsh9+bl2w3FtKUAtjAlaDTUQTQPlw==
-  /debug/4.3.1:
-    dependencies:
-      ms: 2.1.2
-    dev: false
-    engines:
-      node: '>=6.0'
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-    resolution:
-      integrity: sha512-doEwdvm4PCeK4K3RQN2ZC2BYUBaxwLARCqZmMjtF8a51J2Rb0xpVloFRnCODwqjpwnAoao4pelN8l3RJdv3gRQ==
   /decompress-response/4.2.1:
     dependencies:
       mimic-response: 2.1.0
@@ -204,10 +165,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==
-  /error-callsites/2.0.3:
-    dev: false
-    resolution:
-      integrity: sha512-v036z4IEffZFE5kBkV5/F2MzhLnG0vuDyN+VXpzCf4yWXvX/1WJCI0A+TGTr8HWzBfCw5k8gr9rwAo09V+obTA==
   /expand-template/2.0.3:
     dev: false
     engines:
@@ -266,19 +223,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-+UkBxWNuahBevOuza6In2DrV8MH3wE7EflkBMYrAcoEZprU1edRHjb7v9ZphU8zkB6Nxkc33ZyrCi1X9MZJSSQ==
-  /hookit/1.1.3:
-    dev: false
-    resolution:
-      integrity: sha1-YnvRuQvE7sHTe2OiCCzv9Rgb+xk=
   /ieee754/1.2.1:
     dev: false
     resolution:
       integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
-  /in-publish/2.0.1:
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha512-oDM0kUSNFC31ShNxHKUyfZKy8ZeXZBWMjMdZHKLOk13uvT27VTL/QzRGfRUcevJhpkZAvlhPYuXkF7eNWrtyxQ==
   /inherits/2.0.4:
     dev: false
     resolution:
@@ -331,27 +279,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-jJ1nvvQi6unW0WifjNPMIb64Byom0EXzSKWFYA++EpyjK3qv1J2pqeSoEJ61tGJoNG0GoNjPoeLYhxW16riZaA==
-  /load-source-map/1.0.0:
+  /ltsort/1.3.0:
     dependencies:
-      in-publish: 2.0.1
-      semver: 5.7.1
-      source-map: 0.5.7
+      cnd: 9.2.1
+      intertype: 7.6.3
     dev: false
     resolution:
-      integrity: sha1-MY9JkFzopwnft8w/FvPv47zx3QU=
-  /lru-cache/4.1.5:
-    dependencies:
-      pseudomap: 1.0.2
-      yallist: 2.1.2
-    dev: false
-    resolution:
-      integrity: sha512-sWZlbEP2OsHNkXrMl5GYk/jKk70MBng6UU4YI/qGDYbgf6YbP4EvmqISbXCoJiRKs+1bSpFHVgQxvJ17F2li5g==
-  /ltsort/1.2.4:
-    dependencies:
-      cnd: 4.9.0
-    dev: false
-    resolution:
-      integrity: sha512-6unvcv1u5dOtufuyyMDnuduohhd6ogxfNe8N+6YCV2SzIBmvzULEHwqsH9/RZXzQVpptQ8j666a2iBPIMfcQ3w==
+      integrity: sha512-2foOFVbFE+ZV7PWtRrfNoqV4s+hbDw/12h06Z1YsfSQmwhtQ4TuIy6NxjusH6L50aNSlthZaOrzWrzir8br/eQ==
   /mimic-response/2.1.0:
     dev: false
     engines:
@@ -383,13 +317,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==
-  /mkdirp/0.5.5:
-    dependencies:
-      minimist: 1.2.5
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
   /mkdirp/1.0.4:
     dev: false
     engines:
@@ -397,10 +324,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
-  /ms/2.1.2:
-    dev: false
-    resolution:
-      integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
   /multimix/4.1.0:
     dependencies:
       cnd: 9.2.1
@@ -478,10 +401,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
-  /pseudomap/1.0.2:
-    dev: false
-    resolution:
-      integrity: sha1-8FKijacOYYkX7wqKw0wa5aaChrM=
   /pump/3.0.0:
     dependencies:
       end-of-stream: 1.4.4
@@ -554,22 +473,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-bCR6cP+aTdScaQCnQKbPKtJOKDp/hj9EDLJo3Nw4y1QksqaovlW/bnptB6/c1e+qmNIDHRK+oXFDdEqBT8WzUA==
-  /source-map/0.5.7:
-    dev: false
-    engines:
-      node: '>=0.10.0'
-    resolution:
-      integrity: sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=
-  /stackman/4.0.1:
-    dependencies:
-      after-all-results: 2.0.0
-      async-cache: 1.1.0
-      debug: 4.3.1
-      error-callsites: 2.0.3
-      load-source-map: 1.0.0
-    dev: false
-    resolution:
-      integrity: sha512-lntIge3BFEElgvpZT2ld5f4U+mF84fRtJ8vA3ymUVx1euVx43ZMkd09+5RWW4FmvYDFhZwPh1gvtdsdnJyF4Fg==
   /steampipes/6.7.0:
     dependencies:
       '@uppy/fs-tail-stream': 1.2.0
@@ -657,16 +560,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-QFQRqOfmM5/mTbmiNN4R3DHgK9Q=
-  /trycatch/1.5.21:
-    dependencies:
-      hookit: 1.1.3
-    dev: false
-    engines:
-      node: '>=0.8.14'
-    optionalDependencies:
-      ansi-styles: 1.1.0
-    resolution:
-      integrity: sha1-LLFdQ9T0X3Q2dweYoQvfvh1aVv4=
   /tunnel-agent/0.6.0:
     dependencies:
       safe-buffer: 5.2.1
@@ -691,10 +584,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
-  /yallist/2.1.2:
-    dev: false
-    resolution:
-      integrity: sha1-HBH5IY8HYImkfdUS+TxmmaaoHVI=
   /yallist/4.0.0:
     dev: false
     resolution:
@@ -706,4 +595,4 @@ specifiers:
   hollerith-codec: 3.0.0
   intercourse: 7.0.0
   intertype: 7.6.3
-  ltsort: ^1.2.4
+  ltsort: 1.3.0
