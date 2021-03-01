@@ -1,9 +1,9 @@
 dependencies:
   better-sqlite3: 7.1.2
   cnd: 9.2.1
-  hollerith-codec: 3.0.0
-  intercourse: 7.0.0
-  intertype: 7.6.3
+  hollerith-codec: 3.0.1
+  intercourse: 7.0.1
+  intertype: 7.6.5
   ltsort: 1.3.0
 devDependencies:
   guy-test: 4.0.1
@@ -101,33 +101,41 @@ packages:
   /cupofjoe/0.1.1:
     dependencies:
       cnd: 9.2.1
-      intertype: 7.6.3
+      intertype: 7.6.5
       multimix: 4.1.0
     dev: false
     resolution:
       integrity: sha512-lNapdhUmwN0y94FGYvGubow+ZznI/A8+AlETPRli5+N4WkSnCys9Md1MiG8ZFPhjpS5Z+/NYC8nWdu+sLOOd/Q==
+  /cupofjoe/0.2.1:
+    dependencies:
+      cnd: 9.2.1
+      intertype: 7.6.5
+      multimix: 5.0.0
+    dev: false
+    resolution:
+      integrity: sha512-kZHlb3DmPu2jV0rmZvqsGwI8OEy+VEyN+50bUFp95HrD1buun7G9BVpf286UiL+sNfjXEn4EdbAFHASkxibSHQ==
   /datom/8.0.0:
     dependencies:
       cnd: 9.2.1
       cupofjoe: 0.1.1
       emittery: 0.6.0
-      intertype: 7.6.3
+      intertype: 7.6.5
       letsfreezethat: 3.1.0
       multimix: 4.1.0
     dev: false
     resolution:
       integrity: sha512-sEcFHTEq2GJq2WUyJ+nOCvT3rHY3kalKmMyFg2z/DI2zFqh/ylJWsHHZphKM937vVEcxXvi0/UDSBI+s2B2I0A==
-  /datom/8.0.2:
+  /datom/8.0.3:
     dependencies:
       cnd: 9.2.1
-      cupofjoe: 0.1.1
+      cupofjoe: 0.2.1
       emittery: 0.6.0
-      intertype: 7.6.3
+      intertype: 7.6.5
       letsfreezethat: 3.1.0
       multimix: 5.0.0
     dev: false
     resolution:
-      integrity: sha512-vKLmQvQ3UMV7wfLBilFUrq74kQBTeahsw4FQa3drBXLpRYAM08TWDH4QXOsh9+bl2w3FtKUAtjAlaDTUQTQPlw==
+      integrity: sha512-brh+I+TIC89r891ekwWtzaO6zvQu/hgyEdfm3gs8WOF3jJ+nCpwnoF2/96jUZibaKCfFjxpqQbQu3K7/SkA64g==
   /decompress-response/4.2.1:
     dependencies:
       mimic-response: 2.1.0
@@ -216,13 +224,13 @@ packages:
     dev: false
     resolution:
       integrity: sha1-4Ob+aijPUROIVeCG0Wkedx3iqLk=
-  /hollerith-codec/3.0.0:
+  /hollerith-codec/3.0.1:
     dependencies:
       cnd: 9.2.1
-      intertype: 7.6.3
+      intertype: 7.6.5
     dev: false
     resolution:
-      integrity: sha512-+UkBxWNuahBevOuza6In2DrV8MH3wE7EflkBMYrAcoEZprU1edRHjb7v9ZphU8zkB6Nxkc33ZyrCi1X9MZJSSQ==
+      integrity: sha512-n5RohCykMVDvx/dPJdIb6z1NUfprkVAg8Q5nuPAFutJ92741aeNyWisK1GKs3bzxGGOxUsz8XwYK9vg/CglT6A==
   /ieee754/1.2.1:
     dev: false
     resolution:
@@ -235,19 +243,19 @@ packages:
     dev: false
     resolution:
       integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==
-  /intercourse/7.0.0:
+  /intercourse/7.0.1:
     dependencies:
       cnd: 9.2.1
-      datom: 8.0.2
-      intertype: 7.6.3
+      datom: 8.0.3
+      intertype: 7.6.5
       steampipes: 6.7.0
     dev: false
     resolution:
-      integrity: sha512-w4u24wmLsrG8x16Ra2+rpdkvNqxmY7uYmovXZ0op7cwcdj9KBh3XtPVCtQUqxk0wTwFRb5YeVJZGkN052192Lg==
+      integrity: sha512-aMsRD7+2tJZvBt90N4NS4FfFlhRIQo4TWK2CONtD6C7lLLU2/ICvCOsSKtz2nx4fp52idrzFQhhVpGeEksbBPw==
   /intertext-splitlines/1.2.0:
     dependencies:
       cnd: 9.2.1
-      intertype: 7.6.3
+      intertype: 7.6.5
     dev: false
     resolution:
       integrity: sha512-K88EL5l2F01CjSux+MZeKqOGNWAIKKYDPsetDB7WTvwLnT/EMgp/JXOjAJqhyFC2ji5vMYHKnbtM7vxS+iLoog==
@@ -256,6 +264,12 @@ packages:
       multimix: 5.0.0
     resolution:
       integrity: sha512-77FmgaqGydWBc5OIde+geMj4+dGZ1i5UIFXM4C9QHiEIBjh+Gojycsb7XtRYYLNhNJepa+jotHXfAGPngHatzw==
+  /intertype/7.6.5:
+    dependencies:
+      multimix: 5.0.0
+    dev: false
+    resolution:
+      integrity: sha512-763YK3ezLYy9FkX+cTTg/qwGHteqlaTMiec9a2sVAKm7kXp9e7QkzbyYS6u4CcbLxx12L8bcRbe3SFsPeaJCMA==
   /is-fullwidth-code-point/1.0.0:
     dependencies:
       number-is-nan: 1.0.1
@@ -271,7 +285,7 @@ packages:
   /jfee/0.1.3:
     dependencies:
       cnd: 9.2.1
-      intertype: 7.6.3
+      intertype: 7.6.5
     dev: false
     resolution:
       integrity: sha512-TteheV7ceYKk1AVoU74tngE9vTAn1EtNhZD5tYWJmfT8JMc+wn0H4RYQl7kwsJ/yTWErvJcrtFMDeY0vpJWcUQ==
@@ -479,7 +493,7 @@ packages:
       cnd: 9.2.1
       datom: 8.0.0
       intertext-splitlines: 1.2.0
-      intertype: 7.6.3
+      intertype: 7.6.5
       jfee: 0.1.3
       multimix: 5.0.0
       timsort: 0.3.0
@@ -592,7 +606,7 @@ specifiers:
   better-sqlite3: ^7.0.1
   cnd: 9.2.1
   guy-test: 4.0.1
-  hollerith-codec: 3.0.0
-  intercourse: 7.0.0
-  intertype: 7.6.3
+  hollerith-codec: 3.0.1
+  intercourse: 7.0.1
+  intertype: 7.6.5
   ltsort: 1.3.0

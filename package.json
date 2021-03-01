@@ -29,9 +29,9 @@
   "dependencies": {
     "better-sqlite3": "^7.0.1",
     "cnd": "9.2.1",
-    "hollerith-codec": "3.0.0",
-    "intercourse": "7.0.0",
-    "intertype": "7.6.3",
+    "hollerith-codec": "3.0.1",
+    "intercourse": "7.0.1",
+    "intertype": "7.6.5",
     "ltsort": "1.3.0"
   }
 }
