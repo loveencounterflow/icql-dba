@@ -135,19 +135,21 @@ local_methods =
   transaction:    ( me, P...  ) -> @db.transaction      P...
 
   #---------------------------------------------------------------------------------------------------------
-  catalog:        ( me        ) ->
+  catalog: ( me ) ->
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
     primary key index in SQLite) ###
     # throw new Error "µ45222 deprecated until next major version"
     @query "select * from sqlite_master order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
-  list_objects:   ( me, schema = 'main' ) ->
+  list_objects: ( me, schema = 'main' ) ->
     validate.ic_schema schema
     return @query "select * from #{@as_identifier schema}.sqlite_master order by type desc, name;"
-  list_schemas:   ( me ) -> @pragma "database_list;"
 
-  #-----------------------------------------------------------------------------------------------------------
+  #---------------------------------------------------------------------------------------------------------
+  list_schemas: ( me ) -> @pragma "database_list;"
+
+  #---------------------------------------------------------------------------------------------------------
   ### TAINT must escape path, schema ###
   attach: ( me, path, schema ) ->
     validate.ic_path path
