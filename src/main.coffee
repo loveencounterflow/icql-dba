@@ -46,7 +46,7 @@ local_methods =
 
   #---------------------------------------------------------------------------------------------------------
   _echo: ( me, ref, sql ) ->
-    return null unless me.$.settings.echo
+    return null unless @settings.echo
     echo ( CND.reverse CND.blue "^icql@888-#{ref}^" ) + ( CND.reverse CND.yellow sql )
     return null
 
@@ -91,19 +91,19 @@ local_methods =
   #---------------------------------------------------------------------------------------------------------
   query: ( me, sql, P... ) ->
     @_echo '1', sql
-    statement = ( me.$._statements[ sql ] ?= me.$.db.prepare sql )
+    statement = ( @_statements[ sql ] ?= @db.prepare sql )
     return statement.iterate P...
 
   #---------------------------------------------------------------------------------------------------------
   run: ( me, sql, P... ) ->
     @_echo '2', sql
-    statement = ( me.$._statements[ sql ] ?= me.$.db.prepare sql )
+    statement = ( @_statements[ sql ] ?= @db.prepare sql )
     return statement.run P...
 
   #---------------------------------------------------------------------------------------------------------
   _run_or_query: ( me, entry_type, is_last, sql, Q ) ->
     @_echo '3', sql
-    statement     = ( me.$._statements[ sql ] ?= me.$.db.prepare sql )
+    statement     = ( @_statements[ sql ] ?= @db.prepare sql )
     returns_data  = statement.reader
     #.......................................................................................................
     ### Always use `run()` method if statement does not return data: ###
@@ -120,19 +120,19 @@ local_methods =
   #---------------------------------------------------------------------------------------------------------
   execute: ( me, sql  ) ->
     @_echo '4', sql
-    return me.$.db.exec sql
+    return @db.exec sql
 
   #---------------------------------------------------------------------------------------------------------
-  prepare:        ( me, P...  ) -> me.$.db.prepare          P...
-  aggregate:      ( me, P...  ) -> me.$.db.aggregate        P...
-  backup:         ( me, P...  ) -> me.$.db.backup           P...
-  checkpoint:     ( me, P...  ) -> me.$.db.checkpoint       P...
-  close:          ( me, P...  ) -> me.$.db.close            P...
-  read:           ( me, path  ) -> me.$.db.exec FS.readFileSync path, { encoding: 'utf-8', }
-  function:       ( me, P...  ) -> me.$.db.function         P...
-  load:           ( me, P...  ) -> me.$.db.loadExtension    P...
-  pragma:         ( me, P...  ) -> me.$.db.pragma           P...
-  transaction:    ( me, P...  ) -> me.$.db.transaction      P...
+  prepare:        ( me, P...  ) -> @db.prepare          P...
+  aggregate:      ( me, P...  ) -> @db.aggregate        P...
+  backup:         ( me, P...  ) -> @db.backup           P...
+  checkpoint:     ( me, P...  ) -> @db.checkpoint       P...
+  close:          ( me, P...  ) -> @db.close            P...
+  read:           ( me, path  ) -> @db.exec FS.readFileSync path, { encoding: 'utf-8', }
+  function:       ( me, P...  ) -> @db.function         P...
+  load:           ( me, P...  ) -> @db.loadExtension    P...
+  pragma:         ( me, P...  ) -> @db.pragma           P...
+  transaction:    ( me, P...  ) -> @db.transaction      P...
   #.........................................................................................................
   as_identifier:  ( me, text  ) -> '"' + ( text.replace /"/g, '""' ) + '"'
   ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
@@ -152,7 +152,7 @@ local_methods =
 
   #-----------------------------------------------------------------------------------------------------------
   type_of: ( me, name, schema = 'main' ) ->
-    for row from me.$.catalog()
+    for row from @catalog()
       return row.type if row.name is name
     return null
 
@@ -161,18 +161,18 @@ local_methods =
     R = {}
     ### TAINT we apparently have to call the pragma in this roundabout fashion since SQLite refuses to
     accept placeholders in that statement: ###
-    for row from me.$.query me.$.interpolate "pragma table_info( $table );", { table, }
+    for row from @query @interpolate "pragma table_info( $table );", { table, }
       R[ row.name ] = row.type
     return R
 
   #---------------------------------------------------------------------------------------------------------
   _dependencies_of: ( me, table, schema = 'main' ) ->
-    return me.$.query "pragma #{schema}.foreign_key_list( #{me.$.as_sql table} )"
+    return @query "pragma #{schema}.foreign_key_list( #{@as_sql table} )"
 
   #---------------------------------------------------------------------------------------------------------
   dependencies_of:  ( me, table, schema = 'main' ) ->
     validate.ic_schema schema
-    return ( row.table for row from me.$._dependencies_of table )
+    return ( row.table for row from @_dependencies_of table )
 
   #---------------------------------------------------------------------------------------------------------
   get_toposort: ( me, schema = 'main' ) ->
@@ -216,8 +216,8 @@ local_methods =
   #---------------------------------------------------------------------------------------------------------
   as_sql: ( me, x ) ->
     switch type = type_of x
-      when 'text'     then return "'#{me.$.escape_text x}'"
-      when 'list'     then return "'#{me.$.list_as_json x}'"
+      when 'text'     then return "'#{@escape_text x}'"
+      when 'list'     then return "'#{@list_as_json x}'"
       when 'float'    then return x.toString()
       when 'boolean'  then return ( if x then '1' else '0' )
       when 'null'     then return 'null'
@@ -229,7 +229,7 @@ local_methods =
   interpolate: ( me, sql, Q ) ->
     return sql.replace @_interpolation_pattern, ( $0, $1 ) =>
       try
-        return me.$.as_sql Q[ $1 ]
+        return @as_sql Q[ $1 ]
       catch error
         throw new Error \
           "µ55563 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
