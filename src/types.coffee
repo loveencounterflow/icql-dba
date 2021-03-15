@@ -41,6 +41,9 @@ intertype                 = new Intertype module.exports
   return false unless @isa.text x
   return ( /^[a-z][a-z0-9_]*$/ ).test x
 
+#-----------------------------------------------------------------------------------------------------------
+@declare 'ic_path', ( x ) -> @isa.nonempty_text x
+
 
 
 
