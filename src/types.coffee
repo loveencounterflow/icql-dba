@@ -35,6 +35,12 @@ intertype                 = new Intertype module.exports
     "x is a text":                              ( x ) -> @isa.text    x
     "x is in 'procedure', 'query', 'fragment'": ( x ) -> x in [ 'procedure', 'query', 'fragment', ]
 
+#-----------------------------------------------------------------------------------------------------------
+@declare 'ic_schema', ( x ) ->
+  ### NOTE to keep things simple, only allow lower case ASCII letters, digits, underscores in schemas ###
+  return false unless @isa.text x
+  return ( /^[a-z][a-z0-9_]*$/ ).test x
+
 
 
 
