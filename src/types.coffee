@@ -27,6 +27,7 @@ intertype                 = new Intertype module.exports
     # "x has key 'icql_path'":                  ( x ) -> @has_key             x, 'icql_path'
     "x.db_path is a nonempty text":           ( x ) -> @isa.nonempty_text x.db_path
     "x.icql_path is a nonempty text":         ( x ) -> @isa.nonempty_text x.icql_path
+    "x.echo? is a boolean":                   ( x ) -> @isa_optional.boolean x.echo
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'ic_entry_type',

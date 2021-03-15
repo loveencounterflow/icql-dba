@@ -39,11 +39,16 @@ IC                        = require 'intercourse'
   type_of }               = @types
 max_excerpt_length        = 10000
 
-
 #===========================================================================================================
 # LOCAL METHODS
 #-----------------------------------------------------------------------------------------------------------
 local_methods =
+
+  #---------------------------------------------------------------------------------------------------------
+  _echo: ( me, ref, sql ) ->
+    return null unless me.$.settings.echo
+    echo ( CND.reverse CND.blue "^icql@888-#{ref}^" ) + ( CND.reverse CND.yellow sql )
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   limit: ( me, n, iterator ) ->
@@ -85,16 +90,19 @@ local_methods =
 
   #---------------------------------------------------------------------------------------------------------
   query: ( me, sql, P... ) ->
+    @_echo '1', sql
     statement = ( me.$._statements[ sql ] ?= me.$.db.prepare sql )
     return statement.iterate P...
 
   #---------------------------------------------------------------------------------------------------------
   run: ( me, sql, P... ) ->
+    @_echo '2', sql
     statement = ( me.$._statements[ sql ] ?= me.$.db.prepare sql )
     return statement.run P...
 
   #---------------------------------------------------------------------------------------------------------
   _run_or_query: ( me, entry_type, is_last, sql, Q ) ->
+    @_echo '3', sql
     statement     = ( me.$._statements[ sql ] ?= me.$.db.prepare sql )
     returns_data  = statement.reader
     #.......................................................................................................
@@ -110,6 +118,7 @@ local_methods =
     return if Q? then ( statement.iterate Q ) else statement.iterate()
 
   #---------------------------------------------------------------------------------------------------------
+    @_echo '4', sql
   prepare:        ( me, P...  ) -> me.$.db.prepare          P...
   aggregate:      ( me, P...  ) -> me.$.db.aggregate        P...
   backup:         ( me, P...  ) -> me.$.db.backup           P...
