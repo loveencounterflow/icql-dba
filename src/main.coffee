@@ -140,16 +140,18 @@ local_methods =
     primary key index in SQLite) ###
     # throw new Error "µ45222 deprecated until next major version"
     @query "select * from sqlite_master order by type desc, name;"
+
+  #---------------------------------------------------------------------------------------------------------
   list_objects:   ( me, schema = 'main' ) ->
     validate.ic_schema schema
-    return @query "select * from #{schema}.sqlite_master order by type desc, name;"
+    return @query "select * from #{@as_identifier schema}.sqlite_master order by type desc, name;"
   list_schemas:   ( me ) -> @pragma "database_list;"
 
   #-----------------------------------------------------------------------------------------------------------
   ### TAINT must escape path, schema ###
   attach: ( me, path, schema ) ->
     validate.ic_schema schema
-    return @execute "attach '#{path}' as [#{schema}];"
+    return @execute "attach '#{path}' as [#{@as_identifier schema}];"
 
   #-----------------------------------------------------------------------------------------------------------
   type_of: ( me, name, schema = 'main' ) ->
@@ -168,7 +170,7 @@ local_methods =
 
   #---------------------------------------------------------------------------------------------------------
   _dependencies_of: ( me, table, schema = 'main' ) ->
-    return @query "pragma #{schema}.foreign_key_list( #{@as_identifier table} )"
+    return @query "pragma #{@as_identifier schema}.foreign_key_list( #{@as_identifier table} )"
 
   #---------------------------------------------------------------------------------------------------------
   dependencies_of:  ( me, table, schema = 'main' ) ->
