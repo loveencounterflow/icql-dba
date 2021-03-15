@@ -151,7 +151,7 @@ local_methods =
   ### TAINT must escape path, schema ###
   attach: ( me, path, schema ) ->
     validate.ic_schema schema
-    return @execute "attach '#{path}' as [#{@as_identifier schema}];"
+    return @execute "attach #{@as_sql path} as #{@as_identifier schema};"
 
   #-----------------------------------------------------------------------------------------------------------
   type_of: ( me, name, schema = 'main' ) ->
