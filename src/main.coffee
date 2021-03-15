@@ -134,7 +134,6 @@ local_methods =
   pragma:         ( me, P...  ) -> @db.pragma           P...
   transaction:    ( me, P...  ) -> @db.transaction      P...
   #.........................................................................................................
-  as_identifier:  ( me, text  ) -> '"' + ( text.replace /"/g, '""' ) + '"'
   ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
   primary key index in SQLite) ###
   catalog:        ( me        ) -> @query "select * from sqlite_master order by type desc, name;"
@@ -202,6 +201,9 @@ local_methods =
       @execute statement
       count += +1
     return count
+
+  #---------------------------------------------------------------------------------------------------------
+  as_identifier:  ( me, text  ) -> '"' + ( text.replace /"/g, '""' ) + '"'
 
   #---------------------------------------------------------------------------------------------------------
   escape_text: ( me, x ) ->
