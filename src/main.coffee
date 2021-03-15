@@ -138,11 +138,20 @@ local_methods =
   ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
   primary key index in SQLite) ###
   catalog:        ( me        ) -> @query "select * from sqlite_master order by type desc, name;"
+  #.........................................................................................................
+  list_objects:   ( me, schema = 'main' ) ->
     validate.ic_schema schema
+    return @query "select * from #{schema}.sqlite_master order by type desc, name;"
+  list_schemas:   ( me ) -> @pragma "database_list;"
 
   #-----------------------------------------------------------------------------------------------------------
-  type_of: ( me, name ) ->
+  ### TAINT must escape path, schema ###
+  attach: ( me, path, schema ) ->
     validate.ic_schema schema
+    return @execute "attach '#{path}' as [#{schema}];"
+
+  #-----------------------------------------------------------------------------------------------------------
+  type_of: ( me, name, schema = 'main' ) ->
     for row from me.$.catalog()
       return row.type if row.name is name
     return null
@@ -157,19 +166,26 @@ local_methods =
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  _dependencies_of: ( me, table_name ) -> me.$.query "pragma foreign_key_list( #{me.$.as_sql table_name} )"
-  dependencies_of:  ( me, table_name ) -> ( row.table for row from me.$._dependencies_of table_name )
-  get_toposort: ( me ) ->
+  _dependencies_of: ( me, table_name, schema = 'main' ) ->
+    return me.$.query "pragma foreign_key_list( #{schema}.#{me.$.as_sql table_name} )"
+
+  #---------------------------------------------------------------------------------------------------------
+  dependencies_of:  ( me, table_name, schema = 'main' ) ->
+    validate.ic_schema schema
+    return ( row.table for row from me.$._dependencies_of table_name )
+
+  #---------------------------------------------------------------------------------------------------------
+  get_toposort: ( me, schema = 'main' ) ->
     LTSORT  = require 'ltsort'
     g       = LTSORT.new_graph()
     indexes = []
     types   = {}
-    for x from me.$.catalog()
+    for x from @list_objects schema
       types[ x.name ] = x.type
       unless x.type is 'table'
         indexes.push x.name
         continue
-      dependencies = me.$.dependencies_of x.name
+      dependencies = @dependencies_of x.name
       if dependencies.length is 0
         LTSORT.add g, x.name
       else
