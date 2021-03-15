@@ -153,13 +153,13 @@ local_methods =
     validate.ic_schema schema
     return @execute "attach #{@as_sql path} as #{@as_identifier schema};"
 
-  #-----------------------------------------------------------------------------------------------------------
+  #---------------------------------------------------------------------------------------------------------
   type_of: ( me, name, schema = 'main' ) ->
     for row from @catalog()
       return row.type if row.name is name
     return null
 
-  #-----------------------------------------------------------------------------------------------------------
+  #---------------------------------------------------------------------------------------------------------
   column_types: ( me, table ) ->
     R = {}
     ### TAINT we apparently have to call the pragma in this roundabout fashion since SQLite refuses to
