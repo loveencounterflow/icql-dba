@@ -157,22 +157,22 @@ local_methods =
     return null
 
   #-----------------------------------------------------------------------------------------------------------
-  column_types: ( me, table_name ) ->
+  column_types: ( me, table ) ->
     R = {}
     ### TAINT we apparently have to call the pragma in this roundabout fashion since SQLite refuses to
     accept placeholders in that statement: ###
-    for row from me.$.query me.$.interpolate "pragma table_info( $table_name );", { table_name, }
+    for row from me.$.query me.$.interpolate "pragma table_info( $table );", { table, }
       R[ row.name ] = row.type
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  _dependencies_of: ( me, table_name, schema = 'main' ) ->
-    return me.$.query "pragma #{schema}.foreign_key_list( #{me.$.as_sql table_name} )"
+  _dependencies_of: ( me, table, schema = 'main' ) ->
+    return me.$.query "pragma #{schema}.foreign_key_list( #{me.$.as_sql table} )"
 
   #---------------------------------------------------------------------------------------------------------
-  dependencies_of:  ( me, table_name, schema = 'main' ) ->
+  dependencies_of:  ( me, table, schema = 'main' ) ->
     validate.ic_schema schema
-    return ( row.table for row from me.$._dependencies_of table_name )
+    return ( row.table for row from me.$._dependencies_of table )
 
   #---------------------------------------------------------------------------------------------------------
   get_toposort: ( me, schema = 'main' ) ->
