@@ -144,7 +144,13 @@ local_methods =
   #---------------------------------------------------------------------------------------------------------
   list_objects: ( me, schema = 'main' ) ->
     validate.ic_schema schema
-    return @query "select * from #{@as_identifier schema}.sqlite_master order by type desc, name;"
+    return @all_rows @query """
+      select
+          type      as type,
+          name      as name,
+          sql       as sql
+        from #{@as_identifier schema}.sqlite_master
+        order by type desc, name;"""
 
   #---------------------------------------------------------------------------------------------------------
   list_schemas: ( me ) -> @pragma "database_list;"
