@@ -167,7 +167,7 @@ local_methods =
 
   #---------------------------------------------------------------------------------------------------------
   _dependencies_of: ( me, table_name, schema = 'main' ) ->
-    return me.$.query "pragma foreign_key_list( #{schema}.#{me.$.as_sql table_name} )"
+    return me.$.query "pragma #{schema}.foreign_key_list( #{me.$.as_sql table_name} )"
 
   #---------------------------------------------------------------------------------------------------------
   dependencies_of:  ( me, table_name, schema = 'main' ) ->
