@@ -3,8 +3,8 @@ dependencies:
   cnd: 9.2.1
   hollerith-codec: 3.0.1
   intercourse: 7.0.1
-  intertype: 7.6.5
-  ltsort: 1.3.0
+  intertype: 7.6.6
+  ltsort: 1.3.1
 devDependencies:
   guy-test: 4.0.1
 lockfileVersion: 5.2
@@ -262,6 +262,7 @@ packages:
   /intertype/7.6.3:
     dependencies:
       multimix: 5.0.0
+    dev: true
     resolution:
       integrity: sha512-77FmgaqGydWBc5OIde+geMj4+dGZ1i5UIFXM4C9QHiEIBjh+Gojycsb7XtRYYLNhNJepa+jotHXfAGPngHatzw==
   /intertype/7.6.5:
@@ -270,6 +271,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-763YK3ezLYy9FkX+cTTg/qwGHteqlaTMiec9a2sVAKm7kXp9e7QkzbyYS6u4CcbLxx12L8bcRbe3SFsPeaJCMA==
+  /intertype/7.6.6:
+    dependencies:
+      multimix: 5.0.0
+    dev: false
+    resolution:
+      integrity: sha512-iqUMhx+WLwg9CwffvYbLDkM3CDiYSVGI3dPEe+uHtNp3ZheRgG2406DHckhfwaI4zW6OE1WnNAZyF6XbRlwUCA==
   /is-fullwidth-code-point/1.0.0:
     dependencies:
       number-is-nan: 1.0.1
@@ -293,13 +300,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-jJ1nvvQi6unW0WifjNPMIb64Byom0EXzSKWFYA++EpyjK3qv1J2pqeSoEJ61tGJoNG0GoNjPoeLYhxW16riZaA==
-  /ltsort/1.3.0:
+  /ltsort/1.3.1:
     dependencies:
       cnd: 9.2.1
-      intertype: 7.6.3
+      intertype: 7.6.5
     dev: false
     resolution:
-      integrity: sha512-2foOFVbFE+ZV7PWtRrfNoqV4s+hbDw/12h06Z1YsfSQmwhtQ4TuIy6NxjusH6L50aNSlthZaOrzWrzir8br/eQ==
+      integrity: sha512-0PCOwh7hshpe0kZiHguAaRhLAc9OZvunmovbnhtx/YjGSKpJ9bEJl0X8GoMb+1gtIrlfbfBhJQEBpc7UwrXSbg==
   /mimic-response/2.1.0:
     dev: false
     engines:
@@ -608,5 +615,5 @@ specifiers:
   guy-test: 4.0.1
   hollerith-codec: 3.0.1
   intercourse: 7.0.1
-  intertype: 7.6.5
-  ltsort: 1.3.0
+  intertype: 7.6.6
+  ltsort: 1.3.1
