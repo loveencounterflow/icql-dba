@@ -118,13 +118,16 @@ local_methods =
     return if Q? then ( statement.iterate Q ) else statement.iterate()
 
   #---------------------------------------------------------------------------------------------------------
+  execute: ( me, sql  ) ->
     @_echo '4', sql
+    return me.$.db.exec sql
+
+  #---------------------------------------------------------------------------------------------------------
   prepare:        ( me, P...  ) -> me.$.db.prepare          P...
   aggregate:      ( me, P...  ) -> me.$.db.aggregate        P...
   backup:         ( me, P...  ) -> me.$.db.backup           P...
   checkpoint:     ( me, P...  ) -> me.$.db.checkpoint       P...
   close:          ( me, P...  ) -> me.$.db.close            P...
-  execute:        ( me, P...  ) -> me.$.db.exec             P...
   read:           ( me, path  ) -> me.$.db.exec FS.readFileSync path, { encoding: 'utf-8', }
   function:       ( me, P...  ) -> me.$.db.function         P...
   load:           ( me, P...  ) -> me.$.db.loadExtension    P...
@@ -135,9 +138,11 @@ local_methods =
   ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
   primary key index in SQLite) ###
   catalog:        ( me        ) -> @query "select * from sqlite_master order by type desc, name;"
+    validate.ic_schema schema
 
   #-----------------------------------------------------------------------------------------------------------
   type_of: ( me, name ) ->
+    validate.ic_schema schema
     for row from me.$.catalog()
       return row.type if row.name is name
     return null
@@ -224,7 +229,7 @@ local_methods =
 #-----------------------------------------------------------------------------------------------------------
 @bind = ( settings ) ->
   validate.icql_settings settings
-  me            = { $: { _statements: {}, }, }
+  me            = { $: { _statements: {}, settings, }, }
   connector     = settings.connector ? require 'better-sqlite3'
   me.icql_path  = settings.icql_path
   @connect                    me, connector, settings.db_path, settings.db_settings
