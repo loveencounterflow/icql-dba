@@ -197,9 +197,9 @@ local_methods =
   #---------------------------------------------------------------------------------------------------------
   clear: ( me ) ->
     count = 0
-    for { type, name, } in me.$.get_toposort()
+    for { type, name, } in @get_toposort()
       statement = "drop #{type} if exists #{@as_identifier name};"
-      me.$.execute statement
+      @execute statement
       count += +1
     return count
 
