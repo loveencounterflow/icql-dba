@@ -167,15 +167,25 @@ local_methods =
     @pragma "#{@as_identifier to_schema}.foreign_keys = off;"
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
+    #.......................................................................................................
     for d in @list_objects from_schema
       continue if ( not d.sql? ) or ( d.sql is '' )
+      #.....................................................................................................
+      ### TAINT consider to use `validate.ic_db_object_type` ###
+      unless d.type in [ 'table', 'index', ]
+        throw new Error "µ49888 unknown type #{rpr d.type} for DB object #{rpr d}"
+      #.....................................................................................................
       name_x  = @as_identifier d.name
       sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX)\s*/i, "create table #{to_schema_x}."
+      #.....................................................................................................
+      if sql is d.sql
+        throw new Error "µ49889 unexpected SQL string #{rpr d.sql}"
+      #.....................................................................................................
       @execute sql
       if d.type is 'table'
         sql     = "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
         @execute sql
-    # me.$.db.
+    #.......................................................................................................
     @pragma "#{@as_identifier to_schema}.foreign_keys = on;"
     @pragma "#{@as_identifier to_schema}.foreign_key_check;"
     return null
