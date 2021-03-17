@@ -322,7 +322,7 @@ How this is any better than `from users, addresses` totally escapes me.
 * [ ] remove `better-sqlite3` dependency, consumers will have to pass in a DB instance
 * [ ] introduce syntax to distinguish between compile-time and run-time interpolated parameters, ex.:
   `select * from $META:schema.$META:table where length > $min_length;`
-
+* [ ] refactor returned object, `_local_methods` with MultiMix
 
 
 
