@@ -156,7 +156,8 @@ max_excerpt_length        = 10000
         order by type desc, name;"""
 
   #---------------------------------------------------------------------------------------------------------
-  list_schemas: -> @pragma "database_list;"
+  list_schemas:       -> @pragma "database_list;"
+  list_schema_names:  -> new Set ( d.name for d in @list_schemas() )
 
   #---------------------------------------------------------------------------------------------------------
   ### TAINT must escape path, schema ###
