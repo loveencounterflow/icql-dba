@@ -170,9 +170,11 @@ max_excerpt_length        = 10000
     # debug '^33387^', me
     # debug '^33387^', @
     # debug '^33387^', { from_schema, to_schema, }
-    debug '^33387^', @list_schemas me
+    schemas       = @list_schema_names()
     validate.ic_schema from_schema
     validate.ic_schema to_schema
+    throw new Error "µ57873 unknown schema #{rpr from_schema}" unless schemas.has from_schema
+    throw new Error "µ57873 unknown schema #{rpr to_schema}"   unless schemas.has to_schema
     @pragma "#{@as_identifier to_schema}.foreign_keys = off;"
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
