@@ -45,6 +45,9 @@ max_excerpt_length        = 10000
 @_local_methods =
 
   #---------------------------------------------------------------------------------------------------------
+  _statements: {}
+
+  #---------------------------------------------------------------------------------------------------------
   _echo: ( ref, sql ) ->
     return null unless @settings.echo
     echo ( CND.reverse CND.blue "^icql@888-#{ref}^" ) + ( CND.reverse CND.yellow sql )
@@ -295,7 +298,7 @@ max_excerpt_length        = 10000
 #-----------------------------------------------------------------------------------------------------------
 @bind = ( settings ) ->
   validate.icql_settings settings
-  me            = { $: { _statements: {}, settings, }, }
+  me            = { $: { settings, }, }
   connector     = settings.connector ? require 'better-sqlite3'
   me.icql_path  = settings.icql_path
   @connect                    me, connector, settings.db_path, settings.db_settings
