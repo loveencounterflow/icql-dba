@@ -42,7 +42,7 @@ max_excerpt_length        = 10000
 #===========================================================================================================
 # LOCAL METHODS
 #-----------------------------------------------------------------------------------------------------------
-local_methods =
+@_local_methods =
 
   #---------------------------------------------------------------------------------------------------------
   _echo: ( me, ref, sql ) ->
@@ -318,7 +318,7 @@ local_methods =
     throw new Error "µ11292 name collision: #{rpr name} already defined" if me[ name ]?
   me.$ ?= {}
   #.........................................................................................................
-  for name, local_method of local_methods
+  for name, local_method of @_local_methods
     do ( name, local_method ) ->
       check_unique name
       if ( isa.function local_method )
