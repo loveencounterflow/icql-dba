@@ -181,6 +181,7 @@ max_excerpt_length        = 10000
     #.......................................................................................................
     for d in @list_objects from_schema
       # debug '^44463^', "DB object:", d if
+      debug '^44463^', "DB object:", d if @.settings.verbose
       continue if ( not d.sql? ) or ( d.sql is '' )
       #.....................................................................................................
       ### TAINT consider to use `validate.ic_db_object_type` ###
