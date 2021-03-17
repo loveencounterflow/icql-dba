@@ -45,13 +45,13 @@ max_excerpt_length        = 10000
 @_local_methods =
 
   #---------------------------------------------------------------------------------------------------------
-  _echo: ( me, ref, sql ) ->
+  _echo: ( ref, sql ) ->
     return null unless @settings.echo
     echo ( CND.reverse CND.blue "^icql@888-#{ref}^" ) + ( CND.reverse CND.yellow sql )
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  limit: ( me, n, iterator ) ->
+  limit: ( n, iterator ) ->
     count = 0
     for x from iterator
       return if count >= n
@@ -60,12 +60,12 @@ max_excerpt_length        = 10000
     return
 
   #---------------------------------------------------------------------------------------------------------
-  single_row:   ( me, iterator ) ->
+  single_row:   ( iterator ) ->
     throw new Error "µ33833 expected at least one row, got none" if ( R = @first_row iterator ) is undefined
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  all_first_values: ( me, iterator ) ->
+  all_first_values: ( iterator ) ->
     R = []
     for row from iterator
       for key, value of row
@@ -74,7 +74,7 @@ max_excerpt_length        = 10000
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  first_values: ( me, iterator ) ->
+  first_values: ( iterator ) ->
     R = []
     for row from iterator
       for key, value of row
@@ -82,26 +82,26 @@ max_excerpt_length        = 10000
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  first_row:    ( me, iterator  ) -> return row for row from iterator
+  first_row:    ( iterator  ) -> return row for row from iterator
   ### TAINT must ensure order of keys in row is same as order of fields in query ###
-  single_value: ( me, iterator  ) -> return value for key, value of @single_row iterator
-  first_value:  ( me, iterator  ) -> return value for key, value of @first_row iterator
-  all_rows:     ( me, iterator  ) -> [ iterator..., ]
+  single_value: ( iterator  ) -> return value for key, value of @single_row iterator
+  first_value:  ( iterator  ) -> return value for key, value of @first_row iterator
+  all_rows:     ( iterator  ) -> [ iterator..., ]
 
   #---------------------------------------------------------------------------------------------------------
-  query: ( me, sql, P... ) ->
+  query: ( sql, P... ) ->
     @_echo '1', sql
     statement = ( @_statements[ sql ] ?= @db.prepare sql )
     return statement.iterate P...
 
   #---------------------------------------------------------------------------------------------------------
-  run: ( me, sql, P... ) ->
+  run: ( sql, P... ) ->
     @_echo '2', sql
     statement = ( @_statements[ sql ] ?= @db.prepare sql )
     return statement.run P...
 
   #---------------------------------------------------------------------------------------------------------
-  _run_or_query: ( me, entry_type, is_last, sql, Q ) ->
+  _run_or_query: ( entry_type, is_last, sql, Q ) ->
     @_echo '3', sql
     statement     = ( @_statements[ sql ] ?= @db.prepare sql )
     returns_data  = statement.reader
@@ -118,31 +118,31 @@ max_excerpt_length        = 10000
     return if Q? then ( statement.iterate Q ) else statement.iterate()
 
   #---------------------------------------------------------------------------------------------------------
-  execute: ( me, sql  ) ->
+  execute: ( sql  ) ->
     @_echo '4', sql
     return @db.exec sql
 
   #---------------------------------------------------------------------------------------------------------
-  prepare:        ( me, P...  ) -> @db.prepare          P...
-  aggregate:      ( me, P...  ) -> @db.aggregate        P...
-  backup:         ( me, P...  ) -> @db.backup           P...
-  checkpoint:     ( me, P...  ) -> @db.checkpoint       P...
-  close:          ( me, P...  ) -> @db.close            P...
-  read:           ( me, path  ) -> @db.exec FS.readFileSync path, { encoding: 'utf-8', }
-  function:       ( me, P...  ) -> @db.function         P...
-  load:           ( me, P...  ) -> @db.loadExtension    P...
-  pragma:         ( me, P...  ) -> @db.pragma           P...
-  transaction:    ( me, P...  ) -> @db.transaction      P...
+  prepare:        ( P...  ) -> @db.prepare          P...
+  aggregate:      ( P...  ) -> @db.aggregate        P...
+  backup:         ( P...  ) -> @db.backup           P...
+  checkpoint:     ( P...  ) -> @db.checkpoint       P...
+  close:          ( P...  ) -> @db.close            P...
+  read:           ( path  ) -> @db.exec FS.readFileSync path, { encoding: 'utf-8', }
+  function:       ( P...  ) -> @db.function         P...
+  load:           ( P...  ) -> @db.loadExtension    P...
+  pragma:         ( P...  ) -> @db.pragma           P...
+  transaction:    ( P...  ) -> @db.transaction      P...
 
   #---------------------------------------------------------------------------------------------------------
-  catalog: ( me ) ->
+  catalog: ->
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
     primary key index in SQLite) ###
     # throw new Error "µ45222 deprecated until next major version"
     @query "select * from sqlite_master order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
-  list_objects: ( me, schema = 'main' ) ->
+  list_objects: ( schema = 'main' ) ->
     validate.ic_schema schema
     return @all_rows @query """
       select
@@ -153,22 +153,29 @@ max_excerpt_length        = 10000
         order by type desc, name;"""
 
   #---------------------------------------------------------------------------------------------------------
-  list_schemas: ( me ) -> @pragma "database_list;"
+  list_schemas: -> @pragma "database_list;"
 
   #---------------------------------------------------------------------------------------------------------
   ### TAINT must escape path, schema ###
-  attach: ( me, path, schema ) ->
+  attach: ( path, schema ) ->
     validate.ic_path path
     validate.ic_schema schema
     return @execute "attach #{@as_sql path} as #{@as_identifier schema};"
 
   #-----------------------------------------------------------------------------------------------------------
-  copy_schema: ( me, from_schema, to_schema ) ->
+  copy_schema: ( from_schema, to_schema ) ->
+    # debug '^33387^', me
+    # debug '^33387^', @
+    # debug '^33387^', { from_schema, to_schema, }
+    debug '^33387^', @list_schemas me
+    validate.ic_schema from_schema
+    validate.ic_schema to_schema
     @pragma "#{@as_identifier to_schema}.foreign_keys = off;"
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
     #.......................................................................................................
     for d in @list_objects from_schema
+      # debug '^44463^', "DB object:", d if
       continue if ( not d.sql? ) or ( d.sql is '' )
       #.....................................................................................................
       ### TAINT consider to use `validate.ic_db_object_type` ###
@@ -191,13 +198,13 @@ max_excerpt_length        = 10000
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  type_of: ( me, name, schema = 'main' ) ->
+  type_of: ( name, schema = 'main' ) ->
     for row from @catalog()
       return row.type if row.name is name
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  column_types: ( me, table ) ->
+  column_types: ( table ) ->
     R = {}
     ### TAINT we apparently have to call the pragma in this roundabout fashion since SQLite refuses to
     accept placeholders in that statement: ###
@@ -206,16 +213,16 @@ max_excerpt_length        = 10000
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  _dependencies_of: ( me, table, schema = 'main' ) ->
+  _dependencies_of: ( table, schema = 'main' ) ->
     return @query "pragma #{@as_identifier schema}.foreign_key_list( #{@as_identifier table} )"
 
   #---------------------------------------------------------------------------------------------------------
-  dependencies_of:  ( me, table, schema = 'main' ) ->
+  dependencies_of:  ( table, schema = 'main' ) ->
     validate.ic_schema schema
     return ( row.table for row from @_dependencies_of table )
 
   #---------------------------------------------------------------------------------------------------------
-  get_toposort: ( me, schema = 'main' ) ->
+  get_toposort: ( schema = 'main' ) ->
     LTSORT  = require 'ltsort'
     g       = LTSORT.new_graph()
     indexes = []
@@ -235,7 +242,7 @@ max_excerpt_length        = 10000
     return ( { name, type: types[ name ], } for name in R )
 
   #---------------------------------------------------------------------------------------------------------
-  clear: ( me ) ->
+  clear: ->
     count = 0
     for { type, name, } in @get_toposort()
       statement = "drop #{type} if exists #{@as_identifier name};"
@@ -244,20 +251,20 @@ max_excerpt_length        = 10000
     return count
 
   #---------------------------------------------------------------------------------------------------------
-  as_identifier:  ( me, text  ) -> '"' + ( text.replace /"/g, '""' ) + '"'
+  as_identifier:  ( text  ) -> '"' + ( text.replace /"/g, '""' ) + '"'
 
   #---------------------------------------------------------------------------------------------------------
-  escape_text: ( me, x ) ->
+  escape_text: ( x ) ->
     validate.text x
     x.replace /'/g, "''"
 
   #---------------------------------------------------------------------------------------------------------
-  list_as_json: ( me, x ) ->
+  list_as_json: ( x ) ->
     validate.list x
     return jr x
 
   #---------------------------------------------------------------------------------------------------------
-  as_sql: ( me, x ) ->
+  as_sql: ( x ) ->
     switch type = type_of x
       when 'text'     then return "'#{@escape_text x}'"
       when 'list'     then return "'#{@list_as_json x}'"
@@ -269,7 +276,7 @@ max_excerpt_length        = 10000
     throw new Error "µ12342 unable to express a #{type} as SQL literal, got #{rpr x}"
 
   #---------------------------------------------------------------------------------------------------------
-  interpolate: ( me, sql, Q ) ->
+  interpolate: ( sql, Q ) ->
     return sql.replace @_interpolation_pattern, ( $0, $1 ) =>
       try
         return @as_sql Q[ $1 ]
@@ -279,8 +286,8 @@ max_excerpt_length        = 10000
   _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
 
   #---------------------------------------------------------------------------------------------------------
-  as_hollerith:   ( me, x ) -> HOLLERITH.encode x
-  from_hollerith: ( me, x ) -> HOLLERITH.decode x
+  as_hollerith:   ( x ) -> HOLLERITH.encode x
+  from_hollerith: ( x ) -> HOLLERITH.decode x
 
 
 #===========================================================================================================
@@ -325,7 +332,7 @@ max_excerpt_length        = 10000
         local_method  = local_method.bind me.$
         method = ( P... ) ->
           try
-            local_method me, P...
+            local_method P...
           catch error
             excerpt = rpr P
             if excerpt.length > max_excerpt_length
