@@ -164,20 +164,6 @@ local_methods =
 
   #-----------------------------------------------------------------------------------------------------------
   copy_schema: ( me, from_schema, to_schema ) ->
-    # debug '^3334^', ( k for k of me )
-    # debug '^3334^', ( k for k of me.$.db )
-    # urge '^64656^', @get_toposort()
-    # me.$.db.exec "create table #{to_schema}.a ( n integer );"
-    # urge '^64656^', "get_toposort 'main'", @get_toposort 'main'
-    # urge '^64656^', "get_toposort to_schema", @get_toposort to_schema
-    # urge '^64656^', @all_rows @catalog()
-    # help '^64656^', @all_rows @list_objects 'main'
-    # help '^64656^', @all_rows @list_objects to_schema
-    # urge '^64656^', @all_rows @list_schemas()
-    # info '^67888^', @all_rows @query "select * from #{to_schema}.a;"
-    # info '^67888^', @all_rows @query "select * from #{to_schema}.sqlite_schema;"
-    # debug '^55833^', { from_schema, }, @list_objects from_schema
-    # debug '^55833^', { to_schema,   }, @list_objects to_schema
     @pragma "#{@as_identifier to_schema}.foreign_keys = off;"
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
