@@ -180,17 +180,16 @@ max_excerpt_length        = 10000
     from_schema_x = @as_identifier from_schema
     #.......................................................................................................
     for d in @list_objects from_schema
-      # debug '^44463^', "DB object:", d if
       debug '^44463^', "DB object:", d if @.settings.verbose
       continue if ( not d.sql? ) or ( d.sql is '' )
       continue if d.name in [ 'sqlite_sequence', ]
       #.....................................................................................................
       ### TAINT consider to use `validate.ic_db_object_type` ###
-      unless d.type in [ 'table', 'index', ]
+      unless d.type in [ 'table', 'view', 'index', ]
         throw new Error "µ49888 unknown type #{rpr d.type} for DB object #{rpr d}"
       #.....................................................................................................
       name_x  = @as_identifier d.name
-      sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX)\s*/i, "create table #{to_schema_x}."
+      sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
       #.....................................................................................................
       if sql is d.sql
         throw new Error "µ49889 unexpected SQL string #{rpr d.sql}"
