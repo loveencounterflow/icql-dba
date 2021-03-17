@@ -183,6 +183,7 @@ max_excerpt_length        = 10000
       # debug '^44463^', "DB object:", d if
       debug '^44463^', "DB object:", d if @.settings.verbose
       continue if ( not d.sql? ) or ( d.sql is '' )
+      continue if d.name in [ 'sqlite_sequence', ]
       #.....................................................................................................
       ### TAINT consider to use `validate.ic_db_object_type` ###
       unless d.type in [ 'table', 'index', ]
