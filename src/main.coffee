@@ -233,8 +233,10 @@ max_excerpt_length        = 10000
     g       = LTSORT.new_graph()
     indexes = []
     types   = {}
+    sqls    = {}
     for x from @list_objects schema
       types[ x.name ] = x.type
+      sqls[  x.name ] = x.sql
       unless x.type is 'table'
         indexes.push x.name
         continue
@@ -245,7 +247,7 @@ max_excerpt_length        = 10000
         for dependency in dependencies
           LTSORT.add g, x.name, dependency
     R = [ ( LTSORT.linearize g )..., indexes..., ]
-    return ( { name, type: types[ name ], } for name in R )
+    return ( { name, type: types[ name ], sql: sqls[ name ] } for name in R )
 
   #---------------------------------------------------------------------------------------------------------
   clear: ->
