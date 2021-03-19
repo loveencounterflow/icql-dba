@@ -4,6 +4,7 @@ dependencies:
   hollerith-codec: 3.0.1
   intercourse: 7.0.1
   intertype: 7.6.6
+  letsfreezethat: 3.1.0
   ltsort: 1.3.1
 devDependencies:
   guy-test: 4.0.1
@@ -616,4 +617,5 @@ specifiers:
   hollerith-codec: 3.0.1
   intercourse: 7.0.1
   intertype: 7.6.6
+  letsfreezethat: ^3.1.0
   ltsort: 1.3.1
