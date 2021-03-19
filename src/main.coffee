@@ -170,10 +170,8 @@ LFT                       = require 'letsfreezethat'
 
   #-----------------------------------------------------------------------------------------------------------
   copy_schema: ( from_schema, to_schema ) ->
-    # debug '^33387^', me
-    # debug '^33387^', @
-    # debug '^33387^', { from_schema, to_schema, }
     schemas       = @list_schema_names()
+    inserts       = []
     validate.ic_schema from_schema
     validate.ic_schema to_schema
     throw new Error "µ57873 unknown schema #{rpr from_schema}" unless schemas.has from_schema
@@ -183,7 +181,7 @@ LFT                       = require 'letsfreezethat'
     from_schema_x = @as_identifier from_schema
     #.......................................................................................................
     for d in @list_objects from_schema
-      debug '^44463^', "DB object:", d if @.settings.verbose
+      debug '^44463^', "DB object:", d if @settings.verbose
       continue if ( not d.sql? ) or ( d.sql is '' )
       continue if d.name in [ 'sqlite_sequence', ]
       #.....................................................................................................
@@ -191,6 +189,7 @@ LFT                       = require 'letsfreezethat'
       unless d.type in [ 'table', 'view', 'index', ]
         throw new Error "µ49888 unknown type #{rpr d.type} for DB object #{rpr d}"
       #.....................................................................................................
+      ### TAINT using not-so reliable string replacement as substitute for proper parsing ###
       name_x  = @as_identifier d.name
       sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
       #.....................................................................................................
@@ -199,9 +198,14 @@ LFT                       = require 'letsfreezethat'
       #.....................................................................................................
       @execute sql
       if d.type is 'table'
-        sql     = "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
-        @execute sql
+        inserts.push "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
     #.......................................................................................................
+    if @settings.verbose
+      debug '^49864^', "starting with inserts"
+      debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in @list_objects from_schema ).join ', '}"
+      debug '^49864^', "objects in #{rpr to_schema}:   #{rpr ( "(#{d.type})#{d.name}" for d in @list_objects to_schema ).join ', '}"
+    #.......................................................................................................
+    @execute sql for sql in inserts
     @pragma "#{@as_identifier to_schema}.foreign_keys = on;"
     @pragma "#{@as_identifier to_schema}.foreign_key_check;"
     return null
@@ -263,6 +267,7 @@ LFT                       = require 'letsfreezethat'
 
   #---------------------------------------------------------------------------------------------------------
   as_identifier:  ( text  ) -> '"' + ( text.replace /"/g, '""' ) + '"'
+  # as_identifier:  ( text  ) -> '[' + ( text.replace /\]/g, ']]' ) + ']'
 
   #---------------------------------------------------------------------------------------------------------
   escape_text: ( x ) ->
