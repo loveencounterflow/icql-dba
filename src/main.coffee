@@ -38,6 +38,8 @@ IC                        = require 'intercourse'
   size_of
   type_of }               = @types
 max_excerpt_length        = 10000
+LFT                       = require 'letsfreezethat'
+
 
 #===========================================================================================================
 # LOCAL METHODS
@@ -334,7 +336,8 @@ max_excerpt_length        = 10000
     throw new Error "µ11292 name collision: #{rpr name} already defined" if me[ name ]?
   me.$ ?= {}
   #.........................................................................................................
-  for name, local_method of @_local_methods
+  ### TAINT use `new` ###
+  for name, local_method of LFT._deep_copy @_local_methods
     do ( name, local_method ) ->
       check_unique name
       if ( isa.function local_method )
