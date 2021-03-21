@@ -163,7 +163,7 @@ LFT                       = require 'letsfreezethat'
 
   #---------------------------------------------------------------------------------------------------------
   list_schemas:       -> @pragma "database_list;"
-  list_schema_names:  -> new Set ( d.name for d in @list_schemas() )
+  list_schema_names:  -> ( d.name for d in @list_schemas() )
 
   #---------------------------------------------------------------------------------------------------------
   ### TAINT must escape path, schema ###
@@ -178,8 +178,8 @@ LFT                       = require 'letsfreezethat'
     inserts       = []
     validate.ic_schema from_schema
     validate.ic_schema to_schema
-    throw new Error "µ57873 unknown schema #{rpr from_schema}" unless schemas.has from_schema
-    throw new Error "µ57873 unknown schema #{rpr to_schema}"   unless schemas.has to_schema
+    throw new Error "µ57873 unknown schema #{rpr from_schema}" unless from_schema in schemas
+    throw new Error "µ57873 unknown schema #{rpr to_schema}"   unless to_schema   in schemas
     @pragma "#{@as_identifier to_schema}.foreign_keys = off;"
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
