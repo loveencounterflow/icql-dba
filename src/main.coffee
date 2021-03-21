@@ -95,19 +95,19 @@ LFT                       = require 'letsfreezethat'
 
   #---------------------------------------------------------------------------------------------------------
   query: ( sql, P... ) ->
-    @_echo '1', sql
+    @_echo 'query', sql
     statement = ( @_statements[ sql ] ?= @db.prepare sql )
     return statement.iterate P...
 
   #---------------------------------------------------------------------------------------------------------
   run: ( sql, P... ) ->
-    @_echo '2', sql
+    @_echo 'run', sql
     statement = ( @_statements[ sql ] ?= @db.prepare sql )
     return statement.run P...
 
   #---------------------------------------------------------------------------------------------------------
   _run_or_query: ( entry_type, is_last, sql, Q ) ->
-    @_echo '3', sql
+    @_echo '_run_or_query', sql
     statement     = ( @_statements[ sql ] ?= @db.prepare sql )
     returns_data  = statement.reader
     #.......................................................................................................
@@ -124,11 +124,15 @@ LFT                       = require 'letsfreezethat'
 
   #---------------------------------------------------------------------------------------------------------
   execute: ( sql  ) ->
-    @_echo '4', sql
+    @_echo 'execute', sql
     return @db.exec sql
 
   #---------------------------------------------------------------------------------------------------------
-  prepare:        ( P...  ) -> @db.prepare          P...
+  prepare: ( sql  ) ->
+    @_echo 'prepare', sql
+    return @db.prepare sql
+
+  #---------------------------------------------------------------------------------------------------------
   aggregate:      ( P...  ) -> @db.aggregate        P...
   backup:         ( P...  ) -> @db.backup           P...
   checkpoint:     ( P...  ) -> @db.checkpoint       P...
