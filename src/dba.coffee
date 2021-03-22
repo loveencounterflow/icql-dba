@@ -188,16 +188,28 @@ class @Dba
     @query "select * from sqlite_master order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
-  list_objects: ( schema = 'main' ) ->
+  list_objects: ( cfg = {} ) ->
+    { schema
+      schema_x }  = @_schema_from_cfg cfg
     validate.ic_schema schema
-    schema_x = @as_identifier schema
+    validate.dba_list_objects_ordering cfg._ordering
+    #.......................................................................................................
+    if cfg._ordering is 'drop'
+      return @all_rows @query """
+        select
+            type      as type,
+            name      as name,
+            sql       as sql
+          from #{schema_x}.sqlite_master
+          order by type desc, name;"""
+    #.......................................................................................................
     return @all_rows @query """
       select
           type      as type,
           name      as name,
           sql       as sql
         from #{schema_x}.sqlite_master
-        order by type desc, name;"""
+        order by type, name;"""
 
   #---------------------------------------------------------------------------------------------------------
   list_objects_2: ( imagine_options_object_here ) ->
