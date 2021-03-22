@@ -167,6 +167,16 @@ class @Dba
   pragma:         ( P...  ) -> @sqlt.pragma           P...
   transaction:    ( P...  ) -> @sqlt.transaction      P...
 
+  #---------------------------------------------------------------------------------------------------------
+  get_foreign_key_state: -> not not ( @pragma "foreign_keys;" )[ 0 ].foreign_keys
+
+  #---------------------------------------------------------------------------------------------------------
+  set_foreign_key_state: ( onoff ) ->
+    ### TAINT make schema-specific ###
+    validate.boolean onoff
+    @pragma "foreign_keys = #{onoff};"
+    return null
+
 
   #=========================================================================================================
   # DB STRUCTURE REPORTING
