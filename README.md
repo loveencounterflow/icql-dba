@@ -6,6 +6,7 @@
   - [Special Powers](#special-powers)
   - [Installation](#installation)
   - [Usage](#usage)
+    - [Usage: Gotchas](#usage-gotchas)
   - [API](#api)
     - [API: Debugging](#api-debugging)
     - [API: Query Result Adapters](#api-query-result-adapters)
@@ -42,6 +43,17 @@ npm install icql-dba
 
 ## Usage
 
+### Usage: Gotchas
+
+* When looping over the return value of a DB query like `dba.query sql, parameters`, remember that
+  **`dba.query()` returns an iterator over result rows**, not a list (a JS `Array` instance) of values;
+  consequently,
+  * in CoffeeScript, write `for row` **`from`** `dba.query ...` instead of `for row in dba.query ...`
+  * in JavaScript, write `for ( row` **`of`** `dba.query( ... ) )` instead of an indexed loop).
+* As long as the iterator is not exhausted (i.e. hasn't finished walking over rows), the DB connection is
+  considered busy and cannot write to the DB. Therefore, **one cannot alter data in the DB while iterating
+  over rows**. Instead, first retrieve all result rows as a list, and loop over that list; this can be
+  conveniently done with `for row` **`in`** **`dba.list`** `dba.query ...`.
 
 ## API
 
