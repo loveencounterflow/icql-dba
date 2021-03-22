@@ -42,7 +42,7 @@ intertype                 = new Intertype module.exports
   return ( /^[a-z][a-z0-9_]*$/ ).test x
 
 #-----------------------------------------------------------------------------------------------------------
-@declare 'ic_path', ( x ) -> @isa.nonempty_text x
+@declare 'ic_path', ( x ) -> @isa.text x
 
 
 
