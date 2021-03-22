@@ -23,9 +23,6 @@
     "url": "https://github.com/loveencounterflow/icql/issues"
   },
   "homepage": "https://github.com/loveencounterflow/icql#readme",
-  "devDependencies": {
-    "guy-test": "4.0.1"
-  },
   "dependencies": {
     "better-sqlite3": "^7.0.1",
     "cnd": "9.2.1",
