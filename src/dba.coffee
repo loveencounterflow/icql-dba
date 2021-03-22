@@ -193,15 +193,7 @@ class @Dba
       schema_x }  = @_schema_from_cfg cfg
     validate.ic_schema schema
     validate.dba_list_objects_ordering cfg._ordering
-    #.......................................................................................................
-    if cfg._ordering is 'drop'
-      return @all_rows @query """
-        select
-            type      as type,
-            name      as name,
-            sql       as sql
-          from #{schema_x}.sqlite_master
-          order by type desc, name;"""
+    ordering = if ( cfg._ordering is 'drop' ) then 'desc' else 'asc'
     #.......................................................................................................
     return @all_rows @query """
       select
@@ -209,7 +201,7 @@ class @Dba
           name      as name,
           sql       as sql
         from #{schema_x}.sqlite_master
-        order by type, name;"""
+        order by type #{ordering}, name;"""
 
   #---------------------------------------------------------------------------------------------------------
   list_objects_2: ( imagine_options_object_here ) ->
