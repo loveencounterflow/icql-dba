@@ -5,7 +5,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'ICQL/MAIN'
+badge                     = 'ICQL/DBA'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -14,22 +14,8 @@ help                      = CND.get_logger 'help',      badge
 whisper                   = CND.get_logger 'whisper',   badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-# PATH                      = require 'path'
-# PD                        = require 'pipedreams'
-# { $
-#   $async
-#   select }                = PD
-{ assign
-  jr }                    = CND
-# #...........................................................................................................
-# join_path                 = ( P... ) -> PATH.resolve PATH.join P...
-# boolean_as_int            = ( x ) -> if x then 1 else 0
-{ inspect, }              = require 'util'
-xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infinity, maxArrayLength: Infinity, depth: Infinity, }
-#...........................................................................................................
 FS                        = require 'fs'
-IC                        = require 'intercourse'
-@HOLLERITH                = HOLLERITH = require 'hollerith-codec'
+HOLLERITH                 = require 'hollerith-codec'
 #...........................................................................................................
 @types                    = require './types'
 { isa
@@ -37,24 +23,56 @@ IC                        = require 'intercourse'
   declare
   size_of
   type_of }               = @types
-max_excerpt_length        = 10000
 LFT                       = require 'letsfreezethat'
 
 
 #===========================================================================================================
-# LOCAL METHODS
+#
 #-----------------------------------------------------------------------------------------------------------
-@_local_methods =
+class @Dba
 
   #---------------------------------------------------------------------------------------------------------
-  _statements: {}
+  @_defaults:
+    sqlt:       null  ### [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/) instance ###
+    echo:       false ### whether to echo statements to the terminal ###
+    debug:      false ### whether to print additional debugging info ###
+    path:       ''
 
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( cfg ) ->
+    @cfg          = { @constructor._defaults..., cfg..., }
+    ### TAINT allow to pass through `better-sqlite3` options with `cfg` ###
+    @sqlt         = @cfg.sqlt ? ( require 'better-sqlite3' ) ( @cfg.path ? '' )
+    @_statements  = {}
+    return null
+
+
+  #=========================================================================================================
+  # DEBUGGING
   #---------------------------------------------------------------------------------------------------------
   _echo: ( ref, sql ) ->
-    return null unless @settings.echo
+    return null unless @cfg.echo
     echo ( CND.reverse CND.blue "^icql@888-#{ref}^" ) + ( CND.reverse CND.yellow sql )
     return null
 
+  #---------------------------------------------------------------------------------------------------------
+  _debug: ( P... ) ->
+    return null unless @cfg.debug
+    debug P...
+    return null
+
+
+  #=========================================================================================================
+  # INTERNA
+  #---------------------------------------------------------------------------------------------------------
+  _schema_from_cfg: ( cfg ) ->
+    schema    = cfg?.schema ? 'main'
+    schema_x  = @as_identifier schema
+    return { schema, schema_x, }
+
+
+  #=========================================================================================================
+  # QUERY RESULT ADAPTERS
   #---------------------------------------------------------------------------------------------------------
   limit: ( n, iterator ) ->
     count = 0
@@ -91,24 +109,27 @@ LFT                       = require 'letsfreezethat'
   ### TAINT must ensure order of keys in row is same as order of fields in query ###
   single_value: ( iterator  ) -> return value for key, value of @single_row iterator
   first_value:  ( iterator  ) -> return value for key, value of @first_row iterator
-  all_rows:     ( iterator  ) -> [ iterator..., ]
+  list:         ( iterator  ) -> [ iterator..., ]
 
+
+  #=========================================================================================================
+  # QUERYING
   #---------------------------------------------------------------------------------------------------------
   query: ( sql, P... ) ->
     @_echo 'query', sql
-    statement = ( @_statements[ sql ] ?= @db.prepare sql )
+    statement = ( @_statements[ sql ] ?= @sqlt.prepare sql )
     return statement.iterate P...
 
   #---------------------------------------------------------------------------------------------------------
   run: ( sql, P... ) ->
     @_echo 'run', sql
-    statement = ( @_statements[ sql ] ?= @db.prepare sql )
+    statement = ( @_statements[ sql ] ?= @sqlt.prepare sql )
     return statement.run P...
 
   #---------------------------------------------------------------------------------------------------------
   _run_or_query: ( entry_type, is_last, sql, Q ) ->
     @_echo '_run_or_query', sql
-    statement     = ( @_statements[ sql ] ?= @db.prepare sql )
+    statement     = ( @_statements[ sql ] ?= @sqlt.prepare sql )
     returns_data  = statement.reader
     #.......................................................................................................
     ### Always use `run()` method if statement does not return data: ###
@@ -125,24 +146,40 @@ LFT                       = require 'letsfreezethat'
   #---------------------------------------------------------------------------------------------------------
   execute: ( sql  ) ->
     @_echo 'execute', sql
-    return @db.exec sql
+    return @sqlt.exec sql
 
   #---------------------------------------------------------------------------------------------------------
   prepare: ( sql  ) ->
     @_echo 'prepare', sql
-    return @db.prepare sql
+    return @sqlt.prepare sql
+
+
+  #=========================================================================================================
+  # OTHER
+  #---------------------------------------------------------------------------------------------------------
+  aggregate:      ( P...  ) -> @sqlt.aggregate        P...
+  backup:         ( P...  ) -> @sqlt.backup           P...
+  checkpoint:     ( P...  ) -> @sqlt.checkpoint       P...
+  close:          ( P...  ) -> @sqlt.close            P...
+  read:           ( path  ) -> @sqlt.exec FS.readFileSync path, { encoding: 'utf-8', }
+  function:       ( P...  ) -> @sqlt.function         P...
+  load:           ( P...  ) -> @sqlt.loadExtension    P...
+  pragma:         ( P...  ) -> @sqlt.pragma           P...
+  transaction:    ( P...  ) -> @sqlt.transaction      P...
 
   #---------------------------------------------------------------------------------------------------------
-  aggregate:      ( P...  ) -> @db.aggregate        P...
-  backup:         ( P...  ) -> @db.backup           P...
-  checkpoint:     ( P...  ) -> @db.checkpoint       P...
-  close:          ( P...  ) -> @db.close            P...
-  read:           ( path  ) -> @db.exec FS.readFileSync path, { encoding: 'utf-8', }
-  function:       ( P...  ) -> @db.function         P...
-  load:           ( P...  ) -> @db.loadExtension    P...
-  pragma:         ( P...  ) -> @db.pragma           P...
-  transaction:    ( P...  ) -> @db.transaction      P...
+  get_foreign_key_state: -> not not ( @pragma "foreign_keys;" )[ 0 ].foreign_keys
 
+  #---------------------------------------------------------------------------------------------------------
+  set_foreign_key_state: ( onoff ) ->
+    ### TAINT make schema-specific ###
+    validate.boolean onoff
+    @pragma "foreign_keys = #{onoff};"
+    return null
+
+
+  #=========================================================================================================
+  # DB STRUCTURE REPORTING
   #---------------------------------------------------------------------------------------------------------
   catalog: ->
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
@@ -151,89 +188,46 @@ LFT                       = require 'letsfreezethat'
     @query "select * from sqlite_master order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
-  list_objects: ( schema = 'main' ) ->
+  walk_objects: ( cfg = {} ) ->
+    { schema
+      schema_x }  = @_schema_from_cfg cfg
     validate.ic_schema schema
-    schema_x = @as_identifier schema
-    return @all_rows @query """
+    validate.dba_list_objects_ordering cfg._ordering
+    ordering = if ( cfg._ordering is 'drop' ) then 'desc' else 'asc'
+    #.......................................................................................................
+    return @query """
       select
           type      as type,
           name      as name,
           sql       as sql
         from #{schema_x}.sqlite_master
-        order by type desc, name;"""
+        order by type #{ordering}, name;"""
 
   #---------------------------------------------------------------------------------------------------------
   list_objects_2: ( imagine_options_object_here ) ->
-    validate.ic_schema schema
     # for schema in @list_schema_names()
-    schema_x = @as_identifier schema
-
+    schema    = 'main'
+    validate.ic_schema schema
+    schema_x  = @as_identifier schema
     ### thx to https://stackoverflow.com/a/53160348/256361 ###
-    """
-    select
-      m.name as table_name,
-      p.name as column_name
-    from
-      #{schema_x}.sqlite_master as m
-    join
-      #{schema_x}.pragma_table_info( m.name ) as p
-    order by
-      m.name,
-      p.cid;"""
+    return @list @query """
+      select
+        'main'  as schema,
+        'field' as type,
+        m.name  as relation_name,
+        p.name  as field_name
+      from
+        #{schema_x}.sqlite_master as m
+      join
+        #{schema_x}.pragma_table_info( m.name ) as p
+      order by
+        m.name,
+        p.cid;"""
 
   #---------------------------------------------------------------------------------------------------------
   # list_schemas:       -> @pragma "database_list;"
-  list_schemas:       -> @all_rows @query "select * from pragma_database_list order by name;"
+  list_schemas:       -> @list @query "select * from pragma_database_list order by name;"
   list_schema_names:  -> ( d.name for d in @list_schemas() )
-
-  #---------------------------------------------------------------------------------------------------------
-  ### TAINT must escape path, schema ###
-  attach: ( path, schema ) ->
-    validate.ic_path path
-    validate.ic_schema schema
-    return @execute "attach #{@as_sql path} as #{@as_identifier schema};"
-
-  #-----------------------------------------------------------------------------------------------------------
-  copy_schema: ( from_schema, to_schema ) ->
-    schemas       = @list_schema_names()
-    inserts       = []
-    validate.ic_schema from_schema
-    validate.ic_schema to_schema
-    throw new Error "µ57873 unknown schema #{rpr from_schema}" unless from_schema in schemas
-    throw new Error "µ57873 unknown schema #{rpr to_schema}"   unless to_schema   in schemas
-    @pragma "#{@as_identifier to_schema}.foreign_keys = off;"
-    to_schema_x   = @as_identifier to_schema
-    from_schema_x = @as_identifier from_schema
-    #.......................................................................................................
-    for d in @list_objects from_schema
-      debug '^44463^', "DB object:", d if @settings.verbose
-      continue if ( not d.sql? ) or ( d.sql is '' )
-      continue if d.name in [ 'sqlite_sequence', ]
-      #.....................................................................................................
-      ### TAINT consider to use `validate.ic_db_object_type` ###
-      unless d.type in [ 'table', 'view', 'index', ]
-        throw new Error "µ49888 unknown type #{rpr d.type} for DB object #{rpr d}"
-      #.....................................................................................................
-      ### TAINT using not-so reliable string replacement as substitute for proper parsing ###
-      name_x  = @as_identifier d.name
-      sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
-      #.....................................................................................................
-      if sql is d.sql
-        throw new Error "µ49889 unexpected SQL string #{rpr d.sql}"
-      #.....................................................................................................
-      @execute sql
-      if d.type is 'table'
-        inserts.push "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
-    #.......................................................................................................
-    if @settings.verbose
-      debug '^49864^', "starting with inserts"
-      debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in @list_objects from_schema ).join ', '}"
-      debug '^49864^', "objects in #{rpr to_schema}:   #{rpr ( "(#{d.type})#{d.name}" for d in @list_objects to_schema ).join ', '}"
-    #.......................................................................................................
-    @execute sql for sql in inserts
-    @pragma "#{@as_identifier to_schema}.foreign_keys = on;"
-    @pragma "#{@as_identifier to_schema}.foreign_key_check;"
-    return null
 
   #---------------------------------------------------------------------------------------------------------
   type_of: ( name, schema = 'main' ) ->
@@ -259,37 +253,81 @@ LFT                       = require 'letsfreezethat'
     validate.ic_schema schema
     return ( row.table for row from @_dependencies_of table )
 
-  #---------------------------------------------------------------------------------------------------------
-  get_toposort: ( schema = 'main' ) ->
-    LTSORT  = require 'ltsort'
-    g       = LTSORT.new_graph()
-    indexes = []
-    types   = {}
-    sqls    = {}
-    for x from @list_objects schema
-      types[ x.name ] = x.type
-      sqls[  x.name ] = x.sql
-      unless x.type is 'table'
-        indexes.push x.name
-        continue
-      dependencies = @dependencies_of x.name
-      if dependencies.length is 0
-        LTSORT.add g, x.name
-      else
-        for dependency in dependencies
-          LTSORT.add g, x.name, dependency
-    R = [ ( LTSORT.linearize g )..., indexes..., ]
-    return ( { name, type: types[ name ], sql: sqls[ name ] } for name in R )
 
+  #=========================================================================================================
+  # DB STRUCTURE MODIFICATION
   #---------------------------------------------------------------------------------------------------------
-  clear: ->
-    count = 0
-    for { type, name, } in @get_toposort()
+  ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
+  clear: ( cfg ) ->
+    { schema
+      schema_x }  = @_schema_from_cfg cfg
+    validate.ic_schema schema
+    R             = 0
+    fk_state      = @get_foreign_key_state()
+    @set_foreign_key_state off
+    for { type, name, } in @list @walk_objects { schema, _ordering: 'drop', }
       statement = "drop #{type} if exists #{@as_identifier name};"
       @execute statement
-      count += +1
-    return count
+      R += +1
+    @set_foreign_key_state fk_state
+    return R
 
+  #---------------------------------------------------------------------------------------------------------
+  attach: ( path, schema ) ->
+    validate.ic_path path
+    validate.ic_schema schema
+    return @execute "attach #{@as_sql path} as #{@as_identifier schema};"
+
+
+  #=========================================================================================================
+  # IN-MEMORY PROCESSING
+  #-----------------------------------------------------------------------------------------------------------
+  copy_schema: ( from_schema, to_schema ) ->
+    schemas       = @list_schema_names()
+    inserts       = []
+    validate.ic_schema from_schema
+    validate.ic_schema to_schema
+    throw new Error "µ57873 unknown schema #{rpr from_schema}" unless from_schema in schemas
+    throw new Error "µ57873 unknown schema #{rpr to_schema}"   unless to_schema   in schemas
+    @pragma "#{@as_identifier to_schema}.foreign_keys = off;"
+    to_schema_x   = @as_identifier to_schema
+    from_schema_x = @as_identifier from_schema
+    #.......................................................................................................
+    for d in @list @walk_objects from_schema
+      @_debug '^44463^', "DB object:", d
+      continue if ( not d.sql? ) or ( d.sql is '' )
+      continue if d.name in [ 'sqlite_sequence', ]
+      #.....................................................................................................
+      ### TAINT consider to use `validate.ic_db_object_type` ###
+      unless d.type in [ 'table', 'view', 'index', ]
+        throw new Error "µ49888 unknown type #{rpr d.type} for DB object #{rpr d}"
+      #.....................................................................................................
+      ### TAINT using not-so reliable string replacement as substitute for proper parsing ###
+      name_x  = @as_identifier d.name
+      sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
+      #.....................................................................................................
+      if sql is d.sql
+        throw new Error "µ49889 unexpected SQL string #{rpr d.sql}"
+      #.....................................................................................................
+      @execute sql
+      if d.type is 'table'
+        inserts.push "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
+    #.......................................................................................................
+    if @cfg.debug
+      @_debug '^49864^', "starting with inserts"
+      objects = @list @walk_objects { schema: from_schema, }
+      @_debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in objects ).join ', '}"
+      objects = @list @walk_objects { schema: to_schema,   }
+      @_debug '^49864^', "objects in #{rpr to_schema}:   #{rpr ( "(#{d.type})#{d.name}" for d in objects ).join ', '}"
+    #.......................................................................................................
+    @execute sql for sql in inserts
+    @pragma "#{@as_identifier to_schema}.foreign_keys = on;"
+    @pragma "#{@as_identifier to_schema}.foreign_key_check;"
+    return null
+
+
+  #=========================================================================================================
+  # SQL CONSTRUCTION
   #---------------------------------------------------------------------------------------------------------
   as_identifier:  ( text  ) -> '"' + ( text.replace /"/g, '""' ) + '"'
   # as_identifier:  ( text  ) -> '[' + ( text.replace /\]/g, ']]' ) + ']'
@@ -302,7 +340,7 @@ LFT                       = require 'letsfreezethat'
   #---------------------------------------------------------------------------------------------------------
   list_as_json: ( x ) ->
     validate.list x
-    return jr x
+    return JSON.stringify x
 
   #---------------------------------------------------------------------------------------------------------
   as_sql: ( x ) ->
@@ -326,118 +364,11 @@ LFT                       = require 'letsfreezethat'
           "µ55563 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
   _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
 
+
+  #=========================================================================================================
+  # SORTABLE LISTS
   #---------------------------------------------------------------------------------------------------------
   as_hollerith:   ( x ) -> HOLLERITH.encode x
   from_hollerith: ( x ) -> HOLLERITH.decode x
-
-
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-@bind = ( settings ) ->
-  validate.icql_settings settings
-  me            = { $: { settings, }, }
-  connector     = settings.connector ? require 'better-sqlite3'
-  me.icql_path  = settings.icql_path
-  @connect                    me, connector, settings.db_path, settings.db_settings
-  @definitions_from_path_sync me, settings.icql_path
-  @bind_definitions           me
-  @bind_udfs                  me
-  return me
-
-#-----------------------------------------------------------------------------------------------------------
-### TAINT should check connector API compatibility ###
-### TAINT consider to use `new`-less call convention (should be possible acc. to bsql3 docs) ###
-@connect = ( me, connector, db_path, db_settings = {} ) ->
-  me.$     ?= {}
-  me.$.db   = new connector db_path, db_settings
-  # me.$.dbr  = me.$.db
-  # me.$.dbw  = new connector db_path, db_settings
-  return me
-
-#-----------------------------------------------------------------------------------------------------------
-@definitions_from_path_sync = ( me, icql_path ) ->
-  ( me.$ ?= {} ).sql = IC.definitions_from_path_sync icql_path
-  return me
-
-#-----------------------------------------------------------------------------------------------------------
-@bind_definitions = ( me ) ->
-  check_unique = ( name ) ->
-    throw new Error "µ11292 name collision: #{rpr name} already defined" if me[ name ]?
-  me.$ ?= {}
-  #.........................................................................................................
-  ### TAINT use `new` ###
-  for name, local_method of LFT._deep_copy @_local_methods
-    do ( name, local_method ) ->
-      check_unique name
-      if ( isa.function local_method )
-        local_method  = local_method.bind me.$
-        method = ( P... ) ->
-          try
-            local_method P...
-          catch error
-            excerpt = rpr P
-            if excerpt.length > max_excerpt_length
-              x       = max_excerpt_length / 2
-              excerpt = excerpt[ .. x ] + ' ... ' + excerpt[ excerpt.length - x .. ]
-            warn "^icql#15543^ when trying to call method #{name} with #{excerpt}"
-            warn "^icql#15544^ an error occurred: #{error.name ? error.code}: #{error.message}"
-            throw error
-        me.$[ name ]  = method.bind me.$
-      else
-        me.$[ name ]  = local_method
-  #.........................................................................................................
-  for name, ic_entry of me.$.sql
-    ### TAINT fix in intercourse ###
-    ic_entry.name = name
-    check_unique name
-    me[ name ] = @_method_from_ic_entry me, ic_entry
-  #.........................................................................................................
-  return me
-
-#-----------------------------------------------------------------------------------------------------------
-@bind_udfs = ( me ) ->
-  me.$.function 'as_hollerith',   { deterministic: true, varargs: false }, ( x ) => HOLLERITH.encode x
-  me.$.function 'from_hollerith', { deterministic: true, varargs: false }, ( x ) => HOLLERITH.decode x
-  return me
-
-#-----------------------------------------------------------------------------------------------------------
-@_method_from_ic_entry = ( me, ic_entry ) ->
-  validate.ic_entry_type ic_entry.type
-  #.........................................................................................................
-  if ic_entry.type is 'fragment' then return ( Q ) =>
-    descriptor  = @_descriptor_from_arguments me, ic_entry, Q
-    sql         = descriptor.parts.join '\n'
-    return me.$.interpolate sql, Q
-  #.........................................................................................................
-  return ( Q ) =>
-    descriptor  = @_descriptor_from_arguments me, ic_entry, Q
-    last_idx    = descriptor.parts.length - 1
-    try
-      for part, idx in descriptor.parts
-        is_last = idx is last_idx
-        R       = me.$._run_or_query ic_entry.type, is_last, part, Q
-    catch error
-      name      = ic_entry.name
-      type      = ic_entry.type
-      kenning   = descriptor.kenning
-      line_nr   = descriptor.location.line_nr
-      location  = "line #{line_nr}, #{type} #{name}#{kenning}"
-      throw new Error "µ11123 At *.icql #{location}: #{error.message}"
-    return R
-
-#-----------------------------------------------------------------------------------------------------------
-@_descriptor_from_arguments = ( me, ic_entry, Q ) ->
-  [ signature, kenning, ]         = IC.get_signature_and_kenning Q
-  is_void_signature               = kenning in [ '()', 'null', ]
-  if is_void_signature  then  R   = ic_entry[ '()'    ] ? ic_entry[ 'null' ]
-  else                        R   = ic_entry[ kenning ]
-  R                              ?= ic_entry[ 'null'  ]
-  #.........................................................................................................
-  unless R?
-    throw new Error "µ93832 calling method #{rpr ic_entry.name} with signature #{kenning} not implemented"
-  return R
-
-
 
 
