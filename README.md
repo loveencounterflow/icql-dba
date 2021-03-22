@@ -11,10 +11,10 @@
     - [API: Query Result Adapters](#api-query-result-adapters)
     - [API: Querying](#api-querying)
     - [API: Other](#api-other)
-    - [API: Db Structure Reporting](#api-db-structure-reporting)
-    - [API: Db Structure Modification](#api-db-structure-modification)
+    - [API: DB Structure Reporting](#api-db-structure-reporting)
+    - [API: DB Structure Modification](#api-db-structure-modification)
     - [API: In-Memory Processing](#api-in-memory-processing)
-    - [API: Sql Construction](#api-sql-construction)
+    - [API: SQL Construction](#api-sql-construction)
     - [API: Sortable Lists](#api-sortable-lists)
     - [Properties](#properties)
   - [Todo](#todo)
@@ -91,7 +91,7 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 * **`dba.read: ( path )`**—execute SQL statements from a file.
 * **`dba.close()`**—close DB.
 
-### API: Db Structure Reporting
+### API: DB Structure Reporting
 
 * **`dba.walk_objects()`**—return an iterator over all entries in `sqlite_master`; allows to inspect the
   database for all tables, views, and indexes.</strike>
@@ -105,7 +105,7 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 * `_dependencies_of: ( table, schema = 'main' ) ->`
 * `dependencies_of:  ( table, schema = 'main' ) ->`
 
-### API: Db Structure Modification
+### API: DB Structure Modification
 
 * **`dba.clear()`**—drop all tables, views and indexes from the database.
 * **`dba.attach( path, schema )`**—attach a given path to a given schema(name); this allows to manage several databases
@@ -115,7 +115,7 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 * `copy_schema: ( from_schema, to_schema ) ->`
 
-### API: Sql Construction
+### API: SQL Construction
 
 * **`dba.escape_text   x`**—turn text `x` into an SQL string literal.
 * **`dba.list_as_json  x`**—turn list `x` into a JSON array literal.
