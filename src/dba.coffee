@@ -261,40 +261,24 @@ class @Dba
     validate.ic_schema schema
     return ( row.table for row from @_dependencies_of table )
 
-  #---------------------------------------------------------------------------------------------------------
-  get_toposort: ( schema = 'main' ) ->
-    LTSORT  = require 'ltsort'
-    g       = LTSORT.new_graph()
-    indexes = []
-    types   = {}
-    sqls    = {}
-    for x from @list_objects schema
-      types[ x.name ] = x.type
-      sqls[  x.name ] = x.sql
-      unless x.type is 'table'
-        indexes.push x.name
-        continue
-      dependencies = @dependencies_of x.name
-      if dependencies.length is 0
-        LTSORT.add g, x.name
-      else
-        for dependency in dependencies
-          LTSORT.add g, x.name, dependency
-    R = [ ( LTSORT.linearize g )..., indexes..., ]
-    return ( { name, type: types[ name ], sql: sqls[ name ] } for name in R )
-
-
 
   #=========================================================================================================
   # DB STRUCTURE MODIFICATION
   #---------------------------------------------------------------------------------------------------------
-  clear: ->
-    count = 0
-    for { type, name, } in @get_toposort()
+  ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
+  clear: ( cfg ) ->
+    { schema
+      schema_x }  = @_schema_from_cfg cfg
+    validate.ic_schema schema
+    R             = 0
+    fk_state      = @get_foreign_key_state()
+    @set_foreign_key_state off
+    for { type, name, } in @list_objects { schema, _ordering: 'drop', }
       statement = "drop #{type} if exists #{@as_identifier name};"
       @execute statement
-      count += +1
-    return count
+      R += +1
+    @set_foreign_key_state fk_state
+    return R
 
   #---------------------------------------------------------------------------------------------------------
   attach: ( path, schema ) ->
