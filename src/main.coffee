@@ -204,7 +204,7 @@ class @Dba
         order by type #{ordering}, name;"""
 
   #---------------------------------------------------------------------------------------------------------
-  list_objects_2: ( imagine_options_object_here ) ->
+  _list_objects_2: ( imagine_options_object_here ) ->
     # for schema in @list_schema_names()
     schema    = 'main'
     validate.ic_schema schema
