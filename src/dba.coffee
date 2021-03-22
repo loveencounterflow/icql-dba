@@ -51,13 +51,13 @@ class @Dba
   # DEBUGGING
   #---------------------------------------------------------------------------------------------------------
   _echo: ( ref, sql ) ->
-    return null unless @settings.echo
+    return null unless @cfg.echo
     echo ( CND.reverse CND.blue "^icql@888-#{ref}^" ) + ( CND.reverse CND.yellow sql )
     return null
 
   #---------------------------------------------------------------------------------------------------------
   _debug: ( P... ) ->
-    return null unless @settings.debug
+    return null unless @cfg.debug
     debug P...
     return null
 
@@ -108,19 +108,19 @@ class @Dba
   #---------------------------------------------------------------------------------------------------------
   query: ( sql, P... ) ->
     @_echo 'query', sql
-    statement = ( @_statements[ sql ] ?= @db.prepare sql )
+    statement = ( @_statements[ sql ] ?= @sqlt.prepare sql )
     return statement.iterate P...
 
   #---------------------------------------------------------------------------------------------------------
   run: ( sql, P... ) ->
     @_echo 'run', sql
-    statement = ( @_statements[ sql ] ?= @db.prepare sql )
+    statement = ( @_statements[ sql ] ?= @sqlt.prepare sql )
     return statement.run P...
 
   #---------------------------------------------------------------------------------------------------------
   _run_or_query: ( entry_type, is_last, sql, Q ) ->
     @_echo '_run_or_query', sql
-    statement     = ( @_statements[ sql ] ?= @db.prepare sql )
+    statement     = ( @_statements[ sql ] ?= @sqlt.prepare sql )
     returns_data  = statement.reader
     #.......................................................................................................
     ### Always use `run()` method if statement does not return data: ###
@@ -137,26 +137,26 @@ class @Dba
   #---------------------------------------------------------------------------------------------------------
   execute: ( sql  ) ->
     @_echo 'execute', sql
-    return @db.exec sql
+    return @sqlt.exec sql
 
   #---------------------------------------------------------------------------------------------------------
   prepare: ( sql  ) ->
     @_echo 'prepare', sql
-    return @db.prepare sql
+    return @sqlt.prepare sql
 
 
   #=========================================================================================================
   # OTHER
   #---------------------------------------------------------------------------------------------------------
-  aggregate:      ( P...  ) -> @db.aggregate        P...
-  backup:         ( P...  ) -> @db.backup           P...
-  checkpoint:     ( P...  ) -> @db.checkpoint       P...
-  close:          ( P...  ) -> @db.close            P...
-  read:           ( path  ) -> @db.exec FS.readFileSync path, { encoding: 'utf-8', }
-  function:       ( P...  ) -> @db.function         P...
-  load:           ( P...  ) -> @db.loadExtension    P...
-  pragma:         ( P...  ) -> @db.pragma           P...
-  transaction:    ( P...  ) -> @db.transaction      P...
+  aggregate:      ( P...  ) -> @sqlt.aggregate        P...
+  backup:         ( P...  ) -> @sqlt.backup           P...
+  checkpoint:     ( P...  ) -> @sqlt.checkpoint       P...
+  close:          ( P...  ) -> @sqlt.close            P...
+  read:           ( path  ) -> @sqlt.exec FS.readFileSync path, { encoding: 'utf-8', }
+  function:       ( P...  ) -> @sqlt.function         P...
+  load:           ( P...  ) -> @sqlt.loadExtension    P...
+  pragma:         ( P...  ) -> @sqlt.pragma           P...
+  transaction:    ( P...  ) -> @sqlt.transaction      P...
 
 
   #=========================================================================================================
