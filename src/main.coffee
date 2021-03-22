@@ -153,16 +153,37 @@ LFT                       = require 'letsfreezethat'
   #---------------------------------------------------------------------------------------------------------
   list_objects: ( schema = 'main' ) ->
     validate.ic_schema schema
+    schema_x = @as_identifier schema
     return @all_rows @query """
       select
           type      as type,
           name      as name,
           sql       as sql
-        from #{@as_identifier schema}.sqlite_master
+        from #{schema_x}.sqlite_master
         order by type desc, name;"""
 
   #---------------------------------------------------------------------------------------------------------
-  list_schemas:       -> @pragma "database_list;"
+  list_objects_2: ( imagine_options_object_here ) ->
+    validate.ic_schema schema
+    # for schema in @list_schema_names()
+    schema_x = @as_identifier schema
+
+    ### thx to https://stackoverflow.com/a/53160348/256361 ###
+    """
+    select
+      m.name as table_name,
+      p.name as column_name
+    from
+      #{schema_x}.sqlite_master as m
+    join
+      #{schema_x}.pragma_table_info( m.name ) as p
+    order by
+      m.name,
+      p.cid;"""
+
+  #---------------------------------------------------------------------------------------------------------
+  # list_schemas:       -> @pragma "database_list;"
+  list_schemas:       -> @all_rows @query "select * from pragma_database_list order by name;"
   list_schema_names:  -> ( d.name for d in @list_schemas() )
 
   #---------------------------------------------------------------------------------------------------------
