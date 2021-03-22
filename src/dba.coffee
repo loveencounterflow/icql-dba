@@ -109,7 +109,7 @@ class @Dba
   ### TAINT must ensure order of keys in row is same as order of fields in query ###
   single_value: ( iterator  ) -> return value for key, value of @single_row iterator
   first_value:  ( iterator  ) -> return value for key, value of @first_row iterator
-  all_rows:     ( iterator  ) -> [ iterator..., ]
+  list:         ( iterator  ) -> [ iterator..., ]
 
 
   #=========================================================================================================
@@ -188,7 +188,7 @@ class @Dba
     @query "select * from sqlite_master order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
-  list_objects: ( cfg = {} ) ->
+  walk_objects: ( cfg = {} ) ->
     { schema
       schema_x }  = @_schema_from_cfg cfg
     validate.ic_schema schema
@@ -210,7 +210,7 @@ class @Dba
     validate.ic_schema schema
     schema_x  = @as_identifier schema
     ### thx to https://stackoverflow.com/a/53160348/256361 ###
-    return @all_rows @query """
+    return @list @query """
       select
         'main'  as schema,
         'field' as type,
@@ -226,7 +226,7 @@ class @Dba
 
   #---------------------------------------------------------------------------------------------------------
   # list_schemas:       -> @pragma "database_list;"
-  list_schemas:       -> @all_rows @query "select * from pragma_database_list order by name;"
+  list_schemas:       -> @list @query "select * from pragma_database_list order by name;"
   list_schema_names:  -> ( d.name for d in @list_schemas() )
 
   #---------------------------------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ class @Dba
     R             = 0
     fk_state      = @get_foreign_key_state()
     @set_foreign_key_state off
-    for { type, name, } in @all_rows @list_objects { schema, _ordering: 'drop', }
+    for { type, name, } in @list @walk_objects { schema, _ordering: 'drop', }
       statement = "drop #{type} if exists #{@as_identifier name};"
       @execute statement
       R += +1
@@ -293,7 +293,7 @@ class @Dba
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
     #.......................................................................................................
-    for d in @list_objects from_schema
+    for d in @list @walk_objects from_schema
       @_debug '^44463^', "DB object:", d
       continue if ( not d.sql? ) or ( d.sql is '' )
       continue if d.name in [ 'sqlite_sequence', ]
@@ -313,9 +313,12 @@ class @Dba
       if d.type is 'table'
         inserts.push "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
     #.......................................................................................................
-    @_debug '^49864^', "starting with inserts"
-    @_debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in @list_objects from_schema ).join ', '}"
-    @_debug '^49864^', "objects in #{rpr to_schema}:   #{rpr ( "(#{d.type})#{d.name}" for d in @list_objects to_schema ).join ', '}"
+    if @cfg.debug
+      @_debug '^49864^', "starting with inserts"
+      objects = @list @walk_objects { schema: from_schema, }
+      @_debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in objects ).join ', '}"
+      objects = @list @walk_objects { schema: to_schema,   }
+      @_debug '^49864^', "objects in #{rpr to_schema}:   #{rpr ( "(#{d.type})#{d.name}" for d in objects ).join ', '}"
     #.......................................................................................................
     @execute sql for sql in inserts
     @pragma "#{@as_identifier to_schema}.foreign_keys = on;"
