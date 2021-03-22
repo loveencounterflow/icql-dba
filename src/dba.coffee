@@ -36,10 +36,14 @@ class @Dba
     sqlt:       null  ### [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/) instance ###
     echo:       false ### whether to echo statements to the terminal ###
     debug:      false ### whether to print additional debugging info ###
+    path:       ''
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    @_statements = {}
+    @cfg          = { @constructor._defaults..., cfg..., }
+    ### TAINT allow to pass through `better-sqlite3` options with `cfg` ###
+    @sqlt         = @cfg.sqlt ? ( require 'better-sqlite3' ) ( @cfg.path ? '' )
+    @_statements  = {}
     return null
 
 
