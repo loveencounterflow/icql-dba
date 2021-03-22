@@ -195,7 +195,7 @@ class @Dba
     validate.dba_list_objects_ordering cfg._ordering
     ordering = if ( cfg._ordering is 'drop' ) then 'desc' else 'asc'
     #.......................................................................................................
-    return @all_rows @query """
+    return @query """
       select
           type      as type,
           name      as name,
@@ -265,7 +265,7 @@ class @Dba
     R             = 0
     fk_state      = @get_foreign_key_state()
     @set_foreign_key_state off
-    for { type, name, } in @list_objects { schema, _ordering: 'drop', }
+    for { type, name, } in @all_rows @list_objects { schema, _ordering: 'drop', }
       statement = "drop #{type} if exists #{@as_identifier name};"
       @execute statement
       R += +1
