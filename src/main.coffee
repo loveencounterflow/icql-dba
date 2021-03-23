@@ -278,10 +278,14 @@ class @Dba
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  attach: ( path, schema ) ->
-    validate.ic_path path
+  attach: ( cfg ) ->
+    { schema
+      schema_x }  = @_schema_from_cfg cfg
+    @_debug '^33443^', cfg
+    @_debug '^33443^', @_schema_from_cfg cfg
     validate.ic_schema schema
-    return @execute "attach #{@as_sql path} as #{@as_identifier schema};"
+    validate.ic_path cfg.path
+    return @execute "attach #{@as_sql cfg.path} as #{schema_x};"
 
 
   #=========================================================================================================
