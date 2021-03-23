@@ -172,7 +172,6 @@ class @Dba
 
   #---------------------------------------------------------------------------------------------------------
   set_foreign_key_state: ( onoff ) ->
-    ### TAINT make schema-specific ###
     validate.boolean onoff
     @pragma "foreign_keys = #{onoff};"
     return null
