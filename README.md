@@ -6,6 +6,7 @@
   - [Special Powers](#special-powers)
   - [Installation](#installation)
   - [Usage](#usage)
+    - [Usage: In-Memory Processing](#usage-in-memory-processing)
     - [Usage: Gotchas](#usage-gotchas)
   - [API](#api)
     - [API: Debugging](#api-debugging)
@@ -42,6 +43,12 @@ npm install icql-dba
 ```
 
 ## Usage
+
+### Usage: In-Memory Processing
+
+* much faster, less safe than file-based, WAL-logged processing
+* always open DB with path `:memory:` (or empty string for 'temporary DB'), always use `attach()`ed DB to
+  access file content (reason: cannot detach the default `main` schema)
 
 ### Usage: Gotchas
 
