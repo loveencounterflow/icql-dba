@@ -300,6 +300,7 @@ class @Dba
     validate.ic_schema to_schema
     if from_schema is to_schema
       throw new Error "µ43343 unable to copy schema to itself, got #{rpr cfg} (schema #{rpr from_schema})"
+    schemas       = @list_schema_names()
     throw new Error "µ57873 unknown schema #{rpr from_schema}" unless from_schema in schemas
     throw new Error "µ57873 unknown schema #{rpr to_schema}"   unless to_schema   in schemas
     @pragma "#{@as_identifier to_schema}.foreign_keys = off;"
