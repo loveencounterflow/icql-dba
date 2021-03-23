@@ -299,15 +299,15 @@ class @Dba
     throw new Error "µ766 unknown schema #{rpr to_schema}"   unless to_schema   in known_schemas
     #.......................................................................................................
     to_schema_objects = @list @walk_objects { schema: to_schema, }
-    if @cfg.debug
-      @_debug '^49864^', "objects in #{rpr to_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in to_schema_objects ).join ', '}"
+    # if @cfg.debug
+    #   @_debug '^49864^', "objects in #{rpr to_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in to_schema_objects ).join ', '}"
     if to_schema_objects.length > 0
       throw new Error "µ768 unable to copy to non-empty schema #{rpr to_schema}"
     #.......................................................................................................
     from_schema_objects = @list @walk_objects { schema: from_schema }
     return null if from_schema_objects.length is 0
-    if @cfg.debug
-      @_debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in from_schema_objects ).join ', '}"
+    # if @cfg.debug
+    #   @_debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in from_schema_objects ).join ', '}"
     #.......................................................................................................
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
@@ -318,7 +318,7 @@ class @Dba
     @set_foreign_key_state off
     #.......................................................................................................
     for d in from_schema_objects
-      @_debug '^44463^', "copying DB object: (#{d.type}) #{d.name}"
+      # @_debug '^44463^', "copying DB object: (#{d.type}) #{d.name}"
       continue if ( not d.sql? ) or ( d.sql is '' )
       continue if d.name in [ 'sqlite_sequence', ]
       #.....................................................................................................
@@ -336,8 +336,8 @@ class @Dba
       @execute sql
       if d.type is 'table'
         inserts.push "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
-    #.......................................................................................................
-    @_debug '^49864^', "starting with inserts"
+    # #.......................................................................................................
+    # @_debug '^49864^', "starting with inserts"
     #.......................................................................................................
     @execute sql for sql in inserts
     @set_foreign_key_state fk_state
