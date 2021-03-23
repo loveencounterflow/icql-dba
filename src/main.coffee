@@ -286,28 +286,26 @@ class @Dba
   # IN-MEMORY PROCESSING
   #-----------------------------------------------------------------------------------------------------------
   copy_schema: ( cfg ) ->
-    { from_schema
-      to_schema } = cfg
-    from_schema  ?= 'main'
-    to_schema    ?= 'main'
+    from_schema   = pick cfg, 'from_schema',  'main'
+    to_schema     = pick cfg, 'to_schema',    'main'
     validate.ic_schema from_schema
     validate.ic_schema to_schema
-    #.......................................................................................................
-    schemas       = @list_schema_names()
-    throw new Error "µ765 unknown schema #{rpr from_schema}" unless from_schema in schemas
-    throw new Error "µ766 unknown schema #{rpr to_schema}"   unless to_schema   in schemas
     #.......................................................................................................
     if from_schema is to_schema
       throw new Error "µ767 unable to copy schema to itself, got #{rpr cfg} (schema #{rpr from_schema})"
     #.......................................................................................................
-    to_schema_objects = @list @walk_objects to_schema
+    known_schemas     = @list_schema_names()
+    throw new Error "µ765 unknown schema #{rpr from_schema}" unless from_schema in known_schemas
+    throw new Error "µ766 unknown schema #{rpr to_schema}"   unless to_schema   in known_schemas
+    #.......................................................................................................
+    to_schema_objects = @list @walk_objects { schema: to_schema, }
     if @cfg.debug
       @_debug '^49864^', "objects in #{rpr to_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in to_schema_objects ).join ', '}"
     if to_schema_objects.length > 0
       throw new Error "µ768 unable to copy to non-empty schema #{rpr to_schema}"
     #.......................................................................................................
-    if ( from_schema_objects = @list @walk_objects from_schema ).length is 0
-      return null
+    from_schema_objects = @list @walk_objects { schema: from_schema }
+    return null if from_schema_objects.length is 0
     if @cfg.debug
       @_debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in from_schema_objects ).join ', '}"
     #.......................................................................................................
