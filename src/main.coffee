@@ -229,6 +229,12 @@ class @Dba
   list_schema_names:  -> ( d.name for d in @list_schemas() )
 
   #---------------------------------------------------------------------------------------------------------
+  get_schemas: ->
+    R             = {}
+    R[ row.name ] = row.file for row from @query "select * from pragma_database_list order by name;"
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
   type_of: ( name, schema = 'main' ) ->
     for row from @catalog()
       return row.type if row.name is name
