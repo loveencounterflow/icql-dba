@@ -303,12 +303,16 @@ class @Dba
     schemas       = @list_schema_names()
     throw new Error "µ57873 unknown schema #{rpr from_schema}" unless from_schema in schemas
     throw new Error "µ57873 unknown schema #{rpr to_schema}"   unless to_schema   in schemas
-    @pragma "#{@as_identifier to_schema}.foreign_keys = off;"
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
     #.......................................................................................................
+    inserts       = []
+    #.......................................................................................................
+    fk_state      = @get_foreign_key_state()
+    @set_foreign_key_state off
+    #.......................................................................................................
     for d in @list @walk_objects from_schema
-      @_debug '^44463^', "DB object:", d
+      @_debug '^44463^', "copying DB object: (#{d.type}) #{d.name}"
       continue if ( not d.sql? ) or ( d.sql is '' )
       continue if d.name in [ 'sqlite_sequence', ]
       #.....................................................................................................
@@ -335,8 +339,8 @@ class @Dba
       @_debug '^49864^', "objects in #{rpr to_schema}:   #{rpr ( "(#{d.type})#{d.name}" for d in objects ).join ', '}"
     #.......................................................................................................
     @execute sql for sql in inserts
-    @pragma "#{@as_identifier to_schema}.foreign_keys = on;"
-    @pragma "#{@as_identifier to_schema}.foreign_key_check;"
+    @set_foreign_key_state fk_state
+    @pragma "#{@as_identifier to_schema}.foreign_key_check;" if fk_state
     return null
 
 
