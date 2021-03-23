@@ -291,9 +291,11 @@ class @Dba
   #=========================================================================================================
   # IN-MEMORY PROCESSING
   #-----------------------------------------------------------------------------------------------------------
-  copy_schema: ( from_schema, to_schema ) ->
-    schemas       = @list_schema_names()
-    inserts       = []
+  copy_schema: ( cfg ) ->
+    { from_schema
+      to_schema } = cfg
+    from_schema  ?= 'main'
+    to_schema    ?= 'main'
     validate.ic_schema from_schema
     validate.ic_schema to_schema
     throw new Error "µ57873 unknown schema #{rpr from_schema}" unless from_schema in schemas
