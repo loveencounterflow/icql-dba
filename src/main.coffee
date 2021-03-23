@@ -25,6 +25,8 @@ HOLLERITH                 = require 'hollerith-codec'
   type_of }               = @types
 LFT                       = require 'letsfreezethat'
 
+#-----------------------------------------------------------------------------------------------------------
+pick = ( d, key, fallback ) -> d?[ key ] ? fallback
 
 #===========================================================================================================
 #
@@ -60,15 +62,6 @@ class @Dba
     return null unless @cfg.debug
     debug P...
     return null
-
-
-  #=========================================================================================================
-  # INTERNA
-  #---------------------------------------------------------------------------------------------------------
-  _schema_from_cfg: ( cfg ) ->
-    schema    = cfg?.schema ? 'main'
-    schema_x  = @as_identifier schema
-    return { schema, schema_x, }
 
 
   #=========================================================================================================
@@ -187,12 +180,13 @@ class @Dba
     @query "select * from sqlite_master order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
-  walk_objects: ( cfg = {} ) ->
-    { schema
-      schema_x }  = @_schema_from_cfg cfg
+  walk_objects: ( cfg ) ->
+    schema      = pick cfg, 'schema',     'main'
+    ordering    = pick cfg, '_ordering',  null
     validate.ic_schema schema
-    validate.dba_list_objects_ordering cfg._ordering
-    ordering = if ( cfg._ordering is 'drop' ) then 'desc' else 'asc'
+    validate.dba_list_objects_ordering ordering
+    schema_x    = @as_identifier schema
+    ordering_x  = if ( ordering is 'drop' ) then 'desc' else 'asc'
     #.......................................................................................................
     return @query """
       select
@@ -200,7 +194,7 @@ class @Dba
           name      as name,
           sql       as sql
         from #{schema_x}.sqlite_master
-        order by type #{ordering}, name;"""
+        order by type #{ordering_x}, name;"""
 
   #---------------------------------------------------------------------------------------------------------
   _list_objects_2: ( imagine_options_object_here ) ->
@@ -264,9 +258,9 @@ class @Dba
   #---------------------------------------------------------------------------------------------------------
   ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
   clear: ( cfg ) ->
-    { schema
-      schema_x }  = @_schema_from_cfg cfg
+    schema        = pick cfg, 'schema', 'main'
     validate.ic_schema schema
+    schema_x      = @as_identifier schema
     R             = 0
     fk_state      = @get_foreign_key_state()
     @set_foreign_key_state off
@@ -279,13 +273,13 @@ class @Dba
 
   #---------------------------------------------------------------------------------------------------------
   attach: ( cfg ) ->
-    { schema
-      schema_x }  = @_schema_from_cfg cfg
-    @_debug '^33443^', cfg
-    @_debug '^33443^', @_schema_from_cfg cfg
-    validate.ic_schema schema
-    validate.ic_path cfg.path
-    return @execute "attach #{@as_sql cfg.path} as #{schema_x};"
+    schema        = pick cfg, 'schema', 'main'
+    path          = pick cfg, 'path',   ''
+    validate.ic_schema  schema
+    validate.ic_path    path
+    schema_x      = @as_identifier  schema
+    path_x        = @as_sql         path
+    return @execute "attach #{path_x} as #{schema_x};"
 
 
   #=========================================================================================================
