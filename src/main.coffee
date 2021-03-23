@@ -77,7 +77,7 @@ class @Dba
 
   #---------------------------------------------------------------------------------------------------------
   single_row:   ( iterator ) ->
-    throw new Error "µ33833 expected at least one row, got none" if ( R = @first_row iterator ) is undefined
+    throw new Error "µ763 expected at least one row, got none" if ( R = @first_row iterator ) is undefined
     return R
 
   #---------------------------------------------------------------------------------------------------------
@@ -176,7 +176,7 @@ class @Dba
   catalog: ->
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
     primary key index in SQLite) ###
-    # throw new Error "µ45222 deprecated until next major version"
+    # throw new Error "µ764 deprecated until next major version"
     @query "select * from sqlite_master order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
@@ -292,11 +292,25 @@ class @Dba
     to_schema    ?= 'main'
     validate.ic_schema from_schema
     validate.ic_schema to_schema
-    if from_schema is to_schema
-      throw new Error "µ43343 unable to copy schema to itself, got #{rpr cfg} (schema #{rpr from_schema})"
+    #.......................................................................................................
     schemas       = @list_schema_names()
-    throw new Error "µ57873 unknown schema #{rpr from_schema}" unless from_schema in schemas
-    throw new Error "µ57873 unknown schema #{rpr to_schema}"   unless to_schema   in schemas
+    throw new Error "µ765 unknown schema #{rpr from_schema}" unless from_schema in schemas
+    throw new Error "µ766 unknown schema #{rpr to_schema}"   unless to_schema   in schemas
+    #.......................................................................................................
+    if from_schema is to_schema
+      throw new Error "µ767 unable to copy schema to itself, got #{rpr cfg} (schema #{rpr from_schema})"
+    #.......................................................................................................
+    to_schema_objects = @list @walk_objects to_schema
+    if @cfg.debug
+      @_debug '^49864^', "objects in #{rpr to_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in to_schema_objects ).join ', '}"
+    if to_schema_objects.length > 0
+      throw new Error "µ768 unable to copy to non-empty schema #{rpr to_schema}"
+    #.......................................................................................................
+    if ( from_schema_objects = @list @walk_objects from_schema ).length is 0
+      return null
+    if @cfg.debug
+      @_debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in from_schema_objects ).join ', '}"
+    #.......................................................................................................
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
     #.......................................................................................................
@@ -305,32 +319,27 @@ class @Dba
     fk_state      = @get_foreign_key_state()
     @set_foreign_key_state off
     #.......................................................................................................
-    for d in @list @walk_objects from_schema
+    for d in from_schema_objects
       @_debug '^44463^', "copying DB object: (#{d.type}) #{d.name}"
       continue if ( not d.sql? ) or ( d.sql is '' )
       continue if d.name in [ 'sqlite_sequence', ]
       #.....................................................................................................
       ### TAINT consider to use `validate.ic_db_object_type` ###
       unless d.type in [ 'table', 'view', 'index', ]
-        throw new Error "µ49888 unknown type #{rpr d.type} for DB object #{rpr d}"
+        throw new Error "µ769 unknown type #{rpr d.type} for DB object #{rpr d}"
       #.....................................................................................................
       ### TAINT using not-so reliable string replacement as substitute for proper parsing ###
       name_x  = @as_identifier d.name
       sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
       #.....................................................................................................
       if sql is d.sql
-        throw new Error "µ49889 unexpected SQL string #{rpr d.sql}"
+        throw new Error "µ770 unexpected SQL string #{rpr d.sql}"
       #.....................................................................................................
       @execute sql
       if d.type is 'table'
         inserts.push "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
     #.......................................................................................................
-    if @cfg.debug
-      @_debug '^49864^', "starting with inserts"
-      objects = @list @walk_objects { schema: from_schema, }
-      @_debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in objects ).join ', '}"
-      objects = @list @walk_objects { schema: to_schema,   }
-      @_debug '^49864^', "objects in #{rpr to_schema}:   #{rpr ( "(#{d.type})#{d.name}" for d in objects ).join ', '}"
+    @_debug '^49864^', "starting with inserts"
     #.......................................................................................................
     @execute sql for sql in inserts
     @set_foreign_key_state fk_state
@@ -363,8 +372,8 @@ class @Dba
       when 'boolean'  then return ( if x then '1' else '0' )
       when 'null'     then return 'null'
       when 'undefined'
-        throw new Error "µ12341 unable to express 'undefined' as SQL literal"
-    throw new Error "µ12342 unable to express a #{type} as SQL literal, got #{rpr x}"
+        throw new Error "µ771 unable to express 'undefined' as SQL literal"
+    throw new Error "µ772 unable to express a #{type} as SQL literal, got #{rpr x}"
 
   #---------------------------------------------------------------------------------------------------------
   interpolate: ( sql, Q ) ->
@@ -373,7 +382,7 @@ class @Dba
         return @as_sql Q[ $1 ]
       catch error
         throw new Error \
-          "µ55563 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
+          "µ773 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
   _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
 
 
