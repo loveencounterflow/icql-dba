@@ -52,21 +52,23 @@ npm install icql-dba
 
 Workflow:
 
-* **Preparation**—Open (empty, in-memory) 'temporary' DB ([the same as a in-memory DB but with file system
-  support](https://www.sqlite.org/inmemorydb.html#temp_db)); the schema for this primary DB will always be
-  `main`, and the names of tables, views and pragmas may be used with or without the schema prepended.
+* <ins>**Preparation**</ins>—Open (empty, in-memory) 'temporary' DB ([the same as a in-memory DB but with
+  file system support](https://www.sqlite.org/inmemorydb.html#temp_db)); the schema for this primary DB will
+  always be `main`, and the names of tables, views and pragmas may be used with or without the schema
+  prepended.
 * Attach a (new or existing) file-based DB (from `fpath`) to the same connection; the schema for this
   secondary DB is configurable, the default being `file`.
-* **Work**—Copy all DB objects (tables, views, and indexes) from `file` to `main`.
+* <ins>**Work**</ins>—Copy all DB objects (tables, views, and indexes) from `file` to `main`.
 * Optionally, close `main`.
 * Perform work in-memory on `main`.
 * Depending on settings, either:
-  * **Method A**—Save DB in its altered state to a temporary file `tpath` (using `vacuum main to $tpath`),
+  * <ins>**Method A**</ins>—Save DB in its altered state to a temporary file `tpath` (using `vacuum main to
+    $tpath`),
   * remove (or raname) original `fpath` and move `tpath` to `fpath`
   or else
-  * **Method B**—Clear `file` schema
+  * <ins>**Method B**</ins>—Clear `file` schema
   * and copy all data from `main` to `file`.
-* **Loop**—either close DB and finish, or continue to do **Work**, above.
+* <ins>**Loop**</ins>—either close DB and finish, or continue to do <ins>**Work**</ins>, above.
 
 
 ### Usage: Gotchas
