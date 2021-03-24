@@ -351,6 +351,14 @@ class @Dba
     @pragma "#{@as_identifier to_schema}.foreign_key_check;" if fk_state
     return null
 
+  #---------------------------------------------------------------------------------------------------------
+  save_as: ( cfg ) ->
+    schema    = pick cfg, 'schema', 'main'
+    path      = pick cfg, 'path', null
+    schema_x  = @as_identifier schema
+    db.$.run "vacuum #{schema_x} into ?;", [ path, ]
+    return null
+
 
   #=========================================================================================================
   # SQL CONSTRUCTION
