@@ -73,7 +73,8 @@ Workflow:
 
 ```coffee
 #-----------------------------------------------------------------------------------------------------------
-### PREPARATION ###
+do_work               = ( dba ) -> ...                      ### PREPARATION ###
+use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
 dba_cfg               = { path: ':memory:', }               # or empty string for tmp file support
 dba                   = new ICQLDBA.Dba dba_cfg
@@ -82,20 +83,47 @@ dba.copy_schema { from_schema: 'file', to_schema: 'main', }
 dba.detach      { schema: 'file', }                         # optional
 #-----------------------------------------------------------------------------------------------------------
 loop
-  ### WORK ###
-  finished = (await) do_work dba
+  continue = (await) do_work dba                            ### WORK ###
   #---------------------------------------------------------------------------------------------------------
-  ### METHOD A ###
-  tpath                 = '/tmp/temp.db'
-  dba.save_as { schema: 'main', path: tpath, }
-  FS.unlinkSync fpath
-  FS.renameSync tpath, fpath
+  if use_method is 'A'                                      ### METHOD A ###
+    tpath                 = '/tmp/temp.db'
+    fpath_old             = '/tmp/old-db-334a5c3fd89.db'
+    dba.save_as { schema: 'main', path: tpath, }
+    FS.renameSync fpath, fpath_old
+    FS.renameSync tpath, fpath
   #---------------------------------------------------------------------------------------------------------
-  ### METHOD B ###
-  dba.clear { schema: 'file', }
-  dba.copy_schema { from_schema: 'main', to_schema: 'file', }
+  else if use_method is 'B'                                 ### METHOD B ###
+    dba.clear { schema: 'file', }
+    dba.copy_schema { from_schema: 'main', to_schema: 'file', }
   #---------------------------------------------------------------------------------------------------------
-  break if finished
+  break unless continue                                     ### LOOP ###
+```
+
+```coffee
+#-----------------------------------------------------------------------------------------------------------
+do_work               = ( dba ) -> ...                      ### PREPARATION ###
+use_method            = 'A'
+fpath                 = 'path/to/sqlite.db'
+dba_cfg               = { path: ':memory:', use_method, }
+dba                   = new ICQLDBA.Dba dba_cfg
+
+
+#-----------------------------------------------------------------------------------------------------------
+loop
+  continue = (await) do_work dba                            ### WORK ###
+  #---------------------------------------------------------------------------------------------------------
+  if use_method is 'A'                                      ### METHOD A ###
+    tpath                 = '/tmp/temp.db'
+    fpath_old             = '/tmp/old-db-334a5c3fd89.db'
+    dba.save_as { schema: 'main', path: tpath, }
+    FS.renameSync fpath, fpath_old
+    FS.renameSync tpath, fpath
+  #---------------------------------------------------------------------------------------------------------
+  else if use_method is 'B'                                 ### METHOD B ###
+    dba.clear { schema: 'file', }
+    dba.copy_schema { from_schema: 'main', to_schema: 'file', }
+  #---------------------------------------------------------------------------------------------------------
+  break unless continue                                     ### LOOP ###
 ```
 
 ### Usage: Gotchas
