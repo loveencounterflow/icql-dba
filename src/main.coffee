@@ -273,13 +273,20 @@ class @Dba
 
   #---------------------------------------------------------------------------------------------------------
   attach: ( cfg ) ->
-    schema        = pick cfg, 'schema', 'main'
+    schema        = pick cfg, 'schema', null
     path          = pick cfg, 'path',   ''
     validate.ic_schema  schema
     validate.ic_path    path
     schema_x      = @as_identifier  schema
     path_x        = @as_sql         path
     return @execute "attach #{path_x} as #{schema_x};"
+
+  #---------------------------------------------------------------------------------------------------------
+  detach: ( cfg ) ->
+    schema        = pick cfg, 'schema', null
+    validate.ic_schema  schema
+    schema_x      = @as_identifier  schema
+    return @execute "detach #{schema_x};"
 
 
   #=========================================================================================================
