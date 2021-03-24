@@ -80,18 +80,21 @@ dba.attach { path: fpath, schema: 'file', }
 dba.copy_schema { from_schema: 'file', to_schema: 'main', }
 dba.detach { schema: 'file', }                                # optional
 #-----------------------------------------------------------------------------------------------------------
-### WORK ###
-(await) do_work dba
-#-----------------------------------------------------------------------------------------------------------
-### Method A ###
-tpath                 = '/tmp/temp.db'
-dba.save_as { schema: 'main', path: tpath, }
-#-----------------------------------------------------------------------------------------------------------
-### Method B ###
-dba.clear { schema: 'file', }
-dba.copy_schema { from_schema: 'main', to_schema: 'file', }
-#-----------------------------------------------------------------------------------------------------------
-
+loop
+  ### WORK ###
+  finished = (await) do_work dba
+  #---------------------------------------------------------------------------------------------------------
+  ### Method A ###
+  tpath                 = '/tmp/temp.db'
+  dba.save_as { schema: 'main', path: tpath, }
+  FS.unlinkSync fpath
+  FS.renameSync tpath, fpath
+  #---------------------------------------------------------------------------------------------------------
+  ### Method B ###
+  dba.clear { schema: 'file', }
+  dba.copy_schema { from_schema: 'main', to_schema: 'file', }
+  #---------------------------------------------------------------------------------------------------------
+  break if finished
 ```
 
 ### Usage: Gotchas
