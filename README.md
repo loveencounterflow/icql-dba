@@ -72,25 +72,26 @@ Workflow:
 
 
 ```coffee
+#-----------------------------------------------------------------------------------------------------------
 ### PREPARATION ###
 fpath                 = 'path/to/sqlite.db'
-dba_cfg               = { path: ':memory:', }                 # or empty string for tmp file support
+dba_cfg               = { path: ':memory:', }               # or empty string for tmp file support
 dba                   = new ICQLDBA.Dba dba_cfg
-dba.attach { path: fpath, schema: 'file', }
+dba.attach      { path: fpath, schema: 'file', }
 dba.copy_schema { from_schema: 'file', to_schema: 'main', }
-dba.detach { schema: 'file', }                                # optional
+dba.detach      { schema: 'file', }                         # optional
 #-----------------------------------------------------------------------------------------------------------
 loop
   ### WORK ###
   finished = (await) do_work dba
   #---------------------------------------------------------------------------------------------------------
-  ### Method A ###
+  ### METHOD A ###
   tpath                 = '/tmp/temp.db'
   dba.save_as { schema: 'main', path: tpath, }
   FS.unlinkSync fpath
   FS.renameSync tpath, fpath
   #---------------------------------------------------------------------------------------------------------
-  ### Method B ###
+  ### METHOD B ###
   dba.clear { schema: 'file', }
   dba.copy_schema { from_schema: 'main', to_schema: 'file', }
   #---------------------------------------------------------------------------------------------------------
