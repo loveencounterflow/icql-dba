@@ -52,24 +52,47 @@ npm install icql-dba
 
 Workflow:
 
-* <ins>**Preparation**</ins>—Open (empty, in-memory) 'temporary' DB ([the same as a in-memory DB but with
+* <ins>**PREPARATION**</ins>—Open (empty, in-memory) 'temporary' DB ([the same as a in-memory DB but with
   file system support](https://www.sqlite.org/inmemorydb.html#temp_db)); the schema for this primary DB will
   always be `main`, and the names of tables, views and pragmas may be used with or without the schema
   prepended.
 * Attach a (new or existing) file-based DB (from `fpath`) to the same connection; the schema for this
   secondary DB is configurable, the default being `file`.
-* <ins>**Work**</ins>—Copy all DB objects (tables, views, and indexes) from `file` to `main`.
-* Optionally, close `main`.
+* <ins>**WORK**</ins>—Copy all DB objects (tables, views, and indexes) from `file` to `main`.
+* Optionally, close (i.e. detach) `file`.
 * Perform work in-memory on `main`.
 * Depending on settings, either:
-  * <ins>**Method A**</ins>—Save DB in its altered state to a temporary file `tpath` (using `vacuum main to
+  * <ins>**METHOD A**</ins>—Save DB in its altered state to a temporary file `tpath` (using `vacuum main to
     $tpath`),
-  * remove (or raname) original `fpath` and move `tpath` to `fpath`
+  * remove (or rename) file at `fpath`, then move `tpath` to `fpath`
   or else
-  * <ins>**Method B**</ins>—Clear `file` schema
+  * <ins>**METHOD B**</ins>—Clear `file` schema
   * and copy all data from `main` to `file`.
-* <ins>**Loop**</ins>—either close DB and finish, or continue to do <ins>**Work**</ins>, above.
+* <ins>**LOOP**</ins>—either close DB and finish, or continue to do <ins>**WORK**</ins>, above.
 
+
+```coffee
+### PREPARATION ###
+fpath                 = 'path/to/sqlite.db'
+dba_cfg               = { path: ':memory:', }                 # or empty string for tmp file support
+dba                   = new ICQLDBA.Dba dba_cfg
+dba.attach { path: fpath, schema: 'file', }
+dba.copy_schema { from_schema: 'file', to_schema: 'main', }
+dba.detach { schema: 'file', }                                # optional
+#-----------------------------------------------------------------------------------------------------------
+### WORK ###
+(await) do_work dba
+#-----------------------------------------------------------------------------------------------------------
+### Method A ###
+tpath                 = '/tmp/temp.db'
+dba.save_as { schema: 'main', path: tpath, }
+#-----------------------------------------------------------------------------------------------------------
+### Method B ###
+dba.clear { schema: 'file', }
+dba.copy_schema { from_schema: 'main', to_schema: 'file', }
+#-----------------------------------------------------------------------------------------------------------
+
+```
 
 ### Usage: Gotchas
 
