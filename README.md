@@ -170,16 +170,16 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 ### API: Other
 
-* **`aggregate: ( P...  )`** ⮕
-* **`backup: ( P...  )`** ⮕
-* **`checkpoint: ( P...  )`** ⮕
-* **`close: ( P...  )`** ⮕
-* **`function: ( P...  )`** ⮕
-* **`load_extension: ( P...  )`** ⮕
-* **`pragma: ( P...  )`** ⮕
-* **`transaction: ( P...  )`** ⮕
-* **`get_foreign_key_state:`** ⮕
-* **`set_foreign_key_state: ( onoff )`** ⮕
+* **`dba.aggregate: ( P...  )`** ⮕
+* **`dba.backup: ( P...  )`** ⮕
+* **`dba.checkpoint: ( P...  )`** ⮕
+* **`dba.close: ( P...  )`** ⮕
+* **`dba.function: ( P...  )`** ⮕
+* **`dba.load_extension: ( P...  )`** ⮕
+* **`dba.pragma: ( P...  )`** ⮕
+* **`dba.transaction: ( P...  )`** ⮕
+* **`dba.get_foreign_key_state:`** ⮕
+* **`dba.set_foreign_key_state: ( onoff )`** ⮕
 * **`dba.read: ( path )`** ⮕ execute SQL statements from a file.
 * **`dba.close: ()`** ⮕ close DB.
 
@@ -189,12 +189,12 @@ over a given result set, use `dba.all_rows db.my_query ...`.
   database for all tables, views, and indexes.</strike>
 * **`dba.catalog: ()`** ⮕ **deprecated** <strike>return an iterator over all entries in `sqlite_master`; allows
   to inspect the database for all tables, views, and indexes.</strike>
-* **`list_schemas: ()`** ⮕
-* **`list_schema_names: ()`** ⮕
-* **`type_of: ( name, schema = 'main' )`** ⮕
-* **`column_types: ( table )`** ⮕
-* **`_dependencies_of: ( table, schema = 'main' )`** ⮕
-* **`dependencies_of:  ( table, schema = 'main' )`** ⮕
+* **`dba.list_schemas: ()`** ⮕
+* **`dba.list_schema_names: ()`** ⮕
+* **`dba.type_of: ( name, schema = 'main' )`** ⮕
+* **`dba.column_types: ( table )`** ⮕
+* **`dba._dependencies_of: ( table, schema = 'main' )`** ⮕
+* **`dba.dependencies_of:  ( table, schema = 'main' )`** ⮕
 
 ### API: DB Structure Modification
 
@@ -205,7 +205,7 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 ### API: In-Memory Processing
 
-* **`copy_schema: ( from_schema, to_schema )`** ⮕ xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx
+* **`dba.copy_schema: ( from_schema, to_schema )`** ⮕ xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx
   xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx
 
 ### API: SQL Construction
@@ -226,8 +226,8 @@ Encoding lists of values with the [Hollerith-Codec](https://github.com/loveencou
 a total ordering that preserves numerical order, in contradistinction to sorting over SQLite JSON arrays,
 which sorts according to the string representation of the array.
 
-* **`as_hollerith: ( x )`** ⮕ encode a value with Hollerith-Codec
-* **`from_hollerith: ( x )`** ⮕ decode a Hollerith-encoded value
+* **`dba.as_hollerith: ( x )`** ⮕ encode a value with Hollerith-Codec
+* **`dba.from_hollerith: ( x )`** ⮕ decode a Hollerith-encoded value
 
 ### Properties
 
@@ -272,9 +272,9 @@ which sorts according to the string representation of the array.
   databases (schemas) that has little to no utility
 * [ ] replace both 'in-memory' and 'temporary' by 'RAM'
 * [ ] unify usage of the terms 'schema' and 'database' (DB)
-* [ rename * **`list_schemas: ()`** ⮕
-* **`list_schema_names: ()`** ⮕
-]
+* [ ] rename `list_schemas()`, `list_schema_names()`
+* [ ] unify `dba.limit()` with `dba.list()` such that `dba.list()` may be called either as `dba.list
+  iterator` or as `dba.list n, iterator`
 
 
 
