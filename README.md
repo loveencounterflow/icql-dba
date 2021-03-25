@@ -76,8 +76,7 @@ Workflow:
 do_work               = ( dba ) -> ...                      ### PREPARATION ###
 use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
-dba_cfg               = { path: ':memory:', }               # or empty string for tmp file support
-dba                   = new ICQLDBA.Dba dba_cfg
+dba                   = new ICQLDBA.Dba { path: ':memory:', }
 dba.attach      { path: fpath, schema: 'file', }
 dba.copy_schema { from_schema: 'file', to_schema: 'main', }
 dba.detach      { schema: 'file', }                         # optional
@@ -104,10 +103,9 @@ loop
 do_work               = ( dba ) -> ...                      ### PREPARATION ###
 use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
-dba_cfg               = { path: ':memory:', use_method, }
-dba                   = new ICQLDBA.Dba dba_cfg
-
-
+dba                   = new ICQLDBA.Dba { path: ':memory:', }
+dba.copy_db { from_path: fpath, from_schema: 'file', }
+# dba.move_db { from_path: fpath, from_schema: 'file', }
 #-----------------------------------------------------------------------------------------------------------
 loop
   continue = (await) do_work dba                            ### WORK ###
