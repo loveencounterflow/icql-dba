@@ -149,9 +149,11 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 * **`dba.limit: ( n, iterator )`** ⮕ returns an iterator over the first `n` rows.
 * **`dba.list: ( iterator )`** ⮕ returns a list of all rows.
-* **`dba.single_row: ( iterator )`** ⮕ like `first_row`, but throws on `undefined`.
+* **`dba.single_row: ( iterator )`** ⮕ like `first_row`, but throws an exception unless `iterator` yields
+  exactly one row.
 * **`dba.first_row: ( iterator )`** ⮕ returns first row, or `undefined`.
-* **`dba.single_value: ( iterator )`** ⮕ like `first_value`, but throws on `undefined`.
+* **`dba.single_value: ( iterator )`** ⮕ like `first_value`, but throws an exception unless `iterator`
+  yields exactly one row.
 * **`dba.first_value: ( iterator )`** ⮕ returns first field of first row, or `undefined`.
 * **`dba.first_values: ( iterator )`** ⮕ returns an iterator over the first field of all rows.
 * **`dba.all_first_values: ( iterator )`** ⮕ returns a list with the values of the first field of each row.
@@ -244,11 +246,23 @@ which sorts according to the string representation of the array.
   or created when the ICQL-DBA instance was created. This DB cannot be detached; only secondary DBs can be
   attached and detached.
 
-* **database (DB)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+  In less strict terms, a 'schema' can also mean a live database that has been attached to an ICQL-DBA instance (to
+  an SQLite connection), especially
+
+* **symbolic path** ◆ SQLite uses the special values `':memory:'` and `''` (the emtpy string) for paths as
+  escape mechanisms so users can specify [in-memory DBs]() and [temporary DBs](). These special values are
+  not valid **file system** paths.
+
+* **database (DB)** ◆ Somewhat not unlike insects that live through the stages of larva, puppa, and imago,
+  SQLite databases have three life cycle stages:
+  * a **dump**, i.e. an SQL text file (which is how database structures are commonly authored);
+  * as binary DB file (not unlike a binary video or offcie document); and as
+  * **live DB** (that is partly or wholly represented in RAM).
+
+  The unqualified term 'database' may refer to any one of these.
+
 * **(binary) DB file** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **SQL dump (file)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
-* **file path** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
-* **path** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **in-memory schema** (also: **in-memory DB**) ◆ xxxxxxxx
 * **temporary schema** (also: **temporary DB**) ◆ xxxxxxxx
 
