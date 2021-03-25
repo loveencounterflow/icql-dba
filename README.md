@@ -147,49 +147,48 @@ Query result adapters are convenience methods to transform the result set. Becau
 that is returned from a `query`, only a single method may be used; if you have to iterate more than once
 over a given result set, use `dba.all_rows db.my_query ...`.
 
-* **`dba.limit             n, iterator`**—returns an iterator over the first `n` rows;
-* **`dba.list              iterator`**—returns a list of all rows;
-* **`dba.single_row        iterator`**—like `first_row`, but throws on `undefined`;
-* **`dba.first_row         iterator`**—returns first row, or `undefined`;
-* **`dba.single_value      iterator`**—like `first_value`, but throws on `undefined`;
-* **`dba.first_value       iterator`**—returns first field of first row, or `undefined`.
-* **`dba.first_values      iterator`**—returns an iterator over the first field of all rows.
-* **`dba.all_first_values  iterator`**—returns a list with the values of the first field of each row.
+* **`dba.limit: ( n, iterator )`** ⮕ returns an iterator over the first `n` rows.
+* **`dba.list: ( iterator )`** ⮕ returns a list of all rows.
+* **`dba.single_row: ( iterator )`** ⮕ like `first_row`, but throws on `undefined`.
+* **`dba.first_row: ( iterator )`** ⮕ returns first row, or `undefined`.
+* **`dba.single_value: ( iterator )`** ⮕ like `first_value`, but throws on `undefined`.
+* **`dba.first_value: ( iterator )`** ⮕ returns first field of first row, or `undefined`.
+* **`dba.first_values: ( iterator )`** ⮕ returns an iterator over the first field of all rows.
+* **`dba.all_first_values: ( iterator )`** ⮕ returns a list with the values of the first field of each row.
   Useful to turn queries like `select product_id from products order by price desc limit 100` into a flat
   list of values.
 
 
 ### API: Querying
 
-* **`dba.prepare sql`**—prepare a statement. Returns a `better-sqlite3` `statement` instance.
-* **`dba.execute sql`**—execute any number of SQL statements.
-* **`dba.query   sql, P...`**—perform a single `select` statement. Returns an iterator over the resulting
-  rows. When the `sql` text has placeholders, accepts additional values.
-
-* run: ( sql, P... ) ->
+* **`dba.prepare: ( sql )`** ⮕ prepare a statement. Returns a `better-sqlite3` `statement` instance.
+* **`dba.execute: ( sql )`** ⮕ execute any number of SQL statements.
+* **`dba.query:   ( sql, P... )`** ⮕ perform a single `select` statement. Returns an iterator over the
+  resulting rows. When the `sql` text has placeholders, accepts additional values.
+* **`run: ( sql, P... )`** ⮕
 
 
 ### API: Other
 
-* `aggregate:      ( P...  ) -> @sqlt.aggregate        P...`
-* `backup:         ( P...  ) -> @sqlt.backup           P...`
-* `checkpoint:     ( P...  ) -> @sqlt.checkpoint       P...`
-* `close:          ( P...  ) -> @sqlt.close            P...`
-* `function:       ( P...  ) -> @sqlt.function         P...`
-* `load_extension: ( P...  ) -> @sqlt.loadExtension    P...`
-* `pragma:         ( P...  ) -> @sqlt.pragma           P...`
-* `transaction:    ( P...  ) -> @sqlt.transaction      P...`
-* `get_foreign_key_state: -> not not ( @pragma "foreign_keys;" )[ 0 ].foreign_keys`
-* `set_foreign_key_state: ( onoff ) ->`
+* **`aggregate: ( P...  )`** ⮕
+* **`backup: ( P...  )`** ⮕
+* **`checkpoint: ( P...  )`** ⮕
+* **`close: ( P...  )`** ⮕
+* **`function: ( P...  )`** ⮕
+* **`load_extension: ( P...  )`** ⮕
+* **`pragma: ( P...  )`** ⮕
+* **`transaction: ( P...  )`** ⮕
+* **`get_foreign_key_state:`** ⮕
+* **`set_foreign_key_state: ( onoff )`** ⮕
 
-* **`dba.read: ( path )`**—execute SQL statements from a file.
-* **`dba.close()`**—close DB.
+* **`dba.read: ( path )`** ⮕ execute SQL statements from a file.
+* **`dba.close: ()`** ⮕ close DB.
 
 ### API: DB Structure Reporting
 
-* **`dba.walk_objects()`**—return an iterator over all entries in `sqlite_master`; allows to inspect the
+* **`dba.walk_objects: ()`** ⮕ return an iterator over all entries in `sqlite_master`; allows to inspect the
   database for all tables, views, and indexes.</strike>
-* **`dba.catalog()`**—**deprecated** <strike>return an iterator over all entries in `sqlite_master`; allows
+* **`dba.catalog: ()`** ⮕ **deprecated** <strike>return an iterator over all entries in `sqlite_master`; allows
   to inspect the database for all tables, views, and indexes.</strike>
 
 * **`list_schemas: ()`** ⮕
@@ -240,7 +239,7 @@ which sorts according to the string representation of the array.
 ## Glossary
 
 * **schema** ◆ A `schema` (a DB name) is a non-empty string that identifies a DB that is attached to a given
-  connection (a given ICQL-DBA instance). Names of tables and views (as well as some pragmas) may be
+  ICQL-DBA instance (a.k.a. a DB connection). Names of tables and views (as well as some pragmas) may be
   prefixed with a schema to specify a DB other than the principal one.
 
   The default schema is `main`, which is invariably associated with the principal DB—the one that was opened
