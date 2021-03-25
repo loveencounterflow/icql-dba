@@ -211,18 +211,13 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 ### API: SQL Construction
 
-* **`dba.escape_text   x`**—turn text `x` into an SQL string literal.
-* **`dba.list_as_json  x`**—turn list `x` into a JSON array literal.
-* **`dba.as_sql        x`**—express value `x` as SQL literal.
-* **`dba.interpolate   sql, Q`**—interpolate values found in object `Q` into string `sql`.
+**NOTE** these methods are likely to change in the near future.
 
-<!--  -->
-
-* **`dba.as_identifier: ( x ) ->`** escape text `x` for use as an SQL identifier.
-* **`dba.escape_text: ( x ) ->`** escape text `x` for use as an SQL string literal.
-* **`dba.list_as_json: ( x ) ->`** render `x` as a JSON array literal.
-* **`dba.as_sql: ( x ) ->`** express value `x` as SQL literal.
-* **`dba.interpolate: ( sql, Q ) ->`** interpolate values found in object `Q` into template string `sql`
+* **`dba.as_identifier: ( x ) ->`** ⦿ escape text `x` for use as an SQL identifier.
+* **`dba.escape_text: ( x ) ->`** ⦿ escape text `x` for use as an SQL string literal.
+* **`dba.list_as_json: ( x ) ->`** ⦿ render `x` as a JSON array literal.
+* **`dba.as_sql: ( x ) ->`** ⦿ express value `x` as SQL literal.
+* **`dba.interpolate: ( sql, Q ) ->`** ⦿ interpolate values found in object `Q` into template string `sql`
   such that the result is valid SQL.
 
 ### API: Sortable Lists
