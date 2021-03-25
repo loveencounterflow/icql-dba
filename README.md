@@ -216,13 +216,14 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 * **`dba.as_sql        x`**—express value `x` as SQL literal.
 * **`dba.interpolate   sql, Q`**—interpolate values found in object `Q` into string `sql`.
 
-<dl>
-  <dt><code>as_identifier: ( x ) -></code></dt><dd>turn text `x` into an SQL identifier.</dd>
-  <dt><code>escape_text: ( x ) -></code></dt><dd>turn text `x` into an SQL string literal.</dd>
-  <dt><code>list_as_json: ( x ) -></code></dt><dd>turn list `x` into a JSON array literal.</dd>
-  <dt><code>as_sql: ( x ) -></code></dt><dd>express value `x` as SQL literal.</dd>
-  <dt><code>interpolate: ( sql, Q ) -></code></dt><dd>interpolate values found in object `Q` into string `sql`.</dd>
-  </dl>
+<!--  -->
+
+* **`dba.as_identifier: ( x ) ->`** escape text `x` for use as an SQL identifier.
+* **`dba.escape_text: ( x ) ->`** escape text `x` for use as an SQL string literal.
+* **`dba.list_as_json: ( x ) ->`** render `x` as a JSON array literal.
+* **`dba.as_sql: ( x ) ->`** express value `x` as SQL literal.
+* **`dba.interpolate: ( sql, Q ) ->`** interpolate values found in object `Q` into template string `sql`
+  such that the result is valid SQL.
 
 ### API: Sortable Lists
 
