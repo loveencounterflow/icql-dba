@@ -19,6 +19,7 @@
     - [API: SQL Construction](#api-sql-construction)
     - [API: Sortable Lists](#api-sortable-lists)
     - [Properties](#properties)
+  - [Glossary](#glossary)
   - [Todo](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -72,7 +73,7 @@ Workflow:
 
 
 ```coffee
-#--------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 do_work               = ( dba ) -> ...                      ### PREPARATION ###
 use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
@@ -80,47 +81,47 @@ dba                   = new ICQLDBA.Dba { path: ':memory:', }
 dba.attach      { path: fpath, schema: 'file', }
 dba.copy_schema { from_schema: 'file', to_schema: 'main', }
 dba.detach      { schema: 'file', }                         # optional
-#--------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 loop
   continue = (await) do_work dba                            ### WORK ###
-  #------------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   if use_method is 'A'                                      ### METHOD A ###
     tpath                 = '/tmp/temp.db'
     fpath_old             = '/tmp/old-db-334a5c3fd89.db'
     dba.save_as { schema: 'main', path: tpath, }
     FS.renameSync fpath, fpath_old
     FS.renameSync tpath, fpath
-  #------------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   else if use_method is 'B'                                 ### METHOD B ###
     dba.clear { schema: 'file', }
     dba.copy_schema { from_schema: 'main', to_schema: 'file', }
-  #------------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   break unless continue                                     ### LOOP ###
 ```
 
 ```coffee
-#--------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 do_work               = ( dba ) -> ...                      ### PREPARATION ###
 use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
 dba                   = new ICQLDBA.Dba { path: ':memory:', }
 dba.copy_db { from_path: fpath, from_schema: 'file', }
 # dba.move_db { from_path: fpath, from_schema: 'file', }
-#--------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 loop
   continue = (await) do_work dba                            ### WORK ###
-  #------------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   if use_method is 'A'                                      ### METHOD A ###
     tpath                 = '/tmp/temp.db'
     fpath_old             = '/tmp/old-db-334a5c3fd89.db'
     dba.save_as { schema: 'main', path: tpath, }
     FS.renameSync fpath, fpath_old
     FS.renameSync tpath, fpath
-  #------------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   else if use_method is 'B'                                 ### METHOD B ###
     dba.clear { schema: 'file', }
     dba.copy_schema { from_schema: 'main', to_schema: 'file', }
-  #------------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   break unless continue                                     ### LOOP ###
 ```
 
@@ -226,6 +227,18 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 * **`dba.sqlt`**—the underlying `better-sqlite3` object which mediates communication to SQLite3.
 * **`dba.cfg`**—the configuration object where per-instance settings are kept.
+
+## Glossary
+
+<dl>
+<dt>Definition List</dt><dd>A list of terms and their definitions/descriptions.</dd>
+<dt>C++</dt><dd>C++ tutorial.</dd>
+<dt>Java</dt><dd>Java tutorial.</dd>
+</dl>
+
+
+<!-- ## To Do -->
+
 
 
 
