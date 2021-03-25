@@ -216,6 +216,14 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 * **`dba.as_sql        x`**—express value `x` as SQL literal.
 * **`dba.interpolate   sql, Q`**—interpolate values found in object `Q` into string `sql`.
 
+<dl>
+  <dt><code>as_identifier: ( x ) -></code></dt><dd>turn text `x` into an SQL identifier.</dd>
+  <dt><code>escape_text: ( x ) -></code></dt><dd>turn text `x` into an SQL string literal.</dd>
+  <dt><code>list_as_json: ( x ) -></code></dt><dd>turn list `x` into a JSON array literal.</dd>
+  <dt><code>as_sql: ( x ) -></code></dt><dd>express value `x` as SQL literal.</dd>
+  <dt><code>interpolate: ( sql, Q ) -></code></dt><dd>interpolate values found in object `Q` into string `sql`.</dd>
+  </dl>
+
 ### API: Sortable Lists
 
 * **`as_hollerith:   ( x ) -> HOLLERITH.encode x`**—encode a value with
@@ -231,19 +239,12 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 ## Glossary
 
 <dl>
-<dt>Definition List</dt><dd>A list of terms and their definitions/descriptions.</dd>
-<dt>C++</dt><dd>C++ tutorial.</dd>
-<dt>Java</dt><dd>Java tutorial.</dd>
-</dl>
+  <dt>database (DB)</dt><dd>A list of terms and their definitions/descriptions.</dd>
+  <dt>schema</dt><dd>C++ tutorial.</dd>
 
-
-<!-- ## To Do -->
-
-
-
-
-
-
+  <dt>file path</dt><dd>Java tutorial.</dd>
+  <dt>path</dt><dd>Java tutorial.</dd>
+  </dl>
 
 
 ## Todo
