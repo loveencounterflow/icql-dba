@@ -192,22 +192,24 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 * **`dba.catalog()`**—**deprecated** <strike>return an iterator over all entries in `sqlite_master`; allows
   to inspect the database for all tables, views, and indexes.</strike>
 
-* `list_schemas:       -> @list @query "select * from pragma_database_list order by name;"`
-* `list_schema_names:  -> ( d.name for d in @list_schemas() )`
-* `type_of: ( name, schema = 'main' ) ->`
-* `column_types: ( table ) ->`
-* `_dependencies_of: ( table, schema = 'main' ) ->`
-* `dependencies_of:  ( table, schema = 'main' ) ->`
+* **`list_schemas: ()`** ⮕
+* **`list_schema_names: ()`** ⮕
+* **`type_of: ( name, schema = 'main' )`** ⮕
+* **`column_types: ( table )`** ⮕
+* **`_dependencies_of: ( table, schema = 'main' )`** ⮕
+* **`dependencies_of:  ( table, schema = 'main' )`** ⮕
 
 ### API: DB Structure Modification
 
-* **`dba.clear()`**—drop all tables, views and indexes from the database.
-* **`dba.attach( path, schema )`**—attach a given path to a given schema(name); this allows to manage several databases
-  with a single connection.
+* **`dba.clear: ( { schema: 'main', })`** ⮕ drop all tables, views and indexes from the schema.
+* **`dba.attach: ( { schema, path: '' } )`** ⮕ attach a given path to a given schema(name); this allows to
+  manage several databases with a single connection. The default value for the `path` member is the empty
+  string, which symbolizes an in-memory temporary schema.
 
 ### API: In-Memory Processing
 
-* `copy_schema: ( from_schema, to_schema ) ->`
+* **`copy_schema: ( from_schema, to_schema )`** ⮕ xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx
+  xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx
 
 ### API: SQL Construction
 
@@ -222,25 +224,36 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 ### API: Sortable Lists
 
-* **`as_hollerith: ( x )`** ⮕ encode a value with
-  [Hollerith-Codec](https://github.com/loveencounterflow/hollerith-codec) (also see
-  [Hollerith](https://github.com/loveencounterflow/hollerith))
+Encoding lists of values with the [Hollerith-Codec](https://github.com/loveencounterflow/hollerith-codec)
+(also see [Hollerith](https://github.com/loveencounterflow/hollerith)) gives you a byte array (`bytea`) with
+a total ordering that preserves numerical order, in contradistinction to sorting over SQLite JSON arrays,
+which sorts according to the string representation of the array.
+
+* **`as_hollerith: ( x )`** ⮕ encode a value with Hollerith-Codec
 * **`from_hollerith: ( x )`** ⮕ decode a Hollerith-encoded value
 
 ### Properties
 
-* **`dba.sqlt`**—the underlying `better-sqlite3` object which mediates communication to SQLite3.
-* **`dba.cfg`**—the configuration object where per-instance settings are kept.
+* **`dba.sqlt`** ⮕ the underlying `better-sqlite3` object which mediates communication to SQLite3.
+* **`dba.cfg`** ⮕ the configuration object where per-instance settings are kept.
 
 ## Glossary
+
+* **schema** ◆ A `schema` (a DB name) is a non-empty string that identifies a DB that is attached to a given
+  connection (a given ICQL-DBA instance). Names of tables and views (as well as some pragmas) may be
+  prefixed with a schema to specify a DB other than the principal one.
+
+  The default schema is `main`, which is invariably associated with the principal DB—the one that was opened
+  or created when the ICQL-DBA instance was created. This DB cannot be detached; only secondary DBs can be
+  attached and detached.
 
 * **database (DB)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **(binary) DB file** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **SQL dump (file)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
-* **schema** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **file path** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **path** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
-
+* **in-memory schema** (also: **in-memory DB**) ◆ xxxxxxxx
+* **temporary schema** (also: **temporary DB**) ◆ xxxxxxxx
 
 ## Todo
 
@@ -258,5 +271,14 @@ over a given result set, use `dba.all_rows db.my_query ...`.
   relies on `join`ing rows from `sqlite_master` with rows from `pragma_table_info(...)`)?
 * [ ] provide a path to build dynamic SQL; see https://github.com/ianstormtaylor/pg-sql-helpers for some
   ideas.
+* [ ] consider to forego the unnecessary and confusing distinction between 'in-memory' and 'temporary'
+  databases (schemas) that has little to no utility
+* [ ] replace both 'in-memory' and 'temporary' by 'RAM'
+* [ ] unify usage of the terms 'schema' and 'database' (DB)
+* [ rename * **`list_schemas: ()`** ⮕
+* **`list_schema_names: ()`** ⮕
+]
+
+
 
 
