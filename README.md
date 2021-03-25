@@ -13,7 +13,7 @@
     - [API: Query Result Adapters](#api-query-result-adapters)
     - [API: Querying](#api-querying)
     - [API: Other](#api-other)
-    - [API: DB Structure Reporting](#api-db-structure-reporting)
+    - [API: DB Introspection](#api-db-introspection)
     - [API: DB Structure Modification](#api-db-structure-modification)
     - [API: In-Memory Processing](#api-in-memory-processing)
     - [API: SQL Construction](#api-sql-construction)
@@ -180,17 +180,15 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 * **`transaction: ( P...  )`** ⮕
 * **`get_foreign_key_state:`** ⮕
 * **`set_foreign_key_state: ( onoff )`** ⮕
-
 * **`dba.read: ( path )`** ⮕ execute SQL statements from a file.
 * **`dba.close: ()`** ⮕ close DB.
 
-### API: DB Structure Reporting
+### API: DB Introspection
 
 * **`dba.walk_objects: ()`** ⮕ return an iterator over all entries in `sqlite_master`; allows to inspect the
   database for all tables, views, and indexes.</strike>
 * **`dba.catalog: ()`** ⮕ **deprecated** <strike>return an iterator over all entries in `sqlite_master`; allows
   to inspect the database for all tables, views, and indexes.</strike>
-
 * **`list_schemas: ()`** ⮕
 * **`list_schema_names: ()`** ⮕
 * **`type_of: ( name, schema = 'main' )`** ⮕
