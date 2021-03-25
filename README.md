@@ -222,10 +222,10 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 ### API: Sortable Lists
 
-* **`as_hollerith:   ( x ) -> HOLLERITH.encode x`**—encode a value with
+* **`as_hollerith: ( x )`** ⮕ encode a value with
   [Hollerith-Codec](https://github.com/loveencounterflow/hollerith-codec) (also see
   [Hollerith](https://github.com/loveencounterflow/hollerith))
-* **`from_hollerith: ( x ) -> HOLLERITH.decode x`**—decode a Hollerith-encoded value
+* **`from_hollerith: ( x )`** ⮕ decode a Hollerith-encoded value
 
 ### Properties
 
@@ -234,13 +234,10 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 ## Glossary
 
-<dl>
-  <dt>database (DB)</dt><dd>A list of terms and their definitions/descriptions.</dd>
-  <dt>schema</dt><dd>C++ tutorial.</dd>
-
-  <dt>file path</dt><dd>Java tutorial.</dd>
-  <dt>path</dt><dd>Java tutorial.</dd>
-  </dl>
+* **database (DB)** ⮕ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+* **schema** ⮕ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+* **file path** ⮕ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+* **path** ⮕ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 
 
 ## Todo
