@@ -53,55 +53,55 @@ npm install icql-dba
 
 Workflow:
 
-* <ins>**PREPARATION**</ins>—Open (empty, in-memory) 'temporary' DB ([the same as a in-memory DB but with
+* <ins>**#PREPARATION**</ins>—Open (empty, in-memory) 'temporary' DB ([the same as a in-memory DB but with
   file system support](https://www.sqlite.org/inmemorydb.html#temp_db)); the schema for this primary DB will
   always be `main`, and the names of tables, views and pragmas may be used with or without the schema
   prepended.
 * Attach a (new or existing) file-based DB (from `fpath`) to the same connection; the schema for this
   secondary DB is configurable, the default being `file`.
-* <ins>**WORK**</ins>—Copy all DB objects (tables, views, and indexes) from `file` to `main`.
+* <ins>**#WORK**</ins>—Copy all DB objects (tables, views, and indexes) from `file` to `main`.
 * Optionally, close (i.e. detach) `file`.
 * Perform work in-memory on `main`.
 * Depending on settings, either:
-  * <ins>**METHOD A**</ins>—Save DB in its altered state to a temporary file `tpath` (using `vacuum main to
+  * <ins>**#METHOD A**</ins>—Save DB in its altered state to a temporary file `tpath` (using `vacuum main to
     $tpath`),
   * remove (or rename) file at `fpath`, then move `tpath` to `fpath`
   or else
-  * <ins>**METHOD B**</ins>—Clear `file` schema
+  * <ins>**#METHOD B**</ins>—Clear `file` schema
   * and copy all data from `main` to `file`.
-* <ins>**LOOP**</ins>—either close DB and finish, or continue to do <ins>**WORK**</ins>, above.
+* <ins>**#LOOP**</ins>—either close DB and finish, or continue to do <ins>**#WORK**</ins>, above.
 
 
 ```coffee
 #------------------------------------------------------------------------------
-do_work               = ( dba ) -> ...                      ### PREPARATION ###
+do_work               = ( dba ) -> ...                      #PREPARATION
 use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
 dba                   = new ICQLDBA.Dba { path: ':memory:', }
 dba.attach      { path: fpath, schema: 'file', }
 dba.copy_schema { from_schema: 'file', to_schema: 'main', }
-dba.detach      { schema: 'file', }                         # optional
+dba.detach      { schema: 'file', }                         # (optional)
 #------------------------------------------------------------------------------
 loop
-  continue = (await) do_work dba                            ### WORK ###
+  continue = (await) do_work dba                            #WORK
   #----------------------------------------------------------------------------
-  if use_method is 'A'                                      ### METHOD A ###
+  if use_method is 'A'                                      #METHOD A
     tpath                 = '/tmp/temp.db'
     fpath_old             = '/tmp/old-db-334a5c3fd89.db'
     dba.save_as { schema: 'main', path: tpath, }
     FS.renameSync fpath, fpath_old
     FS.renameSync tpath, fpath
   #----------------------------------------------------------------------------
-  else if use_method is 'B'                                 ### METHOD B ###
+  else if use_method is 'B'                                 #METHOD B
     dba.clear { schema: 'file', }
     dba.copy_schema { from_schema: 'main', to_schema: 'file', }
   #----------------------------------------------------------------------------
-  break unless continue                                     ### LOOP ###
+  break unless continue                                     #LOOP
 ```
 
 ```coffee
 #------------------------------------------------------------------------------
-do_work               = ( dba ) -> ...                      ### PREPARATION ###
+do_work               = ( dba ) -> ...                      #PREPARATION
 use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
 dba                   = new ICQLDBA.Dba { path: ':memory:', }
@@ -109,20 +109,20 @@ dba.copy_db { from_path: fpath, from_schema: 'file', }
 # dba.move_db { from_path: fpath, from_schema: 'file', }
 #------------------------------------------------------------------------------
 loop
-  continue = (await) do_work dba                            ### WORK ###
+  continue = (await) do_work dba                            #WORK
   #----------------------------------------------------------------------------
-  if use_method is 'A'                                      ### METHOD A ###
+  if use_method is 'A'                                      #METHOD A
     tpath                 = '/tmp/temp.db'
     fpath_old             = '/tmp/old-db-334a5c3fd89.db'
     dba.save_as { schema: 'main', path: tpath, }
     FS.renameSync fpath, fpath_old
     FS.renameSync tpath, fpath
   #----------------------------------------------------------------------------
-  else if use_method is 'B'                                 ### METHOD B ###
+  else if use_method is 'B'                                 #METHOD B
     dba.clear { schema: 'file', }
     dba.copy_schema { from_schema: 'main', to_schema: 'file', }
   #----------------------------------------------------------------------------
-  break unless continue                                     ### LOOP ###
+  break unless continue                                     #LOOP
 ```
 
 ### Usage: Gotchas
@@ -235,6 +235,8 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 ## Glossary
 
 * **database (DB)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+* **(binary) DB file** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+* **SQL dump (file)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **schema** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **file path** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **path** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
