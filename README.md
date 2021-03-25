@@ -255,9 +255,14 @@ which sorts according to the string representation of the array.
 
 * **database (DB)** ◆ Somewhat not unlike insects that live through the stages of larva, puppa, and imago,
   SQLite databases have three life cycle stages:
-  1) an **SQL dump**, i.e. an SQL text file (which is how database structures are commonly authored);
+
+  1) as **SQL dump**, i.e. an SQL text file (which is how database structures are commonly authored: as text,
+    and also how they are often archived to VCSs);
+
   1) as (binary) **DB file** (not unlike a binary video or offcie document); and as
-  1) **live DB** (that is partly or wholly represented in RAM).
+
+  1) as **live DB** (that is partly or wholly represented in RAM). Only this form is amenable to changes in
+     structure and content without resorting to crude textual search-and-replace.
 
   The unqualified term 'database' may refer to any one of these.
 
