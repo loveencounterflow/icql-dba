@@ -20,6 +20,7 @@
     - [API: Sortable Lists](#api-sortable-lists)
     - [Properties](#properties)
   - [Glossary](#glossary)
+  - [Alternative API](#alternative-api)
   - [Todo](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -264,12 +265,40 @@ which sorts according to the string representation of the array.
   1) as **live DB** (that is partly or wholly represented in RAM). Only this form is amenable to changes in
      structure and content without resorting to crude textual search-and-replace.
 
+  <!-- In addition to these, a so-called 'empty placeholder DB' is what ICQL-DBA creates  -->
+
   The unqualified term 'database' may refer to any one of these.
 
 * **(binary) DB file** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **SQL dump (file)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 * **in-memory schema** (also: **in-memory DB**) ◆ xxxxxxxx
 * **temporary schema** (also: **temporary DB**) ◆ xxxxxxxx
+
+## Alternative API
+
+* When `path` is a **string**, it must denote a file system path to an existant or non-existant file in a
+  writeable directory. If the file exists, it must be a valid SQLite binary DB file (in the future, a
+  `format` option might be added to allow openening SQL dumps, SQLite archives and possibly other file
+  types). If the file does not exists, it will be created.
+* When `path` is not given (or `undefined` or `null`), it will be interpreted like `true`, below.
+* When `path` is a **boolean**, a RAM DB will be created. When `path` is `true` (the default if `path` is
+  not given), this indicates the user wishes to have a RAM DB with file system support (which will be used
+  by SQLite in case RAM is getting scarce); in SQLite parlance, this is called a ['temporary'
+  database](https://www.sqlite.org/inmemorydb.html#temp_db). When `path` is `false`, then what the SQLite
+  documentation calls an ['in-memory database' (without file
+  support)](https://www.sqlite.org/inmemorydb.html) will be created.
+* When `schema` is not given, it is assumed to be the string `main`, which is SQLite's name for the default
+  schema. When `dba.open()` (the instance method) is called with `schema` set implicitly or explicitly to
+  `main`, it will always fail except when the `main` DB is an empty (placeholder) DB. In this case, the
+  placeholder DB will be silently dropped and replaced with a new DB. Therefore, one could do the following:
+
+  ```coffee
+  dba = Dba.open { schema: 'foo', }       # creates RAM DB 'foo' and also empty placeholder DB 'main'
+  dba.open { path: 'path/to/some.db', }   # opens file DB `some.db` as 'main'
+  ```
+
+* **`Dba.open: ( { path, schema, } )`** ⮕ Return a new `Dba` instance with
+* **`dba.open: ( { path, schema, } )`** ⮕
 
 ## Todo
 
