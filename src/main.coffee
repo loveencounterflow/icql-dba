@@ -26,7 +26,11 @@ HOLLERITH                 = require 'hollerith-codec'
 LFT                       = require 'letsfreezethat'
 
 #-----------------------------------------------------------------------------------------------------------
-pick = ( d, key, fallback ) -> d?[ key ] ? fallback
+pick = ( d, key, fallback, type = null ) ->
+  R = d?[ key ] ? fallback
+  validate[ type ] R if type?
+  return R
+
 
 #===========================================================================================================
 #
