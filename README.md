@@ -274,6 +274,9 @@ which sorts according to the string representation of the array.
 * **in-memory schema** (also: **in-memory DB**) ◆ xxxxxxxx
 * **temporary schema** (also: **temporary DB**) ◆ xxxxxxxx
 
+* **schema** ◆ the name of a **live DB** accessible from the same DB connection
+* <a name=known_schema>**known schema**</a> ◆ the name of **live DB** that can be accessed from the same connection ⇔ xxxxxxx ⇐⇒ xxxxxxx ⟸⟹ xxxxxxx ⟺
+
 ## Alternative API
 
 * When `path` is a **string**, it must denote a file system path to an existant or non-existant file in a
@@ -299,6 +302,8 @@ which sorts according to the string representation of the array.
 
 * **`Dba.open: ( { path, schema, } )`** ⮕ Return a new `Dba` instance with
 * **`dba.open: ( { path, schema, } )`** ⮕
+* **`dba.save: ( { path, schema, } )`** ⮕
+  * `schema` must be a known schema
 
 ## Todo
 
@@ -324,6 +329,6 @@ which sorts according to the string representation of the array.
 * [ ] unify `dba.limit()` with `dba.list()` such that `dba.list()` may be called either as `dba.list
   iterator` or as `dba.list n, iterator`
 
-
+jump to [known schema](#known_schema)
 
 
