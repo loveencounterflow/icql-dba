@@ -19,8 +19,8 @@
     - [API: SQL Construction](#api-sql-construction)
     - [API: Sortable Lists](#api-sortable-lists)
     - [Properties](#properties)
+  - [Alternative API (WIP; to be merged into API proper when implemented)](#alternative-api-wip-to-be-merged-into-api-proper-when-implemented)
   - [Glossary](#glossary)
-  - [Alternative API](#alternative-api)
   - [Todo](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -237,46 +237,7 @@ which sorts according to the string representation of the array.
 * **`dba.sqlt`** ⮕ the underlying `better-sqlite3` object which mediates communication to SQLite3.
 * **`dba.cfg`** ⮕ the configuration object where per-instance settings are kept.
 
-## Glossary
-
-* <a name=gls_schema>**schema** ◆ A `schema` (a DB name) is a non-empty string that identifies a DB that is
-  attached to a given ICQL-DBA instance (a.k.a. a DB connection). Names of tables and views (as well as some
-  pragmas) may be prefixed with a schema to specify a DB other than the principal one.
-
-  The default schema is `main`, which is invariably associated with the principal DB—the one that was opened
-  or created when the ICQL-DBA instance was created. This DB cannot be detached; only secondary DBs can be
-  attached and detached.
-
-  In less strict terms, a 'schema' can also mean a live database that has been attached to an ICQL-DBA
-  instance (to an SQLite connection), especially
-
-* <a name=gls_symbolic_path>**symbolic path** ◆ SQLite uses the special values `':memory:'` and `''` (the
-  emtpy string) for paths as escape mechanisms so users can specify [in-memory DBs]() and [temporary DBs]().
-  These special values are not valid **file system** paths.
-
-* <a name=gls_db>**database (DB)** ◆ Somewhat not unlike insects that live through the stages of larva,
-  puppa, and imago, SQLite databases have three life cycle stages:
-
-  1) as **SQL dump**, i.e. an SQL text file (which is how database structures are commonly authored: as
-     text, and also how they are often archived to VCSs);
-
-  1) as (binary) **DB file** (not unlike a binary video or offcie document); and as
-
-  1) as **live DB** (that is partly or wholly represented in RAM). Only this form is amenable to changes in
-     structure and content without resorting to crude textual search-and-replace.
-
-  <!-- In addition to these, a so-called 'empty placeholder DB' is what ICQL-DBA creates  -->
-
-  The unqualified term 'database' may refer to any one of these.
-
-* <a name=gls_binary_db>**(binary) DB file** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
-* <a name=gls_dump>**SQL dump (file)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
-* <a name=gls_in_memory_schema>**in-memory schema** (also: **in-memory DB**) ◆ xxxxxxxx
-* <a name=gls_temporary_schema>**temporary schema** (also: **temporary DB**) ◆ xxxxxxxx
-* <a name=gls_known_schema>**known schema**</a> ◆ the name of **live DB** that can be accessed from the same
-  connection ⟺ a schema name that is listed by `dba.list_schemas()`
-
-## Alternative API
+## Alternative API (WIP; to be merged into API proper when implemented)
 
 * When `path` is a **string**, it must denote a file system path to an existant or non-existant file in a
   writeable directory. If the file exists, it must be a valid SQLite binary DB file (in the future, a
@@ -301,8 +262,61 @@ which sorts according to the string representation of the array.
 
 * **`Dba.open: ( { path, schema, } )`** ⮕ Return a new `Dba` instance with
 * **`dba.open: ( { path, schema, } )`** ⮕
-* **`dba.save: ( { path, schema, } )`** ⮕
-  * `schema` must be a [known schema](#gls_known_schema)
+* **`dba.save: ( { path, schema, overwrite, } )`** ⮕
+  * `schema` must be a [known schema](#gls_known_schema);
+  * `path` must be a [file system path](#gls_fs_path);
+  * `overwrite` (default `false`) must be a boolean;
+  * an error will be raised if `path` already exists and `overwrite` is `false` (the default), *even if the
+    new path is identical to the schema's current path*.
+  * a schema associated with a given path `a` will *remain* to be associated with `a` even after being
+    `dba.save()`d to another path `b`, that is, `dba.save()` always produces a new (independent) copy
+    and does not modify the live DB; however, one can
+
+## Glossary
+
+* <a name='gls_schema'>**schema**</a> ◆ A `schema` (a DB name) is a non-empty string that identifies a DB
+  that is attached to a given ICQL-DBA instance (a.k.a. a DB connection). Names of tables and views (as well
+  as some pragmas) may be prefixed with a schema to specify a DB other than the principal one.
+
+  The default schema is `main`, which is invariably associated with the principal DB—the one that was opened
+  or created when the ICQL-DBA instance was created. This DB cannot be detached; only secondary DBs can be
+  attached and detached.
+
+  In less strict terms, a 'schema' can also mean a live database that has been attached to an ICQL-DBA
+  instance (to an SQLite connection), especially
+
+* <a name='gls_symbolic_path'>**symbolic path**</a> ◆ SQLite uses the special values `':memory:'` and `''`
+  (the emtpy string) for paths as escape mechanisms so users can specify [in-memory DBs]() and [temporary
+  DBs](). These special values are not valid **file system** paths.
+
+* <a name='gls_fs_path'>**file system path**</a> ◆ A non-empty string that points to a file (not a
+  directory) in the file system. Observe that generally, the *file* (the portion that the last path segment
+  refers to) does not have to exist and will be either created when missing (with `dba.open()` and
+  `dba.save()`) or cause an error (with `dba.save()`) to prevent accidental overwrite (where not permitted
+  by `overwrite: true`). However, the parent directory of the referred file *must always already exist*; no
+  directories (except for temporary ones) will be created implicitly.
+
+* <a name='gls_db'>**database (DB)**</a> ◆ Somewhat not unlike insects that live through the stages of
+  larva, puppa, and imago, SQLite databases have three life cycle stages:
+
+  1) as <a name='gls_db'>**SQL dump**</a>, i.e. an SQL text file (which is how database structures are
+     commonly authored: as text, and also how they are often archived to VCSs);
+
+  1) as (binary) <a name='gls_db'>**DB file**</a> (not unlike a binary video or offcie document); and as
+
+  1) as <a name='gls_db'>**live DB**</a> (that is partly or wholly represented in RAM). Only this form is
+     amenable to changes in structure and content without resorting to crude textual search-and-replace.
+
+  <!-- In addition to these, a so-called 'empty placeholder DB' is what ICQL-DBA creates  -->
+
+  The unqualified term 'database' may refer to any one of these.
+
+* <a name='gls_binary_db'>**(binary) DB file**</a> ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+* <a name='gls_dump'>**SQL dump (file)**</a> ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+* <a name='gls_in_memory_schema'>**in-memory schema** (also: **in-memory DB**)</a> ◆ xxxxxxxx
+* <a name='gls_temporary_schema'>**temporary schema** (also: **temporary DB**)</a> ◆ xxxxxxxx
+* <a name='gls_known_schema'>**known schema**</a> ◆ the name of **live DB** that can be accessed from the
+  same connection ⟺ a schema name that is listed by `dba.list_schemas()`.
 
 ## Todo
 
@@ -327,6 +341,14 @@ which sorts according to the string representation of the array.
 * [ ] rename `list_schemas()`, `list_schema_names()`
 * [ ] unify `dba.limit()` with `dba.list()` such that `dba.list()` may be called either as `dba.list
   iterator` or as `dba.list n, iterator`
+<!-- * [ ] allow to associate a RAM DB with a file and allow `dba.save()` without a path -->
+* [ ] consider to alter `dba` to act not as per *connection*, but as per *schema*:
 
+  ```coffee
+  DBA   = new Dba()
+  dba_1 = DBA.open { schema: 'dba_1', }
+  dba_2 = DBA.open { schema: 'dba_2', }
+  ```
 
+  Now `dba_1`, `dba_2` exist in the same connection; there is an empty placeholder schema `main`.
 
