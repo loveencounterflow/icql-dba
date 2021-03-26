@@ -239,26 +239,26 @@ which sorts according to the string representation of the array.
 
 ## Glossary
 
-* **schema** ◆ A `schema` (a DB name) is a non-empty string that identifies a DB that is attached to a given
-  ICQL-DBA instance (a.k.a. a DB connection). Names of tables and views (as well as some pragmas) may be
-  prefixed with a schema to specify a DB other than the principal one.
+* <a name=gls_schema>**schema** ◆ A `schema` (a DB name) is a non-empty string that identifies a DB that is
+  attached to a given ICQL-DBA instance (a.k.a. a DB connection). Names of tables and views (as well as some
+  pragmas) may be prefixed with a schema to specify a DB other than the principal one.
 
   The default schema is `main`, which is invariably associated with the principal DB—the one that was opened
   or created when the ICQL-DBA instance was created. This DB cannot be detached; only secondary DBs can be
   attached and detached.
 
-  In less strict terms, a 'schema' can also mean a live database that has been attached to an ICQL-DBA instance (to
-  an SQLite connection), especially
+  In less strict terms, a 'schema' can also mean a live database that has been attached to an ICQL-DBA
+  instance (to an SQLite connection), especially
 
-* **symbolic path** ◆ SQLite uses the special values `':memory:'` and `''` (the emtpy string) for paths as
-  escape mechanisms so users can specify [in-memory DBs]() and [temporary DBs](). These special values are
-  not valid **file system** paths.
+* <a name=gls_symbolic_path>**symbolic path** ◆ SQLite uses the special values `':memory:'` and `''` (the
+  emtpy string) for paths as escape mechanisms so users can specify [in-memory DBs]() and [temporary DBs]().
+  These special values are not valid **file system** paths.
 
-* **database (DB)** ◆ Somewhat not unlike insects that live through the stages of larva, puppa, and imago,
-  SQLite databases have three life cycle stages:
+* <a name=gls_db>**database (DB)** ◆ Somewhat not unlike insects that live through the stages of larva,
+  puppa, and imago, SQLite databases have three life cycle stages:
 
-  1) as **SQL dump**, i.e. an SQL text file (which is how database structures are commonly authored: as text,
-    and also how they are often archived to VCSs);
+  1) as **SQL dump**, i.e. an SQL text file (which is how database structures are commonly authored: as
+     text, and also how they are often archived to VCSs);
 
   1) as (binary) **DB file** (not unlike a binary video or offcie document); and as
 
@@ -269,13 +269,11 @@ which sorts according to the string representation of the array.
 
   The unqualified term 'database' may refer to any one of these.
 
-* **(binary) DB file** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
-* **SQL dump (file)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
-* **in-memory schema** (also: **in-memory DB**) ◆ xxxxxxxx
-* **temporary schema** (also: **temporary DB**) ◆ xxxxxxxx
-
-* **schema** ◆ the name of a **live DB** accessible from the same DB connection
-* <a name=known_schema>**known schema**</a> ◆ the name of **live DB** that can be accessed from the same
+* <a name=gls_binary_db>**(binary) DB file** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+* <a name=gls_dump>**SQL dump (file)** ◆ xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+* <a name=gls_in_memory_schema>**in-memory schema** (also: **in-memory DB**) ◆ xxxxxxxx
+* <a name=gls_temporary_schema>**temporary schema** (also: **temporary DB**) ◆ xxxxxxxx
+* <a name=gls_known_schema>**known schema**</a> ◆ the name of **live DB** that can be accessed from the same
   connection ⟺ a schema name that is listed by `dba.list_schemas()`
 
 ## Alternative API
@@ -304,7 +302,7 @@ which sorts according to the string representation of the array.
 * **`Dba.open: ( { path, schema, } )`** ⮕ Return a new `Dba` instance with
 * **`dba.open: ( { path, schema, } )`** ⮕
 * **`dba.save: ( { path, schema, } )`** ⮕
-  * `schema` must be a known schema
+  * `schema` must be a [known schema](#gls_known_schema)
 
 ## Todo
 
