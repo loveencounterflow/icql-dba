@@ -201,6 +201,15 @@ class @Dba
         order by type #{ordering_x}, name;"""
 
   #---------------------------------------------------------------------------------------------------------
+  is_empty: ( cfg ) ->
+    schema = pick cfg, 'schema', 'main'
+    validate.ic_schema schema
+    return @_is_empty @as_identifier schema
+
+  #---------------------------------------------------------------------------------------------------------
+  @_is_empty: ( schema_x ) -> ( @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
+
+  #---------------------------------------------------------------------------------------------------------
   _list_objects_2: ( imagine_options_object_here ) ->
     # for schema in @list_schema_names()
     schema    = 'main'
