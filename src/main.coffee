@@ -213,11 +213,15 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   walk_objects: ( cfg ) ->
-    schema      = L.pick cfg, 'schema',     'main', 'ic_schema'
+    schema      = L.pick cfg, 'schema',     null
     ordering    = L.pick cfg, '_ordering',  null
+    return @_walk_all_objects() unless schema?
+    validate_optional.ic_schema schema
     validate_optional.dba_list_objects_ordering ordering
-    schema_x    = @as_identifier schema
+    schema_i    = @as_identifier  schema
+    schema_s    = @as_sql         schema
     ordering_x  = if ( ordering is 'drop' ) then 'desc' else 'asc'
+    seq         = @first_value @query "select seq from pragma_database_list where name = #{schema_s};"
     #.......................................................................................................
     return @query """
       select
@@ -271,8 +275,8 @@ class @Dba extends Multimix
     # return has_schema and @_get_row_counts ...
 
   #---------------------------------------------------------------------------------------------------------
-  _is_empty_schema: ( schema_x ) -> (
-    @list @query "select 1 from #{schema_x}.sqlite_schema limit 1;" ).length is 0
+  _is_empty_schema: ( schema_i ) -> (
+    @list @query "select 1 from #{schema_i}.sqlite_schema limit 1;" ).length is 0
 
   #---------------------------------------------------------------------------------------------------------
   _get_size: ( cfg ) ->
@@ -297,7 +301,7 @@ class @Dba extends Multimix
     # for schema in @list_schema_names()
     schema    = 'main'
     validate.ic_schema schema
-    schema_x  = @as_identifier schema
+    schema_i  = @as_identifier schema
     ### thx to https://stackoverflow.com/a/53160348/256361 ###
     return @list @query """
       select
@@ -306,9 +310,9 @@ class @Dba extends Multimix
         m.name  as relation_name,
         p.name  as field_name
       from
-        #{schema_x}.sqlite_schema as m
+        #{schema_i}.sqlite_schema as m
       join
-        #{schema_x}.pragma_table_info( m.name ) as p
+        #{schema_i}.pragma_table_info( m.name ) as p
       order by
         m.name,
         p.cid;"""
@@ -368,7 +372,7 @@ class @Dba extends Multimix
   clear: ( cfg ) ->
     schema        = L.pick cfg, 'schema', 'main'
     validate.ic_schema schema
-    schema_x      = @as_identifier schema
+    schema_i      = @as_identifier schema
     R             = 0
     fk_state      = @get_foreign_key_state()
     @set_foreign_key_state off
@@ -383,14 +387,14 @@ class @Dba extends Multimix
   attach: ( cfg ) ->
     schema        = L.pick cfg, 'schema', 'main', 'ic_not_temp_schema'
     path          = L.pick cfg, 'path',   '',     'ic_path'
-    schema_x      = @as_identifier  schema
+    schema_i      = @as_identifier  schema
     path_x        = @as_sql         path
     # debug '^attach@54-1^', cfg
-    # debug '^attach@54-2^', { schema, schema_x, path, path_x, }
+    # debug '^attach@54-2^', { schema, schema_i, path, path_x, }
     #.......................................................................................................
     if @has { schema, }
       # debug '^attach@54-3^'
-      unless @_is_empty_schema schema_x
+      unless @_is_empty_schema schema_i
         throw new Error "^icql-dba.attach@44834^ schema #{rpr schema} not empty"
       if schema is 'main'
         unless isa.ic_ram_path @_path_of_schema schema
@@ -404,14 +408,14 @@ class @Dba extends Multimix
       # debug '^attach@54-5^'
       @detach { schema, }
     #.......................................................................................................
-    @execute "attach #{path_x} as #{schema_x};"
+    @execute "attach #{path_x} as #{schema_i};"
     return null
 
   #---------------------------------------------------------------------------------------------------------
   detach: ( cfg ) ->
     schema        = L.pick cfg, 'schema', null, 'ic_schema'
-    schema_x      = @as_identifier  schema
-    return @execute "detach #{schema_x};"
+    schema_i      = @as_identifier  schema
+    return @execute "detach #{schema_i};"
 
 
   #=========================================================================================================
@@ -480,8 +484,8 @@ class @Dba extends Multimix
   save_as: ( cfg ) ->
     schema    = L.pick cfg, 'schema', 'main'
     path      = L.pick cfg, 'path', null
-    schema_x  = @as_identifier schema
-    db.$.run "vacuum #{schema_x} into ?;", [ path, ]
+    schema_i  = @as_identifier schema
+    db.$.run "vacuum #{schema_i} into ?;", [ path, ]
     return null
 
 
