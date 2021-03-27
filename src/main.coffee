@@ -253,7 +253,42 @@ class @Dba extends Multimix
       null
 
   #---------------------------------------------------------------------------------------------------------
-  _get_all_sizes: -> @list @query "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
+  _get_all_sizes: ->
+    # @list @query \
+    "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
+    "select d1.name as name, d1.ncell as row_count  from dbstat('foo',1) as d1;"
+
+  #---------------------------------------------------------------------------------------------------------
+  _create_icqldba_schema: ->
+    schemas   = {}
+    parts     = []
+    #.......................................................................................................
+    ### TAINT use API ###
+    for row from @query "select seq, name, file as path from pragma_database_list order by seq;"
+      schemas[ row.name ] = row
+    #.......................................................................................................
+    for schema, d of schemas
+      # info '^44345^', { schema, d, }
+      schema_id   = @as_identifier  schema
+      schema_sql  = @as_sql         schema
+      # parts.push "select #{d.seq} as seq, #{schema_sql} as schema, #{schema_sql} as name, 'schema' as type"
+      parts.push """select
+          #{d.seq} as seq,
+          #{schema_sql} as schema,
+          name,
+          type
+        from #{schema_id}.sqlite_schema as d1"""
+        # join dbstat( #{schema_sql}, 1 ) using ( name ) """
+    parts     = parts.join " union all\n"
+    #.......................................................................................................
+    sql       = ''
+    sql      += "drop view if exists temp.icqldba_schema;\n"
+    sql      += "create view temp.icqldba_schema as\n"
+    sql      += parts
+    sql      += "\norder by seq, name;"
+    debug '^5345^', sql
+    @execute sql
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   _list_objects_2: ( imagine_options_object_here ) ->
