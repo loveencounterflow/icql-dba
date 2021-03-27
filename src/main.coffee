@@ -20,6 +20,7 @@ HOLLERITH                 = require 'hollerith-codec'
 @types                    = require './types'
 { isa
   validate
+  validate_optional
   declare
   size_of
   type_of }               = @types
@@ -189,10 +190,9 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   walk_objects: ( cfg ) ->
-    schema      = L.pick cfg, 'schema',     'main'
+    schema      = L.pick cfg, 'schema',     'main', 'ic_schema'
     ordering    = L.pick cfg, '_ordering',  null
-    validate.ic_schema schema
-    validate.dba_list_objects_ordering ordering
+    validate_optional.dba_list_objects_ordering ordering
     schema_x    = @as_identifier schema
     ordering_x  = if ( ordering is 'drop' ) then 'desc' else 'asc'
     #.......................................................................................................
@@ -206,8 +206,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   is_empty: ( cfg ) ->
-    schema = L.pick cfg, 'schema', 'main', 'ic_schema'
-    return @_is_empty @as_identifier schema
+    schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty: ( schema_x ) -> ( @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
