@@ -238,6 +238,11 @@ class @Dba extends Multimix
   list_schema_names:  -> ( d.name for d in @list_schemas() )
 
   #---------------------------------------------------------------------------------------------------------
+  has: ( cfg ) ->
+    schema = L.pick cfg, 'schema', null, 'ic_schema'
+    return schema in @list_schema_names()
+
+  #---------------------------------------------------------------------------------------------------------
   get_schemas: ->
     R             = {}
     R[ row.name ] = row.file for row from @query "select * from pragma_database_list order by seq;"
