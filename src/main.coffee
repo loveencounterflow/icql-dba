@@ -53,7 +53,7 @@ class @Dba extends Multimix
     ### TAINT allow to pass through `better-sqlite3` options with `cfg` ###
     @sqlt         = @cfg.sqlt ? ( require 'better-sqlite3' ) ( @cfg.path ? '' )
     @_statements  = {}
-    return null
+    return undefined ### always return `undefined` from constructor ###
 
 
   #=========================================================================================================
