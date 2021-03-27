@@ -42,8 +42,10 @@ intertype                 = new Intertype module.exports
   return ( /^[a-z][a-z0-9_]*$/ ).test x
 
 #-----------------------------------------------------------------------------------------------------------
-@declare 'ic_path', ( x ) -> @isa.text x
-@declare 'ic_name', ( x ) -> @isa.nonempty_text x
+@declare 'ic_not_temp_schema',  ( x ) -> ( @isa.ic_schema x ) and ( x isnt 'temp' )
+@declare 'ic_path',             ( x ) -> @isa.text x
+@declare 'ic_ram_path',         ( x ) -> ( @isa.ic_path x ) and ( x not in [ '', ':memory:', ] )
+@declare 'ic_name',             ( x ) -> @isa.nonempty_text x
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_list_objects_ordering', ( x ) -> ( not x? ) or ( x is 'drop' )
