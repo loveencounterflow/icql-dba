@@ -207,6 +207,8 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   is_empty: ( cfg ) ->
     schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
+    name        = L.pick cfg, 'name', null
+    validate_optional.ic_name name
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty: ( schema_x ) -> ( @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
