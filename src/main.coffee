@@ -48,6 +48,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
+    super()
     @cfg          = { @constructor._defaults..., cfg..., }
     ### TAINT allow to pass through `better-sqlite3` options with `cfg` ###
     @sqlt         = @cfg.sqlt ? ( require 'better-sqlite3' ) ( @cfg.path ? '' )
