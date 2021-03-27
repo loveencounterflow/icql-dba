@@ -198,6 +198,10 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 * **`dba.column_types: ( table )`** ⮕
 * **`dba._dependencies_of: ( table, schema = 'main' )`** ⮕
 * **`dba.dependencies_of:  ( table, schema = 'main' )`** ⮕
+* **`is_empty: ( cfg )`** ⮕ Check whether object is empty, ex.: `dba.is_empty { schema: 'foo', }`,
+  `dba.is_empty { schema: 'foo', table: 'bar' }`.
+* **`has: ( cfg )`** ⮕ Check whether object exists, ex.: `dba.has { schema: 'foo', }`,
+  `dba.has { schema: 'foo', table: 'bar' }`.
 
 ### API: DB Structure Modification
 
