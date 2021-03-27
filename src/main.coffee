@@ -51,7 +51,8 @@ class @Dba extends Multimix
     super()
     @cfg          = { @constructor._defaults..., cfg..., }
     ### TAINT allow to pass through `better-sqlite3` options with `cfg` ###
-    @sqlt         = @cfg.sqlt ? ( require 'better-sqlite3' ) ( @cfg.path ? '' )
+    ### TAINT use `L.pick()` ###
+    @sqlt         = @cfg.sqlt ? ( require 'better-sqlite3' ) ( @cfg.path ? @_defaults.path )
     @_statements  = {}
     return undefined ### always return `undefined` from constructor ###
 
