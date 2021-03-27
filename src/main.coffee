@@ -27,6 +27,7 @@ HOLLERITH                 = require 'hollerith-codec'
 LFT                       = require 'letsfreezethat'
 Multimix                  = require 'multimix'
 L                         = @
+L._misfit                 = Symbol 'misfit'
 
 #-----------------------------------------------------------------------------------------------------------
 L.pick = ( d, key, fallback, type = null ) ->
