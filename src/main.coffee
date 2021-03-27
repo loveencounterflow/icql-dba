@@ -218,13 +218,19 @@ class @Dba extends Multimix
   _is_empty_schema: ( schema_x ) -> (
     @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
 
-  # #---------------------------------------------------------------------------------------------------------
-  # _get_row_counts: ( name_x ) ->
-  #   ### thx to https://stackoverflow.com/a/58251635/256361 ###
-  #   ### see https://www.sqlite.org/dbstat.html ###
-  #   ### TAINT field `ncell` may not be the right one to query for row / element count (?) ###
-  #   ### NOTE SQLite must be compiled with `SQLITE_ENABLE_DBSTAT_VTAB` ###
-  #   "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
+  #---------------------------------------------------------------------------------------------------------
+  _get_size: ( cfg ) ->
+    ### thx to https://stackoverflow.com/a/58251635/256361 ###
+    ### see https://www.sqlite.org/dbstat.html ###
+    ### TAINT field `ncell` may not be the right one to query for row / element count (?) ###
+    ### NOTE SQLite must be compiled with `SQLITE_ENABLE_DBSTAT_VTAB` ###
+    schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
+    name        = L.pick cfg, 'name', null
+    validate_optional.ic_name name
+    unless name?
+
+  #---------------------------------------------------------------------------------------------------------
+  _get_all_sizes: -> @list @query "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
 
   #---------------------------------------------------------------------------------------------------------
   _list_objects_2: ( imagine_options_object_here ) ->
