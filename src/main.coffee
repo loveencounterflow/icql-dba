@@ -210,7 +210,7 @@ class @Dba extends Multimix
     return @_is_empty @as_identifier schema
 
   #---------------------------------------------------------------------------------------------------------
-  @_is_empty: ( schema_x ) -> ( @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
+  _is_empty: ( schema_x ) -> ( @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
 
   #---------------------------------------------------------------------------------------------------------
   _list_objects_2: ( imagine_options_object_here ) ->
