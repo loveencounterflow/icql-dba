@@ -315,17 +315,31 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   attach: ( cfg ) ->
-    schema        = L.pick cfg, 'schema', 'main'
-    path          = L.pick cfg, 'path',   ''
-    validate.ic_schema  schema
-    validate.ic_path    path
+    schema        = L.pick cfg, 'schema', 'main', 'ic_not_temp_schema'
+    path          = L.pick cfg, 'path',   '',     'ic_path'
     schema_x      = @as_identifier  schema
     path_x        = @as_sql         path
+    # debug '^attach@54-1^', cfg
+    # debug '^attach@54-2^', { schema, schema_x, path, path_x, }
+    #.......................................................................................................
     if @has { schema, }
+      # debug '^attach@54-3^'
       unless @_is_empty_schema schema_x
         throw new Error "^icql-dba.attach@44834^ schema #{rpr schema} not empty"
+      if schema is 'main'
+        unless isa.ic_ram_path @_path_of_schema schema
+          throw new Error "^icql-dba.attach@44835^ schema 'main' cannot be overwritten if based on file"
+        # debug '^attach@54-4^'
+        tmp_schema = @_get_free_random_schema()
+        @attach { schema: tmp_schema, path, }
+        @copy_schema { from_schema: tmp_schema, to_schema: 'main', }
+        @detach { schema: tmp_schema, }
+        return null
+      # debug '^attach@54-5^'
       @detach { schema, }
-    return @execute "attach #{path_x} as #{schema_x};"
+    #.......................................................................................................
+    @execute "attach #{path_x} as #{schema_x};"
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   detach: ( cfg ) ->
