@@ -264,6 +264,13 @@ class @Dba extends Multimix
     return R
 
   #---------------------------------------------------------------------------------------------------------
+  _path_of_schema: ( schema, fallback = L._misfit ) ->
+    R = @first_value @query "select file from pragma_database_list where name = ?;", [ schema, ]
+    return R if R?
+    return fallback unless fallback is L._misfit
+    throw new Error "^icql-dba.attach@44822^ unknown schema #{rpr schema}"
+
+  #---------------------------------------------------------------------------------------------------------
   type_of: ( name, schema = 'main' ) ->
     for row from @catalog()
       return row.type if row.name is name
