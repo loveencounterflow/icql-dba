@@ -217,6 +217,10 @@ class @Dba extends Multimix
   _is_empty_schema: ( schema_x ) -> (
     @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
 
+  # #---------------------------------------------------------------------------------------------------------
+  # _get_row_counts: ( name_x ) ->
+  #   "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
+
   #---------------------------------------------------------------------------------------------------------
   _list_objects_2: ( imagine_options_object_here ) ->
     # for schema in @list_schema_names()
