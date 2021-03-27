@@ -205,8 +205,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   is_empty: ( cfg ) ->
-    schema = L.pick cfg, 'schema', 'main'
-    validate.ic_schema schema
+    schema = L.pick cfg, 'schema', 'main', 'ic_schema'
     return @_is_empty @as_identifier schema
 
   #---------------------------------------------------------------------------------------------------------
@@ -299,8 +298,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   detach: ( cfg ) ->
-    schema        = L.pick cfg, 'schema', null
-    validate.ic_schema  schema
+    schema        = L.pick cfg, 'schema', null, 'ic_schema'
     schema_x      = @as_identifier  schema
     return @execute "detach #{schema_x};"
 
