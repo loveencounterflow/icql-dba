@@ -214,7 +214,8 @@ class @Dba extends Multimix
     # return has_schema and @_get_row_counts ...
 
   #---------------------------------------------------------------------------------------------------------
-  _is_empty: ( schema_x ) -> ( @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
+  _is_empty_schema: ( schema_x ) -> (
+    @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
 
   #---------------------------------------------------------------------------------------------------------
   _list_objects_2: ( imagine_options_object_here ) ->
