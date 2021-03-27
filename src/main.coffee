@@ -24,9 +24,11 @@ HOLLERITH                 = require 'hollerith-codec'
   size_of
   type_of }               = @types
 LFT                       = require 'letsfreezethat'
+Multimix                  = require 'multimix'
+L                         = @
 
 #-----------------------------------------------------------------------------------------------------------
-pick = ( d, key, fallback, type = null ) ->
+L.pick = ( d, key, fallback, type = null ) ->
   R = d?[ key ] ? fallback
   validate[ type ] R if type?
   return R
@@ -35,7 +37,7 @@ pick = ( d, key, fallback, type = null ) ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-class @Dba
+class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   @_defaults:
