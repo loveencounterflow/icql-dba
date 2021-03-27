@@ -219,6 +219,10 @@ class @Dba extends Multimix
 
   # #---------------------------------------------------------------------------------------------------------
   # _get_row_counts: ( name_x ) ->
+  #   ### thx to https://stackoverflow.com/a/58251635/256361 ###
+  #   ### see https://www.sqlite.org/dbstat.html ###
+  #   ### TAINT field `ncell` may not be the right one to query for row / element count (?) ###
+  #   ### NOTE SQLite must be compiled with `SQLITE_ENABLE_DBSTAT_VTAB` ###
   #   "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
 
   #---------------------------------------------------------------------------------------------------------
