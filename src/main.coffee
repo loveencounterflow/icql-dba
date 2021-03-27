@@ -187,7 +187,7 @@ class @Dba extends Multimix
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
     primary key index in SQLite) ###
     # throw new Error "µ764 deprecated until next major version"
-    @query "select * from sqlite_master order by type desc, name;"
+    @query "select * from sqlite_schema order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
   walk_objects: ( cfg ) ->
@@ -202,7 +202,7 @@ class @Dba extends Multimix
           type      as type,
           name      as name,
           sql       as sql
-        from #{schema_x}.sqlite_master
+        from #{schema_x}.sqlite_schema
         order by type #{ordering_x}, name;"""
 
   #---------------------------------------------------------------------------------------------------------
@@ -216,7 +216,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty_schema: ( schema_x ) -> (
-    @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
+    @list @query "select 1 from #{schema_x}.sqlite_schema limit 1;" ).length is 0
 
   #---------------------------------------------------------------------------------------------------------
   _get_size: ( cfg ) ->
@@ -228,6 +228,7 @@ class @Dba extends Multimix
     name        = L.pick cfg, 'name', null
     validate_optional.ic_name name
     unless name?
+      null
 
   #---------------------------------------------------------------------------------------------------------
   _get_all_sizes: -> @list @query "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
@@ -246,7 +247,7 @@ class @Dba extends Multimix
         m.name  as relation_name,
         p.name  as field_name
       from
-        #{schema_x}.sqlite_master as m
+        #{schema_x}.sqlite_schema as m
       join
         #{schema_x}.pragma_table_info( m.name ) as p
       order by
