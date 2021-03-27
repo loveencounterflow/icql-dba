@@ -307,10 +307,14 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   attach: ( cfg ) ->
-    schema        = L.pick cfg, 'schema', null
+    schema        = L.pick cfg, 'schema', 'main'
     path          = L.pick cfg, 'path',   ''
     validate.ic_schema  schema
     validate.ic_path    path
+    if @has { schema, }
+      unless @_is_empty_schema schema_x
+        throw new Error "^icql-dba.attach@44834^ schema #{rpr schema} not empty"
+      @detach { schema, }
     schema_x      = @as_identifier  schema
     path_x        = @as_sql         path
     return @execute "attach #{path_x} as #{schema_x};"
