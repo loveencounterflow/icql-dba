@@ -283,7 +283,13 @@ which sorts according to the string representation of the array.
   attached and detached.
 
   In less strict terms, a 'schema' can also mean a live database that has been attached to an ICQL-DBA
-  instance (to an SQLite connection), especially
+  instance (to an SQLite connection), especially XXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX
+  XXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX
+  XXXXXXXXXXXXXXXXXXXXX
+
+  Observe that the schemas `main` and `temp` are special: "The schema-names 'main' and 'temp' refer to the
+  main database and the database used for temporary tables. The main and temp databases cannot be attached
+  or detached."—[*SQLite Documentation*](https://www.sqlite.org/lang_attach.html)
 
 * <a name='gls_symbolic_path'>**symbolic path**</a> ◆ SQLite uses the special values `':memory:'` and `''`
   (the emtpy string) for paths as escape mechanisms so users can specify [in-memory DBs]() and [temporary
@@ -342,12 +348,14 @@ which sorts according to the string representation of the array.
 * [ ] unify `dba.limit()` with `dba.list()` such that `dba.list()` may be called either as `dba.list
   iterator` or as `dba.list n, iterator`
 <!-- * [ ] allow to associate a RAM DB with a file and allow `dba.save()` without a path -->
-* [ ] consider to alter `dba` to act not as per *connection*, but as per *schema*:
+* [ ] consider to add API (`dba.bind_to()`) to derive an instance with methods bound to a given schema:
 
   ```coffee
-  DBA   = new Dba()
-  dba_1 = DBA.open { schema: 'dba_1', }
-  dba_2 = DBA.open { schema: 'dba_2', }
+  dba   = new Dba()
+  dba_1 = dba.bind_to { schema: 'dba_1', }
+  dba_2 = dba.bind_to { schema: 'dba_2', }
+  dba_1 = DBA.open { path: 'path/to/dba_1.db', }
+  dba_2 = DBA.open { path: 'path/to/dba_2.db', }
   ```
 
   Now `dba_1`, `dba_2` exist in the same connection; there is an empty placeholder schema `main`.
