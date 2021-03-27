@@ -241,7 +241,7 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   get_schemas: ->
     R             = {}
-    R[ row.name ] = row.file for row from @query "select * from pragma_database_list order by name;"
+    R[ row.name ] = row.file for row from @query "select * from pragma_database_list order by seq;"
     return R
 
   #---------------------------------------------------------------------------------------------------------
