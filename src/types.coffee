@@ -43,6 +43,7 @@ intertype                 = new Intertype module.exports
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'ic_path', ( x ) -> @isa.text x
+@declare 'ic_name', ( x ) -> @isa.nonempty_text x
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_list_objects_ordering', ( x ) -> ( not x? ) or ( x is 'drop' )
