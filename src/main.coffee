@@ -209,6 +209,9 @@ class @Dba extends Multimix
     schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
     name        = L.pick cfg, 'name', null
     validate_optional.ic_name name
+    return ( has_schema = @_is_empty_schema @as_identifier schema ) unless name?
+    throw new Error "^icql-dba.is_empty@34543^ not implemented: is_empty() for anything but schemas, got #{rpr cfg}"
+    # return has_schema and @_get_row_counts ...
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty: ( schema_x ) -> ( @list @query "select 1 from #{schema_x}.sqlite_master limit 1;" ).length is 0
