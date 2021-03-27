@@ -188,8 +188,8 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   walk_objects: ( cfg ) ->
-    schema      = pick cfg, 'schema',     'main'
-    ordering    = pick cfg, '_ordering',  null
+    schema      = L.pick cfg, 'schema',     'main'
+    ordering    = L.pick cfg, '_ordering',  null
     validate.ic_schema schema
     validate.dba_list_objects_ordering ordering
     schema_x    = @as_identifier schema
@@ -205,7 +205,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   is_empty: ( cfg ) ->
-    schema = pick cfg, 'schema', 'main'
+    schema = L.pick cfg, 'schema', 'main'
     validate.ic_schema schema
     return @_is_empty @as_identifier schema
 
@@ -274,7 +274,7 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
   clear: ( cfg ) ->
-    schema        = pick cfg, 'schema', 'main'
+    schema        = L.pick cfg, 'schema', 'main'
     validate.ic_schema schema
     schema_x      = @as_identifier schema
     R             = 0
@@ -289,8 +289,8 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   attach: ( cfg ) ->
-    schema        = pick cfg, 'schema', null
-    path          = pick cfg, 'path',   ''
+    schema        = L.pick cfg, 'schema', null
+    path          = L.pick cfg, 'path',   ''
     validate.ic_schema  schema
     validate.ic_path    path
     schema_x      = @as_identifier  schema
@@ -299,7 +299,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   detach: ( cfg ) ->
-    schema        = pick cfg, 'schema', null
+    schema        = L.pick cfg, 'schema', null
     validate.ic_schema  schema
     schema_x      = @as_identifier  schema
     return @execute "detach #{schema_x};"
@@ -309,8 +309,8 @@ class @Dba extends Multimix
   # IN-MEMORY PROCESSING
   #-----------------------------------------------------------------------------------------------------------
   copy_schema: ( cfg ) ->
-    from_schema   = pick cfg, 'from_schema',  'main'
-    to_schema     = pick cfg, 'to_schema',    'main'
+    from_schema   = L.pick cfg, 'from_schema',  'main'
+    to_schema     = L.pick cfg, 'to_schema',    'main'
     validate.ic_schema from_schema
     validate.ic_schema to_schema
     #.......................................................................................................
@@ -369,8 +369,8 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   save_as: ( cfg ) ->
-    schema    = pick cfg, 'schema', 'main'
-    path      = pick cfg, 'path', null
+    schema    = L.pick cfg, 'schema', 'main'
+    path      = L.pick cfg, 'path', null
     schema_x  = @as_identifier schema
     db.$.run "vacuum #{schema_x} into ?;", [ path, ]
     return null
