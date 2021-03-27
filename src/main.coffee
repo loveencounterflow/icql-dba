@@ -58,6 +58,28 @@ class @Dba extends Multimix
     @_statements  = {}
     return undefined ### always return `undefined` from constructor ###
 
+  #---------------------------------------------------------------------------------------------------------
+  @open: ( cfg ) ->
+    path        = L.pick cfg, 'path',   '',     'ic_path'
+    schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
+    if schema is 'main'
+      R = new @ { path, }
+    else
+      R = new @ { path: '', }
+      R.attach { path, schema, }
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  open: ( cfg ) ->
+    path        = L.pick cfg, 'path',   null,   'ic_path'
+    schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
+    if @has { schema, }
+      throw new Error "^icql-dba.open@445^ schema #{rpr schema} not empty" unless @is_empty { schema, }
+      throw new Error "^icql-dba.open@445^ cannot open schema #{rpr schema} (yet)" if schema is 'main'
+      @detach { schema, }
+    @attach { path, schema, }
+    return null
+
 
   #=========================================================================================================
   # DEBUGGING
