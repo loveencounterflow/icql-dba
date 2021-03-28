@@ -72,13 +72,15 @@ Workflow:
   * and copy all data from `main` to `file`.
 * <ins>**#LOOP**</ins>—either close DB and finish, or continue to do <ins>**#WORK**</ins>, above.
 
+**UNDER CONSTRUCTION**
 
 ```coffee
 #------------------------------------------------------------------------------
-do_work               = ( dba ) -> ...                      #PREPARATION
+{ Dba }               = require 'icql-dba'                  #PREPARATION
+do_work               = ( dba ) -> ...
 use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
-dba                   = new ICQLDBA.Dba { path: ':memory:', }
+dba                   = new Dba { path: ':memory:', }
 dba.attach      { path: fpath, schema: 'file', }
 dba.copy_schema { from_schema: 'file', to_schema: 'main', }
 dba.detach      { schema: 'file', }                         # (optional)
@@ -102,11 +104,13 @@ loop
 
 ```coffee
 #------------------------------------------------------------------------------
-do_work               = ( dba ) -> ...                      #PREPARATION
+{ Dba }               = require 'icql-dba'                  #PREPARATION
+do_work               = ( dba ) -> ...
 use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
-dba                   = new ICQLDBA.Dba { path: ':memory:', }
-dba.copy_db { from_path: fpath, from_schema: 'file', }
+dba                   = Dba.open { path: fpath, schema: 'main', }
+dba.attach { from_schema: 'main', to_schema: 'ram', }
+dba.copy_schema { from_schema: 'main', to_schema: 'ram', }
 # dba.move_db { from_path: fpath, from_schema: 'file', }
 #------------------------------------------------------------------------------
 loop
