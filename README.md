@@ -376,9 +376,9 @@ which sorts according to the string representation of the array.
   prefix all table names with the schema, *but* this does not work e.g. for the `sqlite_schema` table which
   is implicitly present in each schema). *In the interest of the principle of least surprise, always use
   fully qualified names as in `select * from schema.table`*.
-* document two distinct ways of using ICQL-DBA:
-  * single DB, no in-memory processing: *can* use `dba = new Dba { path, }`, *can* use schema `main` & unqualified
-    table names;
+* [ ] document two distinct ways of using ICQL-DBA:
+  * single DB, no in-memory processing: *can* use `dba = new Dba { path, }`, *can* use schema `main` &
+    unqualified table names;
   * multiple DB and/or RAM processing (for new DB or copied from file): use `dba = new Dba()` without
     `path`, then one or more `dba.open { path, schema, }` calls to attach DBs to schemas; do not use schema
     `main` at all.
