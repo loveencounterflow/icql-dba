@@ -208,7 +208,7 @@ class @Dba extends Multimix
   catalog: ->
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
     primary key index in SQLite) ###
-    # throw new Error "µ764 deprecated until next major version"
+    throw new Error "µ764 deprecated until next major version"
     @query "select * from sqlite_schema order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
