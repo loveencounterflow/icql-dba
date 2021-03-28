@@ -372,11 +372,14 @@ which sorts according to the string representation of the array.
   other, user-defined schemas and require a lot of special-casing. On a related note, disallow / discourage
   using a default setting for `schema` setting of `main`, and encourage to always use fully qualified table
   names (to be sure, since SQLite name resolution works in the order of schemas attached, in principle one
-  can have an empty `main` schema and do all the work in an `attach()`ed `second` schema, but this does not
-  work e.g. for the `sqlite_schema` table, and may also be surprising in case schema ordering has been
-  affected by API methods that create intermediate temporary schemas). *In the interest of the principle of
-  least surprise, always use fully qualified names as in `select * from schema.table`*.
-
+  can have an empty `main` schema and do all the work in an `attach()`ed `second` schema without having to
+  prefix all table names with the schema, *but* this does not work e.g. for the `sqlite_schema` table which
+  is implicitly present in each schema). *In the interest of the principle of least surprise, always use
+  fully qualified names as in `select * from schema.table`*.
+* document two distinct ways of using ICQL-DBA:
+  * single DB, no in-memory processing: can use `new Dba( path )`, `main` schema, unqualified table names;
+  * multiple DB and/or RAM processing (for new DB or copied from file): prefer only using `dba.open()` API,
+    do not use schema `main` at all.
 
 
 
