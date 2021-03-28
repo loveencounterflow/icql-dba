@@ -243,10 +243,8 @@ class @Dba extends Multimix
       schemas[ row.name ] = row
     #.......................................................................................................
     for schema, d of schemas
-      # info '^44345^', { schema, d, }
       schema_i    = @as_identifier  schema
       schema_s  = @as_sql         schema
-      # parts.push "select #{d.seq} as seq, #{schema_s} as schema, #{schema_s} as name, 'schema' as type"
       parts.push """select
           #{d.seq} as seq,
           #{schema_s} as schema,
@@ -254,15 +252,11 @@ class @Dba extends Multimix
           type  as type,
           sql   as sql
         from #{schema_i}.sqlite_schema as d1"""
-        # join dbstat( #{schema_s}, 1 ) using ( name ) """
     parts     = parts.join " union all\n"
     #.......................................................................................................
     sql       = ''
-    # sql      += "drop view if exists temp.icqldba_schema;\n"
-    # sql      += "create view temp.icqldba_schema as\n"
     sql      += parts
     sql      += "\norder by seq, type, name;"
-    # debug '^5345^', sql
     return @query sql
 
   #---------------------------------------------------------------------------------------------------------
@@ -272,53 +266,51 @@ class @Dba extends Multimix
     validate_optional.ic_name name
     return ( has_schema = @_is_empty_schema @as_identifier schema ) unless name?
     throw new Error "^icql-dba.is_empty@34543^ not implemented: is_empty() for anything but schemas, got #{rpr cfg}"
-    # return has_schema and @_get_row_counts ...
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty_schema: ( schema_i ) -> (
     @list @query "select 1 from #{schema_i}.sqlite_schema limit 1;" ).length is 0
 
-  #---------------------------------------------------------------------------------------------------------
-  _get_size: ( cfg ) ->
-    ### thx to https://stackoverflow.com/a/58251635/256361 ###
-    ### see https://www.sqlite.org/dbstat.html ###
-    ### TAINT field `ncell` may not be the right one to query for row / element count (?) ###
-    ### NOTE SQLite must be compiled with `SQLITE_ENABLE_DBSTAT_VTAB` ###
-    schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
-    name        = L.pick cfg, 'name', null
-    validate_optional.ic_name name
-    unless name?
-      null
+  # #---------------------------------------------------------------------------------------------------------
+  # _get_size: ( cfg ) ->
+  #   ### thx to https://stackoverflow.com/a/58251635/256361 ###
+  #   ### see https://www.sqlite.org/dbstat.html ###
+  #   ### TAINT field `ncell` may not be the right one to query for row / element count (?) ###
+  #   ### NOTE SQLite must be compiled with `SQLITE_ENABLE_DBSTAT_VTAB` ###
+  #   schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
+  #   name        = L.pick cfg, 'name', null
+  #   validate_optional.ic_name name
+  #   unless name?
+  #     null
+
+  # #---------------------------------------------------------------------------------------------------------
+  # _get_all_sizes: ->
+  #   # @list @query \
+  #   "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
+  #   "select d1.name as name, d1.ncell as row_count  from dbstat('foo',1) as d1;"
+
+  # #---------------------------------------------------------------------------------------------------------
+  # _list_objects_2: ( imagine_options_object_here ) ->
+  #   # for schema in @list_schema_names()
+  #   schema    = 'main'
+  #   validate.ic_schema schema
+  #   schema_i  = @as_identifier schema
+  #   ### thx to https://stackoverflow.com/a/53160348/256361 ###
+  #   return @list @query """
+  #     select
+  #       'main'  as schema,
+  #       'field' as type,
+  #       m.name  as relation_name,
+  #       p.name  as field_name
+  #     from
+  #       #{schema_i}.sqlite_schema as m
+  #     join
+  #       #{schema_i}.pragma_table_info( m.name ) as p
+  #     order by
+  #       m.name,
+  #       p.cid;"""
 
   #---------------------------------------------------------------------------------------------------------
-  _get_all_sizes: ->
-    # @list @query \
-    "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
-    "select d1.name as name, d1.ncell as row_count  from dbstat('foo',1) as d1;"
-
-  #---------------------------------------------------------------------------------------------------------
-  _list_objects_2: ( imagine_options_object_here ) ->
-    # for schema in @list_schema_names()
-    schema    = 'main'
-    validate.ic_schema schema
-    schema_i  = @as_identifier schema
-    ### thx to https://stackoverflow.com/a/53160348/256361 ###
-    return @list @query """
-      select
-        'main'  as schema,
-        'field' as type,
-        m.name  as relation_name,
-        p.name  as field_name
-      from
-        #{schema_i}.sqlite_schema as m
-      join
-        #{schema_i}.pragma_table_info( m.name ) as p
-      order by
-        m.name,
-        p.cid;"""
-
-  #---------------------------------------------------------------------------------------------------------
-  # list_schemas:       -> @pragma "database_list;"
   list_schemas:       -> @list @query "select * from pragma_database_list order by name;"
   list_schema_names:  -> ( d.name for d in @list_schemas() )
 
@@ -389,23 +381,18 @@ class @Dba extends Multimix
     path          = L.pick cfg, 'path',   '',     'ic_path'
     schema_i      = @as_identifier  schema
     path_x        = @as_sql         path
-    # debug '^attach@54-1^', cfg
-    # debug '^attach@54-2^', { schema, schema_i, path, path_x, }
     #.......................................................................................................
     if @has { schema, }
-      # debug '^attach@54-3^'
       unless @_is_empty_schema schema_i
         throw new Error "^icql-dba.attach@44834^ schema #{rpr schema} not empty"
       if schema is 'main'
         unless isa.ic_ram_path @_path_of_schema schema
           throw new Error "^icql-dba.attach@44835^ schema 'main' cannot be overwritten if based on file"
-        # debug '^attach@54-4^'
         tmp_schema = @_get_free_random_schema()
         @attach { schema: tmp_schema, path, }
         @copy_schema { from_schema: tmp_schema, to_schema: 'main', }
         @detach { schema: tmp_schema, }
         return null
-      # debug '^attach@54-5^'
       @detach { schema, }
     #.......................................................................................................
     @execute "attach #{path_x} as #{schema_i};"
@@ -435,26 +422,19 @@ class @Dba extends Multimix
     throw new Error "µ766 unknown schema #{rpr to_schema}"   unless to_schema   in known_schemas
     #.......................................................................................................
     to_schema_objects = @list @walk_objects { schema: to_schema, }
-    # if @cfg.debug
-    #   @_debug '^49864^', "objects in #{rpr to_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in to_schema_objects ).join ', '}"
     if to_schema_objects.length > 0
       throw new Error "µ768 unable to copy to non-empty schema #{rpr to_schema}"
     #.......................................................................................................
     from_schema_objects = @list @walk_objects { schema: from_schema }
     return null if from_schema_objects.length is 0
-    # if @cfg.debug
-    #   @_debug '^49864^', "objects in #{rpr from_schema}: #{rpr ( "(#{d.type})#{d.name}" for d in from_schema_objects ).join ', '}"
     #.......................................................................................................
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
-    #.......................................................................................................
     inserts       = []
-    #.......................................................................................................
     fk_state      = @get_foreign_key_state()
     @set_foreign_key_state off
     #.......................................................................................................
     for d in from_schema_objects
-      # @_debug '^44463^', "copying DB object: (#{d.type}) #{d.name}"
       continue if ( not d.sql? ) or ( d.sql is '' )
       continue if d.name in [ 'sqlite_sequence', ]
       #.....................................................................................................
@@ -472,8 +452,6 @@ class @Dba extends Multimix
       @execute sql
       if d.type is 'table'
         inserts.push "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
-    # #.......................................................................................................
-    # @_debug '^49864^', "starting with inserts"
     #.......................................................................................................
     @execute sql for sql in inserts
     @set_foreign_key_state fk_state
@@ -494,13 +472,12 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   as_identifier:  ( x  ) ->
     validate.text x
-    '"' + ( x.replace /"/g, '""' ) + '"'
-  # as_identifier:  ( x  ) -> '[' + ( x.replace /\]/g, ']]' ) + ']'
+    return '"' + ( x.replace /"/g, '""' ) + '"'
 
   #---------------------------------------------------------------------------------------------------------
   escape_text: ( x ) ->
     validate.text x
-    x.replace /'/g, "''"
+    return x.replace /'/g, "''"
 
   #---------------------------------------------------------------------------------------------------------
   list_as_json: ( x ) ->
