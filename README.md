@@ -382,6 +382,15 @@ which sorts according to the string representation of the array.
   * multiple DB and/or RAM processing (for new DB or copied from file): use `dba = new Dba()` without
     `path`, then one or more `dba.open { path, schema, }` calls to attach DBs to schemas; do not use schema
     `main` at all.
+* [ ] map `better-sqlite3`'s insatntiation options:
+  * `readonly`: open the database connection in readonly mode (default: `false`). <ins>(Leave as-is)</ins>
+  * `fileMustExist`: if the database does not exist, an Error will be thrown instead of creating a new file.
+    This option does not affect in-memory or `readonly` database connections (default: `false`). <ins>(use
+    `create := not fileMustExist`)</ins>
+  * `timeout`: the number of milliseconds to wait when executing queries on a locked database, before
+    throwing a `SQLITE_BUSY` error (default: 5000). <ins>(Leave as-is)</ins>
+  * `verbose`: provide a function that gets called with every SQL string executed by the database connection
+    (default: `null`). <ins>(consider merging with options `echo`, `debug`)</ins>
 
 
 
