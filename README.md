@@ -382,7 +382,7 @@ which sorts according to the string representation of the array.
   * multiple DB and/or RAM processing (for new DB or copied from file): use `dba = new Dba()` without
     `path`, then one or more `dba.open { path, schema, }` calls to attach DBs to schemas; do not use schema
     `main` at all.
-* [ ] map `better-sqlite3`'s insatntiation options:
+* [ ] map `better-sqlite3`'s instantiation options:
   * `readonly`: open the database connection in readonly mode (default: `false`). <ins>(Leave as-is)</ins>
   * `fileMustExist`: if the database does not exist, an Error will be thrown instead of creating a new file.
     This option does not affect in-memory or `readonly` database connections (default: `false`). <ins>(use
