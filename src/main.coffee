@@ -29,6 +29,7 @@ Multimix                  = require 'multimix'
 L                         = @
 L._misfit                 = Symbol 'misfit'
 
+
 #-----------------------------------------------------------------------------------------------------------
 L.pick = ( d, key, fallback, type = null ) ->
   R = d?[ key ] ? fallback
@@ -43,10 +44,14 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   @_defaults:
-    sqlt:       null  ### [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/) instance ###
-    echo:       false ### whether to echo statements to the terminal ###
-    debug:      false ### whether to print additional debugging info ###
-    path:       ''
+    sqlt:           null  ### [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/) instance ###
+    echo:           false ### whether to echo statements to the terminal ###
+    debug:          false ### whether to print additional debugging info ###
+    path:           ''
+    schema:         'main'
+    create:         true
+    timeout:        5000
+    readonly:       false
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
