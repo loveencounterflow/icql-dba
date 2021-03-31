@@ -417,7 +417,15 @@ class @Dba extends Multimix
   #=========================================================================================================
   # IN-MEMORY PROCESSING
   #-----------------------------------------------------------------------------------------------------------
-  copy_schema: ( cfg ) ->
+  move_schema: ( cfg ) -> @_copy_schema cfg, true
+  copy_schema: ( cfg ) -> @_copy_schema cfg, false
+
+  #-----------------------------------------------------------------------------------------------------------
+  _copy_schema: ( cfg, detach_schema = false ) ->
+    detach_from_schema = ->
+      return null unless detach_schema
+      return @detach { schema: from_schema, }
+    #.......................................................................................................
     from_schema   = L.pick cfg, 'from_schema',  'main'
     to_schema     = L.pick cfg, 'to_schema',    'main'
     validate.ic_schema from_schema
@@ -435,7 +443,7 @@ class @Dba extends Multimix
       throw new Error "µ768 unable to copy to non-empty schema #{rpr to_schema}"
     #.......................................................................................................
     from_schema_objects = @list @walk_objects { schema: from_schema }
-    return null if from_schema_objects.length is 0
+    return detach_from_schema() if from_schema_objects.length is 0
     #.......................................................................................................
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
@@ -465,10 +473,11 @@ class @Dba extends Multimix
     @execute sql for sql in inserts
     @set_foreign_key_state fk_state
     @pragma "#{@as_identifier to_schema}.foreign_key_check;" if fk_state
-    return null
+    return detach_from_schema()
 
   #---------------------------------------------------------------------------------------------------------
   save_as: ( cfg ) ->
+    ### TAINT add boolean `cfg.overwrite` ###
     schema    = L.pick cfg, 'schema', 'main'
     path      = L.pick cfg, 'path', null
     schema_i  = @as_identifier schema
