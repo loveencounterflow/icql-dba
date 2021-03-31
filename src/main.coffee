@@ -56,23 +56,29 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
-    @cfg          = { @constructor._defaults..., cfg..., }
-    ### TAINT allow to pass through `better-sqlite3` options with `cfg` ###
-    ### TAINT use `L.pick()` ###
-    @sqlt         = @cfg.sqlt ? ( require 'better-sqlite3' ) ( @cfg.path ? @constructor._defaults.path )
     @_statements  = {}
-    return undefined ### always return `undefined` from constructor ###
-
-  #---------------------------------------------------------------------------------------------------------
-  @open: ( cfg ) ->
-    path        = L.pick cfg, 'path',   '',     'ic_path'
-    schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
-    if schema is 'main'
-      R = new @ { path, }
+    @cfg          = { @constructor._defaults..., cfg..., }
+    path          = @cfg.path
+    schema        = @cfg.schema
+    validate.ic_path    path
+    validate.ic_schema  schema
+    bsqlt3_cfg    =
+      readonly:       @cfg.readonly
+      fileMustExist:  not @cfg.create
+      timeout:        @cfg.timeout
+      # verbose:        ### TAINT to be done ###
+    #.......................................................................................................
+    if @cfg.sqlt?
+      @sqlt = @cfg.sqlt
     else
-      R = new @ { path: '', }
-      R.attach { path, schema, }
-    return R
+      bsqlt3 = require 'better-sqlite3'
+      if schema is 'main'
+        @sqlt = bsqlt3 path, bsqlt3_cfg
+      else
+        @sqlt = bsqlt3 '', bsqlt3_cfg
+        @open { path, schema, }
+    #.......................................................................................................
+    return undefined ### always return `undefined` from constructor ###
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
