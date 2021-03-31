@@ -391,6 +391,6 @@ which sorts according to the string representation of the array.
     throwing a `SQLITE_BUSY` error (default: 5000). <ins>(Leave as-is)</ins>
   * `verbose`: provide a function that gets called with every SQL string executed by the database connection
     (default: `null`). <ins>(consider merging with options `echo`, `debug`)</ins>
-
+* [ ] simplify `_copy_schema()`, do not special-case schema `main`
 
 
