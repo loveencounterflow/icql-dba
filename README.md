@@ -274,19 +274,19 @@ which sorts according to the string representation of the array.
 
 * **`new Dba: ( cfg )`** ⮕ create a new ICQL-DBA instance. Optionally, an object with the following
   members, all of which are, in turn, optional, may be passed in:
-  * **`sqlt`** (default `null`) ⮕ an [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/)
+  * **`sqlt`** (`null`) ⮕ an [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/)
     instance (or any object that behaves in a compatible way).
-  * **`echo`**, default: `false`) ⮕ whether to echo statements to the terminal (under revision).
-  * **`debug`**, default: `false`) ⮕ whether to print additional debugging info (under revision).
-  * **`path`**, default: `''`) ⮕ path to an SQLite DB file; leave unspecified or set to the empty string or
+  * **`echo`** (`false`) ⮕ whether to echo statements to the terminal (under revision).
+  * **`debug`** (`false`) ⮕ whether to print additional debugging info (under revision).
+  * **`path`** (`''`) ⮕ path to an SQLite DB file; leave unspecified or set to the empty string or
     the special string `':memory:`' to create a RAM-based schema.
-  * **`schema`**, default: `'main'`) ⮕ the name of the schema to attach the new DB to. In case this is not
+  * **`schema`** (`'main'`) ⮕ the name of the schema to attach the new DB to. In case this is not
     `main`, ICQL-DBA will still create an empty, RAM-based schema `main`.
-  * **`create`**, default: `true`) ⮕ whether to create a file at the location given by `path` in case it
+  * **`create`** (`true`) ⮕ whether to create a file at the location given by `path` in case it
     doesn't exists; has no effect in case of RAM DBs.
-  * **`timeout`**, default: `5000`) ⮕ the number of milliseconds to wait when executing queries on a locked
+  * **`timeout`** (`5000`) ⮕ the number of milliseconds to wait when executing queries on a locked
     database, before throwing an `SQLITE_BUSY` error.
-  * **`readonly`**, default: `false`) ⮕ whther to open the DB for reading only.
+  * **`readonly`** (`false`) ⮕ whether to open the DB for reading only.
 
 * **`dba.open: ( { path, schema, } )`** ⮕
 
