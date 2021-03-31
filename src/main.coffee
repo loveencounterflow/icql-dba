@@ -82,12 +82,10 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
-    path        = L.pick cfg, 'path',   null,   'ic_path'
-    schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
-    if @has { schema, }
-      throw new Error "^icql-dba.open@445^ schema #{rpr schema} not empty" unless @is_empty { schema, }
-      throw new Error "^icql-dba.open@445^ cannot open schema #{rpr schema} (yet)" if schema is 'main'
-      @detach { schema, }
+    path        = L.pick cfg, 'path',   null, 'ic_path'
+    schema      = L.pick cfg, 'schema', null, 'ic_schema'
+    throw new Error "^icql-dba.open@445^ cannot open schema #{rpr schema} (yet)"  if schema is 'main'
+    throw new Error "^icql-dba.open@445^ schema #{rpr schema} already exists"     if @has { schema, }
     @attach { path, schema, }
     return null
 
