@@ -20,6 +20,7 @@
     - [API: Sortable Lists](#api-sortable-lists)
     - [Properties](#properties)
   - [Alternative API (WIP; to be merged into API proper when implemented)](#alternative-api-wip-to-be-merged-into-api-proper-when-implemented)
+    - [API: Instantiation, Opening / Creating Schemas](#api-instantiation-opening--creating-schemas)
   - [Glossary](#glossary)
   - [Todo](#todo)
 
@@ -269,8 +270,26 @@ which sorts according to the string representation of the array.
   dba.open { path: 'path/to/some.db', }   # opens file DB `some.db` as 'main'
   ```
 
-* **`Dba.open: ( { path, schema, } )`** ⮕ Return a new `Dba` instance with
+### API: Instantiation, Opening / Creating Schemas
+
+* **`new Dba: ( cfg )`** ⮕ create a new ICQL-DBA instance. Optionally, an object with the following
+  members, all of which are, in turn, optional, may be passed in:
+  * **`sqlt`** (default `null`) ⮕ an [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/)
+    instance (or any object that behaves in a compatible way).
+  * **`echo`**, default: `false`) ⮕ whether to echo statements to the terminal (under revision).
+  * **`debug`**, default: `false`) ⮕ whether to print additional debugging info (under revision).
+  * **`path`**, default: `''`) ⮕ path to an SQLite DB file; leave unspecified or set to the empty string or
+    the special string `':memory:`' to create a RAM-based schema.
+  * **`schema`**, default: `'main'`) ⮕ the name of the schema to attach the new DB to. In case this is not
+    `main`, ICQL-DBA will still create an empty, RAM-based schema `main`.
+  * **`create`**, default: `true`) ⮕ whether to create a file at the location given by `path` in case it
+    doesn't exists; has no effect in case of RAM DBs.
+  * **`timeout`**, default: `5000`) ⮕ the number of milliseconds to wait when executing queries on a locked
+    database, before throwing an `SQLITE_BUSY` error.
+  * **`readonly`**, default: `false`) ⮕ whther to open the DB for reading only.
+
 * **`dba.open: ( { path, schema, } )`** ⮕
+
 * **`dba.save: ( { path, schema, overwrite, } )`** ⮕
   * `schema` must be a [known schema](#gls_known_schema);
   * `path` must be a [file system path](#gls_fs_path);
@@ -382,7 +401,7 @@ which sorts according to the string representation of the array.
   * multiple DB and/or RAM processing (for new DB or copied from file): use `dba = new Dba()` without
     `path`, then one or more `dba.open { path, schema, }` calls to attach DBs to schemas; do not use schema
     `main` at all.
-* [ ] map `better-sqlite3`'s instantiation options:
+* [X] map `better-sqlite3`'s instantiation options:
   * `readonly`: open the database connection in readonly mode (default: `false`). <ins>(Leave as-is)</ins>
   * `fileMustExist`: if the database does not exist, an Error will be thrown instead of creating a new file.
     This option does not affect in-memory or `readonly` database connections (default: `false`). <ins>(use
