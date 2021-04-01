@@ -413,15 +413,19 @@ which sorts according to the string representation of the array.
   this end,
   * [ ] do not use paths `''`, `':memory:'` to indicate a 'tempory' or an 'in-memory' DB; rather, stipulate
     two new parameters:
-    * **`ram`** (`false`)—when `true`, indicates that all processing will be done in RAM, not on disk. RAM
+    * **`ram`** (`false`) ⮕ when `true`, indicates that all processing will be done in RAM, not on disk. RAM
       DBs that were `open()`ed with a `path` argument will be copied to RAM implicitly; they can be
       `save()`d without passing `path` to `save()`. Ex.:
+
       ```coffee
       dba = new Dba()
       dba.open { path: 'path/to/my.db', schema: 'my', ram: true, }  # schema 'my' will be processed in RAM
       dba.execute "create table my.foo ( id integer primary key );" # table only in RAM, not on disk
       dba.save { schema: 'my', }                                    # table written to 'path/to/my.db', DB stays in RAM
       ```
+    * **`disk`** (`true`) ⮕ whether ["parts of a [RAM DB] might be flushed to disk [...] if SQLite comes
+      under memory pressure"](https://www.sqlite.org/inmemorydb.html#temp_db). Has no effect if `ram` is
+      `false`.
 
 <!-- * [ ] consider to return from `open()` an instance of Dba that is bound to schema, but has disadvantage
   of still having to use properly qualified object names in SQL, so maybe not a good idea -->
