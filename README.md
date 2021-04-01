@@ -368,9 +368,6 @@ which sorts according to the string representation of the array.
   relies on `join`ing rows from `sqlite_master` with rows from `pragma_table_info(...)`)?
 * [ ] provide a path to build dynamic SQL; see https://github.com/ianstormtaylor/pg-sql-helpers for some
   ideas.
-* [ ] consider to forego the unnecessary and confusing distinction between 'in-memory' and 'temporary'
-  databases (schemas) that has little to no utility
-* [ ] replace both 'in-memory' and 'temporary' by 'RAM'
 * [ ] unify usage of the terms 'schema' and 'database' (DB)
 * [ ] rename `list_schemas()`, `list_schema_names()`
 * [ ] unify `dba.limit()` with `dba.list()` such that `dba.list()` may be called either as `dba.list
@@ -411,5 +408,21 @@ which sorts according to the string representation of the array.
   * `verbose`: provide a function that gets called with every SQL string executed by the database connection
     (default: `null`). <ins>(consider merging with options `echo`, `debug`)</ins>
 * [ ] simplify `_copy_schema()`, do not special-case schema `main`
+* [ ] consider to forego the unnecessary and confusing distinction between 'in-memory' and 'temporary'
+  databases (schemas) that has little to no utility; replace both 'in-memory' and 'temporary' by 'RAM'. To
+  this end,
+  * [ ] do not use paths `''`, `':memory:'` to indicate a 'tempory' or an 'in-memory' DB; rather, stipulate
+    two new parameters:
+    * **`ram`** (`false`)—when `true`, indicates that all processing will be done in RAM, not on disk. RAM
+      DBs that were `open()`ed with a `path` argument will be copied to RAM implicitly; they can be
+      `save()`d without passing `path` to `save()`. Ex.:
+      ```coffee
+      dba = new Dba()
+      dba.open { path: 'path/to/my.db', schema: 'my', ram: true, }  # schema 'my' will be processed in RAM
+      dba.execute "create table my.foo ( id integer primary key );" # table only in RAM, not on disk
+      dba.save { schema: 'my', }                                    # table written to 'path/to/my.db', DB stays in RAM
+      ```
 
+<!-- * [ ] consider to return from `open()` an instance of Dba that is bound to schema, but has disadvantage
+  of still having to use properly qualified object names in SQL, so maybe not a good idea -->
 
