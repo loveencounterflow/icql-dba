@@ -423,6 +423,11 @@ which sorts according to the string representation of the array.
       dba.execute "create table my.foo ( id integer primary key );" # table only in RAM, not on disk
       dba.save { schema: 'my', }                                    # table written to 'path/to/my.db', DB stays in RAM
       ```
+
+      Observe that as a matter of course, users have to choose between speed and safety: a RAM DB can
+      operate much faster than a disk-based one, but in the unlikely event of an unexpected software fault
+      (`/s`), all unsaved data in a RAM DB is inevitably lost.
+
     * **`disk`** (`true`) ⮕ whether ["parts of a [RAM DB] might be flushed to disk [...] if SQLite comes
       under memory pressure"](https://www.sqlite.org/inmemorydb.html#temp_db). Has no effect if `ram` is
       `false`.
