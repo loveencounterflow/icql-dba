@@ -153,25 +153,25 @@ Query result adapters are convenience methods to transform the result set. Becau
 that is returned from a `query`, only a single method may be used; if you have to iterate more than once
 over a given result set, use `dba.all_rows db.my_query ...`.
 
-* **`dba.limit: ( n, iterator )`** ⮕ returns an iterator over the first `n` rows.
-* **`dba.list: ( iterator )`** ⮕ returns a list of all rows.
-* **`dba.single_row: ( iterator )`** ⮕ like `first_row`, but throws an exception unless `iterator` yields
+* **`dba.limit: ( n, iterator )`** ⮕ Returns an iterator over the first `n` rows.
+* **`dba.list: ( iterator )`** ⮕ Returns a list of all rows.
+* **`dba.single_row: ( iterator )`** ⮕ Like `first_row`, but throws an exception unless `iterator` yields
   exactly one row.
-* **`dba.first_row: ( iterator )`** ⮕ returns first row, or `undefined`.
-* **`dba.single_value: ( iterator )`** ⮕ like `first_value`, but throws an exception unless `iterator`
+* **`dba.first_row: ( iterator )`** ⮕ Returns first row, or `undefined`.
+* **`dba.single_value: ( iterator )`** ⮕ Like `first_value`, but throws an exception unless `iterator`
   yields exactly one row.
-* **`dba.first_value: ( iterator )`** ⮕ returns first field of first row, or `undefined`.
-* **`dba.first_values: ( iterator )`** ⮕ returns an iterator over the first field of all rows.
-* **`dba.all_first_values: ( iterator )`** ⮕ returns a list with the values of the first field of each row.
+* **`dba.first_value: ( iterator )`** ⮕ Returns first field of first row, or `undefined`.
+* **`dba.first_values: ( iterator )`** ⮕ Returns an iterator over the first field of all rows.
+* **`dba.all_first_values: ( iterator )`** ⮕ Returns a list with the values of the first field of each row.
   Useful to turn queries like `select product_id from products order by price desc limit 100` into a flat
   list of values.
 
 
 ### API: Querying
 
-* **`dba.prepare: ( sql )`** ⮕ prepare a statement. Returns a `better-sqlite3` `statement` instance.
-* **`dba.execute: ( sql )`** ⮕ execute any number of SQL statements.
-* **`dba.query:   ( sql, P... )`** ⮕ perform a single `select` statement. Returns an iterator over the
+* **`dba.prepare: ( sql )`** ⮕ Prepare a statement. Returns a `better-sqlite3` `statement` instance.
+* **`dba.execute: ( sql )`** ⮕ Execute any number of SQL statements.
+* **`dba.query:   ( sql, P... )`** ⮕ Perform a single `select` statement. Returns an iterator over the
   resulting rows. When the `sql` text has placeholders, accepts additional values.
 * **`run: ( sql, P... )`** ⮕
 
@@ -188,12 +188,12 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 * **`dba.transaction: ( P...  )`** ⮕
 * **`dba.get_foreign_key_state:`** ⮕
 * **`dba.set_foreign_key_state: ( onoff )`** ⮕
-* **`dba.read: ( path )`** ⮕ execute SQL statements from a file.
-* **`dba.close: ()`** ⮕ close DB.
+* **`dba.read: ( path )`** ⮕ Execute SQL statements from a file.
+* **`dba.close: ()`** ⮕ Close DB.
 
 ### API: DB Introspection
 
-* **`dba.walk_objects: ()`** ⮕ return an iterator over all entries in `sqlite_master`; allows to inspect the
+* **`dba.walk_objects: ()`** ⮕ Return an iterator over all entries in `sqlite_master`; allows to inspect the
   database for all tables, views, and indexes.</strike>
 * **`dba.catalog: ()`** ⮕ **deprecated** <strike>return an iterator over all entries in `sqlite_master`; allows
   to inspect the database for all tables, views, and indexes.</strike>
@@ -211,25 +211,25 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 
 ### API: DB Structure Modification
 
-* **`dba.clear: ( { schema: 'main', })`** ⮕ drop all tables, views and indexes from the schema.
-* **`dba.attach: ( { schema, path: '' } )`** ⮕ attach a given path to a given schema(name); this allows to
+* **`dba.clear: ( { schema: 'main', })`** ⮕ Drop all tables, views and indexes from the schema.
+* **`dba.attach: ( { schema, path: '' } )`** ⮕ Attach a given path to a given schema(name); this allows to
   manage several databases with a single connection. The default value for the `path` member is the empty
   string, which symbolizes an in-memory temporary schema.
 
 ### API: In-Memory Processing
 
-* **`dba.copy_schema: ( from_schema, to_schema )`** ⮕ xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx
+* **`dba.copy_schema: ( from_schema, to_schema )`** ⮕ Xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx
   xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx xxxxxxxxxxxx
 
 ### API: SQL Construction
 
 **NOTE** these methods are likely to change in the near future.
 
-* **`dba.as_identifier: ( x )`** ⮕ escape text `x` for use as an SQL identifier.
-* **`dba.escape_text: ( x )`** ⮕ escape text `x` for use as an SQL string literal.
-* **`dba.list_as_json: ( x )`** ⮕ render `x` as a JSON array literal.
-* **`dba.as_sql: ( x )`** ⮕ express value `x` as SQL literal.
-* **`dba.interpolate: ( sql, Q )`** ⮕ interpolate values found in object `Q` into template string `sql`
+* **`dba.as_identifier: ( x )`** ⮕ Escape text `x` for use as an SQL identifier.
+* **`dba.escape_text: ( x )`** ⮕ Escape text `x` for use as an SQL string literal.
+* **`dba.list_as_json: ( x )`** ⮕ Render `x` as a JSON array literal.
+* **`dba.as_sql: ( x )`** ⮕ Express value `x` as SQL literal.
+* **`dba.interpolate: ( sql, Q )`** ⮕ Interpolate values found in object `Q` into template string `sql`
   such that the result is valid SQL.
 
 ### API: Sortable Lists
@@ -239,13 +239,13 @@ Encoding lists of values with the [Hollerith-Codec](https://github.com/loveencou
 a total ordering that preserves numerical order, in contradistinction to sorting over SQLite JSON arrays,
 which sorts according to the string representation of the array.
 
-* **`dba.as_hollerith: ( x )`** ⮕ encode a value with Hollerith-Codec
-* **`dba.from_hollerith: ( x )`** ⮕ decode a Hollerith-encoded value
+* **`dba.as_hollerith: ( x )`** ⮕ Encode a value with Hollerith-Codec
+* **`dba.from_hollerith: ( x )`** ⮕ Decode a Hollerith-encoded value
 
 ### Properties
 
-* **`dba.sqlt`** ⮕ the underlying `better-sqlite3` object which mediates communication to SQLite3.
-* **`dba.cfg`** ⮕ the configuration object where per-instance settings are kept.
+* **`dba.sqlt`** ⮕ The underlying `better-sqlite3` object which mediates communication to SQLite3.
+* **`dba.cfg`** ⮕ The configuration object where per-instance settings are kept.
 
 ## Alternative API (WIP; to be merged into API proper when implemented)
 
@@ -272,23 +272,26 @@ which sorts according to the string representation of the array.
 
 ### API: Instantiation, Opening / Creating Schemas
 
-* **`new Dba: ( cfg )`** ⮕ create a new ICQL-DBA instance. Optionally, an object with the following
+* **`new Dba: ( cfg )`** ⮕ Create a new ICQL-DBA instance. Optionally, an object with the following
   members, all of which are, in turn, optional, may be passed in:
-  * **`sqlt`** (`null`) ⮕ an [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/)
+  * **`sqlt`** (`null`) ⮕ An [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/)
     instance (or any object that behaves in a compatible way).
-  * **`echo`** (`false`) ⮕ whether to echo statements to the terminal (under revision).
-  * **`debug`** (`false`) ⮕ whether to print additional debugging info (under revision).
-  * **`path`** (`''`) ⮕ path to an SQLite DB file; leave unspecified or set to the empty string or
+  * **`echo`** (`false`) ⮕ Whether to echo statements to the terminal (under revision).
+  * **`debug`** (`false`) ⮕ Whether to print additional debugging info (under revision).
+  * **`path`** (`''`) ⮕ Path to an SQLite DB file; leave unspecified or set to the empty string or
     the special string `':memory:`' to create a RAM-based schema.
-  * **`schema`** (`'main'`) ⮕ the name of the schema to attach the new DB to. In case this is not
+  * **`schema`** (`'main'`) ⮕ The name of the schema to attach the new DB to. In case this is not
     `main`, ICQL-DBA will still create an empty, RAM-based schema `main`.
-  * **`create`** (`true`) ⮕ whether to create a file at the location given by `path` in case it
+  * **`create`** (`true`) ⮕ Whether to create a file at the location given by `path` in case it
     doesn't exists; has no effect in case of RAM DBs.
-  * **`timeout`** (`5000`) ⮕ the number of milliseconds to wait when executing queries on a locked
+  * **`timeout`** (`5000`) ⮕ The number of milliseconds to wait when executing queries on a locked
     database, before throwing an `SQLITE_BUSY` error.
-  * **`readonly`** (`false`) ⮕ whether to open the DB for reading only.
+  * **`readonly`** (`false`) ⮕ Whether to open the DB for reading only.
 
-* **`dba.open: ( { path, schema, } )`** ⮕
+* **`dba.open: ( { path, schema, } )`** ⮕ Open a new `schema` at location `path`. Both `path` and `schema`
+  must always be given and valid. It is not possible to `open()` the privileged schemas `main` and `temp`.
+  The `schema` must not yet exist in the connection; to `open()` an existing schema you must first `close()`
+  it.
 
 * **`dba.save: ( { path, schema, overwrite, } )`** ⮕
   * `schema` must be a [known schema](#gls_known_schema);
@@ -413,7 +416,7 @@ which sorts according to the string representation of the array.
   this end,
   * [ ] do not use paths `''`, `':memory:'` to indicate a 'tempory' or an 'in-memory' DB; rather, stipulate
     two new parameters:
-    * **`ram`** (`false`) ⮕ when `true`, indicates that all processing will be done in RAM, not on disk. RAM
+    * **`ram`** (`false`) ⮕ When `true`, indicates that all processing will be done in RAM, not on disk. RAM
       DBs that were `open()`ed with a `path` argument will be copied to RAM implicitly; they can be
       `save()`d without passing `path` to `save()`. Ex.:
 
@@ -428,10 +431,24 @@ which sorts according to the string representation of the array.
       operate much faster than a disk-based one, but in the unlikely event of an unexpected software fault
       (`/s`), all unsaved data in a RAM DB is inevitably lost.
 
-    * **`disk`** (`true`) ⮕ whether ["parts of a [RAM DB] might be flushed to disk [...] if SQLite comes
+    * **`disk`** (`true`) ⮕ Whether ["parts of a [RAM DB] might be flushed to disk [...] if SQLite comes
       under memory pressure"](https://www.sqlite.org/inmemorydb.html#temp_db). Has no effect if `ram` is
       `false`.
 
 <!-- * [ ] consider to return from `open()` an instance of Dba that is bound to schema, but has disadvantage
   of still having to use properly qualified object names in SQL, so maybe not a good idea -->
+
+* [ ] introduce a method to save asynchronously:
+  * **`save_async: { schema, [ path ], progress, }`** ⮕ Like `save()`, but works asynchronously and has the
+    option to call back for progress reports. This method uses [the `better-sqlite3` API `backup()` method
+    with `{ attached: schema,
+    }`](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#backupdestination-options---promise).
+    When given, the `progress` property should be a function; this function will be called with an object `{
+    totalPages, remainingPages, }` containing the total number of pages in the DB and the number of pages
+    that remain to be written.
+
+    * original API: return number of [pages](https://www.sqlite.org/fileformat.html#pages) (or `undefined`,
+      `null` not allowed) to be written in one batch (cycle of the event loop); should make this more
+      explicit e.g. by calling `dba.set_backup_pages_per_cycle()`. Default is `100`.
+
 
