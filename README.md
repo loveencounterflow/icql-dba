@@ -451,4 +451,14 @@ which sorts according to the string representation of the array.
       `null` not allowed) to be written in one batch (cycle of the event loop); should make this more
       explicit e.g. by calling `dba.set_backup_pages_per_cycle()`. Default is `100`.
 
+* [ ] Save methods:
+  * **`save()`** ⮕ save to associated path, must not give path
+  * **`save_as()`** ⮕ save to path given, becomes new associated path
+  * **`export()`** ⮕ save to path given, in format given (binary DB file; SQL dump; ...); DB does not get
+    associated with path
+* [ ] Clarify terminology:
+  * **`DB`** ⮕
+  * **`Connection`** ⮕
+  * **`Schema`** ⮕
+
 
