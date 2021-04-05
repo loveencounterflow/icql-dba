@@ -478,10 +478,32 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   save_as: ( cfg ) ->
     ### TAINT add boolean `cfg.overwrite` ###
-    schema    = L.pick cfg, 'schema', 'main'
-    path      = L.pick cfg, 'path', null
+    schema    = L.pick cfg, 'schema',     'main', 'ic_schema'
+    path      = L.pick cfg, 'path',       null,   'ic_path'
+    overwrite = L.pick cfg, 'overwrite',  false,  'boolean'
+    @_export schema, path, 'sqlitedb', overwrite
+    ### TAINT associate path with schema ###
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  export: ( cfg ) ->
+    ### TAINT add boolean `cfg.overwrite` ###
+    schema    = L.pick cfg, 'schema',     'main', 'ic_schema'
+    path      = L.pick cfg, 'path',       null,   'ic_path'
+    overwrite = L.pick cfg, 'overwrite',  false,  'boolean'
+    format    = @_format_from_path path
+    format    = L.pick cfg, 'format',     format, 'ic_db_file_format'
+    return @_export schema, path, format, overwrite
+
+  #---------------------------------------------------------------------------------------------------------
+  _export: ( schema, path, format, overwrite ) ->
+    ### TAINT add boolean `cfg.overwrite` ###
+    ### TAINT implement `format` ###
     schema_i  = @as_identifier schema
-    db.$.run "vacuum #{schema_i} into ?;", [ path, ]
+    switch format
+      when 'sqlitedb'
+        db.$.run "vacuum #{schema_i} into ?;", [ path, ]
+      else throw new Error "µ47492 unknown format #{rpr format}"
     return null
 
 
