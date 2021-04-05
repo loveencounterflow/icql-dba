@@ -452,10 +452,14 @@ which sorts according to the string representation of the array.
       explicit e.g. by calling `dba.set_backup_pages_per_cycle()`. Default is `100`.
 
 * [ ] Save methods:
-  * **`save()`** ⮕ save to associated path, must not give path
-  * **`save_as()`** ⮕ save to path given, becomes new associated path
-  * **`export()`** ⮕ save to path given, in format given (binary DB file; SQL dump; ...); DB does not get
-    associated with path
+  * **`save { schema, }`** ⮕ save to associated path. Passing an explicit path is not allowed; use
+    `save_as()` instead. This is a no-op for file-based DBs; for RAM DBs, this involves executing SQL
+    `vacuum $schema into $temp_path` to obtain a temporary DB file, then removing the file at the original
+    path and replacing it with the temporary one.
+  * **`save_as { schema, path, overwrite, }`** ⮕ save to path given, becomes new associated path
+  * **`export { schema, path, format, overwrite, }`** ⮕ save to path given, in format given (binary DB file;
+    SQL dump;
+    ...); DB does not get associated with path
 * [ ] Clarify terminology:
   * **`DB`** ⮕
   * **`Connection`** ⮕
