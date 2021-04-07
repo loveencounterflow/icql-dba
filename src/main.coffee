@@ -58,26 +58,25 @@ class @Dba extends Multimix
   constructor: ( cfg ) ->
     super()
     @_statements  = {}
-    @cfg          = { @constructor._defaults..., cfg..., }
-    path          = @cfg.path
-    schema        = @cfg.schema
-    validate.ic_path    path
-    validate.ic_schema  schema
+    @_schemas     = {}
+    cfg           = { @constructor._defaults..., cfg..., }
+    @_dbg         = { debug: cfg.debug, echo: cfg.echo, }
+    throw new Error "^icql-dba.open@445^ argument `sqlt` not supported (yet)" if cfg.sqlt?
+    path          = L.pick cfg, 'path',   @constructor._defaults.path,   'ic_path'
+    schema        = L.pick cfg, 'schema', @constructor._defaults.schema, 'ic_schema'
     bsqlt3_cfg    =
-      readonly:       @cfg.readonly
-      fileMustExist:  not @cfg.create
-      timeout:        @cfg.timeout
+      readonly:       cfg.readonly
+      fileMustExist:  not cfg.create
+      timeout:        cfg.timeout
       # verbose:        ### TAINT to be done ###
     #.......................................................................................................
-    if @cfg.sqlt?
-      @sqlt = @cfg.sqlt
+    ### TAINT unify this part with `open()` ###
+    if schema is 'main'
+      @sqlt               = new_bsqlt3_connection path, bsqlt3_cfg
+      @_schemas[ schema ] = { path, }
     else
-      bsqlt3 = require 'better-sqlite3'
-      if schema is 'main'
-        @sqlt = bsqlt3 path, bsqlt3_cfg
-      else
-        @sqlt = bsqlt3 '', bsqlt3_cfg
-        @open { path, schema, }
+      @sqlt = new_bsqlt3_connection '', bsqlt3_cfg
+      @open { path, schema, }
     #.......................................................................................................
     return undefined ### always return `undefined` from constructor ###
 
@@ -95,13 +94,13 @@ class @Dba extends Multimix
   # DEBUGGING
   #---------------------------------------------------------------------------------------------------------
   _echo: ( ref, sql ) ->
-    return null unless @cfg.echo
+    return null unless @_dbg.echo
     echo ( CND.reverse CND.blue "^icql@888-#{ref}^" ) + ( CND.reverse CND.yellow sql )
     return null
 
   #---------------------------------------------------------------------------------------------------------
   _debug: ( P... ) ->
-    return null unless @cfg.debug
+    return null unless @_dbg.debug
     debug P...
     return null
 
@@ -403,16 +402,20 @@ class @Dba extends Multimix
         @copy_schema { from_schema: tmp_schema, to_schema: 'main', }
         @detach { schema: tmp_schema, }
         return null
+        @_schemas[ schema ] = { path, }
       @detach { schema, }
     #.......................................................................................................
     @execute "attach #{path_x} as #{schema_i};"
+    @_schemas[ schema ] = { path, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
   detach: ( cfg ) ->
     schema        = L.pick cfg, 'schema', null, 'ic_schema'
     schema_i      = @as_identifier  schema
-    return @execute "detach #{schema_i};"
+    @execute "detach #{schema_i};"
+    delete @_schemas[ schema ]
+    return null
 
 
   #=========================================================================================================
