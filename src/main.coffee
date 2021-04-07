@@ -28,6 +28,7 @@ LFT                       = require 'letsfreezethat'
 Multimix                  = require 'multimix'
 L                         = @
 L._misfit                 = Symbol 'misfit'
+new_bsqlt3_connection     = require 'better-sqlite3'
 
 
 #-----------------------------------------------------------------------------------------------------------
