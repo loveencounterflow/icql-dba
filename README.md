@@ -444,15 +444,21 @@ which sorts according to the string representation of the array.
     * **Overview:** To 'open' a DB means to associate a schema with a binary file DB. Any changes to the DB
       will update the file. To 'import' a DB means to create an empty RAM DB and then acquiring data from a
       binary file DB or another format (such as SQL) *without* associating the DB with that file.
+    * **`new Dba {...}`** ⮕ see above
     * **`open: {}`** ⮕ see above
     * **`import: { schema, path, format, save_as: null, overwrite: false, }`** ⮕ Create a RAM DB from data
       read from a file. The `path` in a `dba.import()` call will *not* be associated with the schema (it
       will not become the basepath of the schema); this is different from `dba.open()`.
 
-      The `save_as` and `overwrite` properties allow to do the two commands `dba.import { schema, path:
-      'old_path', format, save_as: 'new_path.db', overwrite, }; dba.save_as { save_as: 'new_path.db',
-      overwrite, };` in a single step as `dba.import { schema, path: 'old_path', format, save_as:
-      'new_path.db', }`.
+      The `save_as` and `overwrite` properties allow to do the two commands
+
+      ```coffee
+      dba.import { schema, path: 'old_path', format, save_as: 'new_path.db', overwrite, }
+      dba.save_as { save_as: 'new_path.db', overwrite, }
+      ```
+
+      in a single step `dba.import { schema, path: 'old_path', format, save_as: 'new_path.db', }`.
+
   * [ ] Write data:
     * **Overview:** Schemas opened from a file DB (the 'basefile' which is located at the 'basepath') always
       keep in sync with that file so there's no need to call `dba.save { schema, }`. However, one may also
