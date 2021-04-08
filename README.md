@@ -438,28 +438,44 @@ which sorts according to the string representation of the array.
 <!-- * [ ] consider to return from `open()` an instance of Dba that is bound to schema, but has disadvantage
   of still having to use properly qualified object names in SQL, so maybe not a good idea -->
 
-* [ ] introduce a method to save asynchronously:
-  * **`save_async: { schema, [ path ], progress, }`** ⮕ Like `save()`, but works asynchronously and has the
-    option to call back for progress reports. This method uses [the `better-sqlite3` API `backup()` method
-    with `{ attached: schema,
-    }`](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#backupdestination-options---promise).
-    When given, the `progress` property should be a function; this function will be called with an object `{
-    totalPages, remainingPages, }` containing the total number of pages in the DB and the number of pages
-    that remain to be written.
 
-    * original API: return number of [pages](https://www.sqlite.org/fileformat.html#pages) (or `undefined`,
-      `null` not allowed) to be written in one batch (cycle of the event loop); should make this more
-      explicit e.g. by calling `dba.set_backup_pages_per_cycle()`. Default is `100`.
+* [ ] IO Methods:
+  * [ ] Read data:
+    * **Overview:** To 'open' a DB means to associate a schema with a binary file DB. Any changes to the
+      DB will update the file. To 'import' a DB means to acquire data from a  binary file DB or another
+      format such as SQL *without*
+    * **`open: {}`** ⮕ see above
+    * **`import: { schema, path, format, save_as, overwrite: false, }`** ⮕ Create a RAM DB from data read
+      from a file. The `path` will *not* be associated with the schema (it will not become the basepath of
+      the schema); thus, calling `dba.import { path: 'path/to/file.db', }` is different from `dba.open {
+      path: 'path/to/file.db', }`. The `save_as` and `overwrite` properties allow to do the tqo commands
+      `dba.import { schema, path: 'old_path', format, save_as: 'new_path.db', overwrite, }; dba.save_as {
+      save_as: 'new_path.db', overwrite, };` in a single step as `dba.import { schema, path: 'old_path',
+      format, save_as: 'new_path.db', }`.
+  * [ ] Write data:
+    * **Overview:** Schemas opened from a file DB (the 'basefile' which is located at the 'basepath') always
+      keep in sync with that file so there's no need to call `dba.save { schema, }`. However, one may also
+      choose to move from the original basepath to a new baspath which can be done with `dba.save_as {
+      schema, path, }`. The `save*()` methods will only write binary DB files, in order to save data to
+      another format such as (textual) SQL, use `dba.export()` instead.
+    * **`save { schema, }`** ⮕ save to basepath. Passing an explicit path is not allowed; use
+      `save_as()` instead. This is a no-op for file-based DBs; for RAM DBs, this involves executing SQL
+      `vacuum $schema into $temp_path` to obtain a temporary DB file, then removing the file at the original
+      path and replacing it with the temporary one.
+    * **`save_as { schema, path, overwrite: false, }`** ⮕ save to path given, becomes new basepath
+    * **`export { schema, path, format: 'db', overwrite: false, }`** ⮕ save to path given, in format given
+      (`db`: binary DB file; `sql`: SQL dump; ...). DB does not get re-associated with new `path`.
+    * **`save_async: { schema, path, progress, }`** ⮕ Like `save()`, but works asynchronously and has
+      the option to call back for progress reports. This method uses [the `better-sqlite3` API `backup()`
+      method with `{ attached: schema,
+      }`](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#backupdestination-options---promise).
+      When given, the `progress` property must be a function; this function will be called with an object
+      `{ totalPages, remainingPages, }` containing the total number of pages in the DB and the number of
+      pages that remain to be written. In the original API, may return number of
+      [pages](https://www.sqlite.org/fileformat.html#pages) (or `undefined`, `null` not allowed) to be
+      written in subsequent batches (cycle of the event loop); should make this more explicit e.g. by
+      calling `dba.set_backup_pages_per_cycle()`. Default is `100`.
 
-* [ ] Save methods:
-  * **`save { schema, }`** ⮕ save to associated path. Passing an explicit path is not allowed; use
-    `save_as()` instead. This is a no-op for file-based DBs; for RAM DBs, this involves executing SQL
-    `vacuum $schema into $temp_path` to obtain a temporary DB file, then removing the file at the original
-    path and replacing it with the temporary one.
-  * **`save_as { schema, path, overwrite, }`** ⮕ save to path given, becomes new associated path
-  * **`export { schema, path, format, overwrite, }`** ⮕ save to path given, in format given (binary DB file;
-    SQL dump;
-    ...); DB does not get associated with path
 * [ ] Clarify terminology:
   * **`DB`** ⮕
   * **`Connection`** ⮕
