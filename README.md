@@ -441,9 +441,9 @@ which sorts according to the string representation of the array.
 
 * [ ] IO Methods:
   * [ ] Read data:
-    * **Overview:** To 'open' a DB means to associate a schema with a binary file DB. Any changes to the
-      DB will update the file. To 'import' a DB means to acquire data from a  binary file DB or another
-      format such as SQL *without*
+    * **Overview:** To 'open' a DB means to associate a schema with a binary file DB. Any changes to the DB
+      will update the file. To 'import' a DB means to create an empty RAM DB and then acquiring data from a
+      binary file DB or another format (such as SQL) *without* associating the DB with that file.
     * **`open: {}`** ⮕ see above
     * **`import: { schema, path, format, save_as, overwrite: false, }`** ⮕ Create a RAM DB from data read
       from a file. The `path` will *not* be associated with the schema (it will not become the basepath of
@@ -462,7 +462,8 @@ which sorts according to the string representation of the array.
       `save_as()` instead. This is a no-op for file-based DBs; for RAM DBs, this involves executing SQL
       `vacuum $schema into $temp_path` to obtain a temporary DB file, then removing the file at the original
       path and replacing it with the temporary one.
-    * **`save_as { schema, path, overwrite: false, }`** ⮕ save to path given, becomes new basepath
+    * **`save_as { schema, path, overwrite: false, }`** ⮕ Save a file DB or a RAM DB to the path given,
+      which will become the new basepath.
     * **`export { schema, path, format: 'db', overwrite: false, }`** ⮕ save to path given, in format given
       (`db`: binary DB file; `sql`: SQL dump; ...). DB does not get re-associated with new `path`.
     * **`save_async: { schema, path, progress, }`** ⮕ Like `save()`, but works asynchronously and has
