@@ -24,18 +24,24 @@
 
 ### OIMDB Functionality
 
-* To process a DB file in RAM, ICQL DB first opens the file using a temporary schema name and then copies
-  all DB objects into a temporary schema
-  * **Note** SQLite 'temporary schemas' (which use an empty string instead of a valid file system path) are
-    *mostly* based in RAM but may use disk space in case available memory becomes insufficient. Schemas
-    *without* disk-based backup (which use the pseudo-path `:memory:`) also exists; ICQL DBA users can elect
+* To process a DB file in RAM, ICQL DB first opens the file using a ad-hoc schema name and then copies all
+  DB objects (table, view and index definitions as well as data) from that ad-hoc schema into a RAM-based
+  schema using the name supplied in the `open()` call.
+  * **Note**—SQLite 'temporary schemas' are *mostly* based in RAM but may use disk space in case available
+    memory becomes insufficient. Schemas *without* disk-based backup also exists; ICQL DBA users can elect
     to use either model (with the `disk: true|false` configuration) although IMO there's little reason to
-    choose the latter over the former.
-* Persistence to HD is implemented with synchronous calls to `vacuum $schema into $tpath`. The API method to
-  do so is `save()`, a method that does nothing in case a given schema is disk-based (and therefore writes
-  all changes to disk, continuously); therefore, it's possible to make it so that the same code with
-  strategically placed `save()` statements can run using a RAM-based ort a disk-based DB without any further
-  changes. In this casse, the RAM DB will be much faster than the disk-based one, but of course the
-  disk-based one will be better safeguarded against unexpected interruptions.
+    not use optional HD support.
+  * **Note**—Confusingly, to get a RAM-based DB with the original SQLite and BSQLT3 API, you either use the
+    empty string to get disk support (in ase of RAM shortage) or the pseudo-path `:memory:` to get one
+    without disk support. In ICQL DBA, you use the `ram: true|false, disk: true|false` settings instead
+    which is much clearer. In addition, you can *still* optionally use the `path` setting to specify the
+    default path to be used as default for the `save()` command.
+* Persistence to HD is implemented with synchronous calls to `vacuum $schema into $path` (no schema-copying
+  is involved in this step). The API method to do so is `save()`, a method that does nothing in case a given
+  schema is disk-based (and therefore writes all changes to disk, continuously); therefore, one can make it
+  so that the same code with strategically placed `save()` statements works for both RAM-based and
+  disk-based DBs without any further changes.
+  * The RAM DB will be much faster than the disk-based one, but of course the disk-based one will be better
+    safeguarded against data loss from unexpected interruptions.
 
 
