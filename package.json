@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/loveencounterflow/icql-dba#readme",
   "dependencies": {
-    "better-sqlite3": "^7.0.1",
+    "better-sqlite3": "^7.1.5",
     "cnd": "9.2.1",
     "hollerith-codec": "3.0.1",
     "intertype": "7.6.7",
