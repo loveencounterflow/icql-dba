@@ -7,8 +7,11 @@
 
 - [Introduction](#introduction)
 - [OIMDB Functionality](#oimdb-functionality)
+- [Regular Persistency](#regular-persistency)
 - [Eventual Persistency](#eventual-persistency)
-- [Data Acquisition](#data-acquisition)
+- [Ad Hoc Persistency](#ad-hoc-persistency)
+- [Regular Acquisition](#regular-acquisition)
+- [Ad Hoc Acquisition](#ad-hoc-acquisition)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -39,35 +42,50 @@
     which is much clearer. In addition, you can *still* optionally use the `path` setting to specify the
     default path to be used as default for the `save()` command.
 
+## Regular Persistency
+
+* When a DB is `open()`ed (from a file) with setting `ram: false`, every change to its structure or its
+  business data will be immediately reflected to disk; this, of course, is the regular mode of operation
+  for SQLite and most all RDBMSes and is, hence, known as Regular Persistency (RP).
+  * If the referenced file is non-existant, it will be auto-created unless `create: false` has been
+    specified.
+* Regular Persistency always uses the [SQLite binary file format](https://sqlite.org/fileformat.html).
+
 ## Eventual Persistency
 
 * While file-based SQLite DBs are permanently persistent (i.e. each change is written to disk as soon and as
   safely as possible to make the DB resistant against unexpected interruptions), ICQL DBA's OIMDB mode is
   'eventually persistent' for all states of the DB arrived at right after a `save()` command has completed
   and before any new changes have been executed.
-* Eventual Persistence to disk is implemented with synchronous calls to `vacuum $schema into $path` (no
+* Eventual Persistency to disk is implemented with synchronous calls to `vacuum $schema into $path` (no
   schema-copying is involved in this step). The API method to do so is `save()`, a method that does nothing
   in case a given schema is disk-based (and therefore writes all changes to disk, continuously); therefore,
   one can make it so that the same code with strategically placed `save()` statements works for both
   RAM-based and disk-based DBs without any further changes.
   * The RAM DB will be much faster than the disk-based one, but of course the disk-based one will be better
     safeguarded against data loss from unexpected interruptions.
-* Eventual Persistence always uses the [SQLite binary file format](https://sqlite.org/fileformat.html).
-* There's also a way to do 'Ad Hoc' Persistence using the `export()` API. The `export()` method will allow to
-  write, for example, an SQL dump or the SQLite binary format to a given file.
+* Eventual Persistency always uses the [SQLite binary file format](https://sqlite.org/fileformat.html).
 
-## Data Acquisition
+## Ad Hoc Persistency
 
-* The counterpart
-* Other than `import()`,
+* There's also a way to do 'Ad Hoc' Persistency using the `export()` API. The `export()` method will allow
+  to write, for example, an SQL dump or the SQLite binary format to a given file.
+
+## Regular Acquisition
+
+* 'Regular Acquisition' is a fancy way to describe what the `open()` method does
+
+## Ad Hoc Acquisition
+
+* The counterpart to `export()` (Ad Hoc Persistency) is `import()` (Ad Hoc Acquisition).
+* Some file formats (such as `sql`) may be valid when empty and result in an empty DB.
 
 
 
-| Tables   |      Are      |  Cool |
-|----------|:-------------:|------:|
-| col 1 is |  left-aligned | $1600 |
-| col 2 is |    centered   |   $12 |
-| col 3 is | right-aligned |    $1 |
+|                      | Acquisition | Persistency |
+|:---------------------|:-----------:|------------:|
+| Regular and Eventual |    open     |        save |
+| Ad Hoc               |  import()   |    export() |
 
 
 
