@@ -6,7 +6,9 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Introduction](#introduction)
-  - [OIMDB Functionality](#oimdb-functionality)
+- [OIMDB Functionality](#oimdb-functionality)
+- [Eventual Persistency](#eventual-persistency)
+- [Data Acquisition](#data-acquisition)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -22,7 +24,7 @@
 * SQLite and BSQLT3 already provide In-Memory IMDB functionality. However, **ICQL DBA makes it easier to
   switch between In-Memory (RAM) and On-Disk operational modes**, hence the O in OIMDB.
 
-### OIMDB Functionality
+## OIMDB Functionality
 
 * To process a DB file in RAM, ICQL DB first opens the file using a ad-hoc schema name and then copies all
   DB objects (table, view and index definitions as well as data) from that ad-hoc schema into a RAM-based
@@ -36,12 +38,42 @@
     without disk support. In ICQL DBA, you use the `ram: true|false, disk: true|false` settings instead
     which is much clearer. In addition, you can *still* optionally use the `path` setting to specify the
     default path to be used as default for the `save()` command.
-* Persistence to HD is implemented with synchronous calls to `vacuum $schema into $path` (no schema-copying
-  is involved in this step). The API method to do so is `save()`, a method that does nothing in case a given
-  schema is disk-based (and therefore writes all changes to disk, continuously); therefore, one can make it
-  so that the same code with strategically placed `save()` statements works for both RAM-based and
-  disk-based DBs without any further changes.
+
+## Eventual Persistency
+
+* While file-based SQLite DBs are permanently persistent (i.e. each change is written to disk as soon and as
+  safely as possible to make the DB resistant against unexpected interruptions), ICQL DBA's OIMDB mode is
+  'eventually persistent' for all states of the DB arrived at right after a `save()` command has completed
+  and before any new changes have been executed.
+* Eventual Persistence to disk is implemented with synchronous calls to `vacuum $schema into $path` (no
+  schema-copying is involved in this step). The API method to do so is `save()`, a method that does nothing
+  in case a given schema is disk-based (and therefore writes all changes to disk, continuously); therefore,
+  one can make it so that the same code with strategically placed `save()` statements works for both
+  RAM-based and disk-based DBs without any further changes.
   * The RAM DB will be much faster than the disk-based one, but of course the disk-based one will be better
     safeguarded against data loss from unexpected interruptions.
+* Eventual Persistence always uses the [SQLite binary file format](https://sqlite.org/fileformat.html).
+* There's also a way to do 'Ad Hoc' Persistence using the `export()` API. The `export()` method will allow to
+  write, for example, an SQL dump or the SQLite binary format to a given file.
+
+## Data Acquisition
+
+* The counterpart
+* Other than `import()`,
+
+
+
+| Tables   |      Are      |  Cool |
+|----------|:-------------:|------:|
+| col 1 is |  left-aligned | $1600 |
+| col 2 is |    centered   |   $12 |
+| col 3 is | right-aligned |    $1 |
+
+
+
+
+
+
+
 
 
