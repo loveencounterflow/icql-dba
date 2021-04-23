@@ -82,11 +82,12 @@
 
 
 
-|                      | Acquisition | Persistency |
-|:---------------------|:-----------:|------------:|
-| Regular and Eventual |    open     |        save |
-| Ad Hoc               |  import()   |    export() |
+|                          | Acquisition | Persistency |
+|:-------------------------|:-----------:|:-----------:|
+| **Regular and Eventual** |   open()    |   save()¹   |
+| **Ad Hoc**               |  import()   |  export()   |
 
+¹ *`save()` calls are optional no-ops for Regular Persistency*
 
 
 
