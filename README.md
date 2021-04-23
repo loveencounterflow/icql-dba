@@ -65,8 +65,8 @@ Workflow:
 * Optionally, close (i.e. detach) `file`.
 * Perform work in-memory on `main`.
 * Depending on settings, either:
-  * <ins>**#METHOD A**</ins>—Save DB in its altered state to a temporary file `tpath` (using `vacuum main to
-    $tpath`),
+  * <ins>**#METHOD A**</ins>—Save DB in its altered state to a temporary file `tpath` (using `vacuum main
+    into $tpath`),
   * remove (or rename) file at `fpath`, then move `tpath` to `fpath`
   or else
   * <ins>**#METHOD B**</ins>—Clear `file` schema
