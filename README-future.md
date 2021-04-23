@@ -7,7 +7,7 @@
 
   - [Introduction](#introduction)
   - [OIMDB Functionality](#oimdb-functionality)
-  - [Switching between File and RAM Based Modes](#switching-between-file-and-ram-based-modes)
+  - [Switching between File- and RAM-Based Modes](#switching-between-file--and-ram-based-modes)
   - [Regular Persistency](#regular-persistency)
   - [Eventual Persistency](#eventual-persistency)
   - [Ad Hoc Persistency](#ad-hoc-persistency)
@@ -47,7 +47,7 @@
     which is much clearer. In addition, you can *still* optionally use the `path` setting to specify the
     default path to be used as default for the `save()` command.
 
-## Switching between File and RAM Based Modes
+## Switching between File- and RAM-Based Modes
 
 * the `transfer()` API method may be used
   * to switch between Regular and Eventual Persistency, and to
