@@ -7,6 +7,7 @@
 
   - [Introduction](#introduction)
   - [OIMDB Functionality](#oimdb-functionality)
+  - [Switching between File and RAM Based Modes](#switching-between-file-and-ram-based-modes)
   - [Regular Persistency](#regular-persistency)
   - [Eventual Persistency](#eventual-persistency)
   - [Ad Hoc Persistency](#ad-hoc-persistency)
@@ -25,8 +26,11 @@
   the interface between NodeJS (JavaScript) and SQLite.
 * Because [BSQLT3 is almost fully synchronous](https://github.com/JoshuaWise/better-sqlite3/issues/262),
   **ICQL operates almost completely synchronously**, too.
-* SQLite and BSQLT3 already provide In-Memory IMDB functionality. However, **ICQL DBA makes it easier to
-  switch between In-Memory (RAM) and On-Disk operational modes**, hence the O in OIMDB.
+* SQLite and BSQLT3 already provide In-Memory (IMDB) functionality. However, **ICQL DBA makes it easier to
+  switch between In-Memory (RAM) and On-Disk operational modes**, hence the O for Optional in OIMDB.
+* Using ICQL DBA, you could open a DB file, add some data which will readily be written to disk, then
+  switch to RAM mode to perform some tedious data mangling, and then save the new DB state to the same
+  file you opened the DB originally from.
 
 ## OIMDB Functionality
 
@@ -42,6 +46,20 @@
     without disk support. In ICQL DBA, you use the `ram: true|false, disk: true|false` settings instead
     which is much clearer. In addition, you can *still* optionally use the `path` setting to specify the
     default path to be used as default for the `save()` command.
+
+## Switching between File and RAM Based Modes
+
+* the `transfer()` API method may be used
+  * to switch between Regular and Eventual Persistency, and to
+  * associate/dissociate a DB with/from a new file path.
+
+* `transfer { schema, ram: true, [ path: 'path/to/file.db' ], }` switches from file-based Regular
+  Persistency to memory-based Eventual Persistency. This is a no-op in case the DB is already memory-based.
+* Likewise, `transfer { schema, ram: false, [ path: 'path/to/file.db' ], }` switches
+  * a memory-based DB to Regular Persistency. If the DB was originally opened from a file, the `path`
+    setting is optional. If `path` is given, the DB will now be associated with that (possibly new) on-disk
+    location
+
 
 ## Regular Persistency
 
