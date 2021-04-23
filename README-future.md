@@ -5,13 +5,14 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [Introduction](#introduction)
-- [OIMDB Functionality](#oimdb-functionality)
-- [Regular Persistency](#regular-persistency)
-- [Eventual Persistency](#eventual-persistency)
-- [Ad Hoc Persistency](#ad-hoc-persistency)
-- [Regular Acquisition](#regular-acquisition)
-- [Ad Hoc Acquisition](#ad-hoc-acquisition)
+  - [Introduction](#introduction)
+  - [OIMDB Functionality](#oimdb-functionality)
+  - [Regular Persistency](#regular-persistency)
+  - [Eventual Persistency](#eventual-persistency)
+  - [Ad Hoc Persistency](#ad-hoc-persistency)
+  - [Regular Acquisition](#regular-acquisition)
+  - [Ad Hoc Acquisition](#ad-hoc-acquisition)
+- [Privileged / Special Schemas: Main and Temp](#privileged--special-schemas-main-and-temp)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -91,6 +92,7 @@
 
 
 
+# Privileged / Special Schemas: Main and Temp
 
 
 
