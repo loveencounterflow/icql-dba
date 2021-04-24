@@ -82,9 +82,9 @@ do_work               = ( dba ) -> ...
 use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
 dba                   = new Dba { path: ':memory:', }
-dba.attach      { path: fpath, schema: 'file', }
+dba._attach     { path: fpath, schema: 'file', }
 dba.copy_schema { from_schema: 'file', to_schema: 'main', }
-dba.detach      { schema: 'file', }                         # (optional)
+dba._detach     { schema: 'file', }                         # (optional)
 #------------------------------------------------------------------------------
 loop
   continue = (await) do_work dba                            #WORK
@@ -111,7 +111,7 @@ use_method            = 'A'
 fpath                 = 'path/to/sqlite.db'
 dba                   = Dba.open { path: fpath, schema: 'main', }
 dba.move_schema { from_schema: 'main', to_schema: 'ram', }
-# dba.attach { from_schema: 'main', to_schema: 'ram', }
+# dba._attach { from_schema: 'main', to_schema: 'ram', }
 # dba.move_db { from_path: fpath, from_schema: 'file', }
 #------------------------------------------------------------------------------
 loop
@@ -212,9 +212,10 @@ over a given result set, use `dba.all_rows db.my_query ...`.
 ### API: DB Structure Modification
 
 * **`dba.clear: ( { schema: 'main', })`** ⮕ Drop all tables, views and indexes from the schema.
-* **`dba.attach: ( { schema, path: '' } )`** ⮕ Attach a given path to a given schema(name); this allows to
+* **`dba._attach: ( { schema, path: '' } )`** ⮕ Attach a given path to a given schema(name); this allows to
   manage several databases with a single connection. The default value for the `path` member is the empty
   string, which symbolizes an in-memory temporary schema.
+* **`dba._detach: ( { schema, } )`** ⮕
 
 ### API: In-Memory Processing
 
@@ -473,7 +474,7 @@ which sorts according to the string representation of the array.
       which will become the new basepath.
     * **`export { schema, path, format: 'db', overwrite: false, }`** ⮕ save to path given, in format given
       (`db`: binary DB file; `sql`: SQL dump; ...). DB does not get re-associated with new `path`.
-    * **`save_async: { schema, path, progress, }`** ⮕ Like `save()`, but works asynchronously and has
+    * **`backup_async: { schema, path, progress, }`** ⮕ Like `save()`, but works asynchronously and has
       the option to call back for progress reports. This method uses [the `better-sqlite3` API `backup()`
       method with `{ attached: schema,
       }`](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#backupdestination-options---promise).
@@ -483,6 +484,15 @@ which sorts according to the string representation of the array.
       [pages](https://www.sqlite.org/fileformat.html#pages) (or `undefined`, `null` not allowed) to be
       written in subsequent batches (cycle of the event loop); should make this more explicit e.g. by
       calling `dba.set_backup_pages_per_cycle()`. Default is `100`.
+
+  * [ ] Closing:
+    * **`close { schema, }`** ⮕ Close given schema, i.e. `dba_detach { schema, }`. In the case of schema
+      `main`, the schema is replaced with an empty RAM DB.
+    * **`close()`** ⮕ Calls `close()` on the underly `better-sqlite3` object and removes it from the `dba`
+      instance.
+    * Consider to rename one of the `close()` methods as they do different things.
+  * [ ] Introduce method to associate a path with a RAM DB (without writing to the file yet as would be the
+    case with `dba.save_as()`)
 
 * [ ] Clarify terminology:
   * **`DB`** ⮕
