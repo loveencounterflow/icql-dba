@@ -125,16 +125,19 @@ DBA = require 'icl-dba'
 dba = new DBA.Dba()
 ```
 
+* `dba` is not connected to any DB; the only meaningful next operation is `open()`.
+* In the future, may add configuration to create `dba` and open DB in single step.
+
 ### Open File-Based DB
 
-* with Continuous Persistency:
+* File-Based DB with Continuous Persistency:
   * use `create: false` to throw error in case file does not exit
 
 ```coffee
 dba.open { path: 'path/to/my.db', schema: 'myschema', }
 ```
 
-* with Eventual Persistency:
+* RAM-Based DB with Eventual Persistency:
   * use `disk: false` to avoid SQLite using temporary files
 
 ```coffee
