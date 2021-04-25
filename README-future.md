@@ -7,7 +7,7 @@
 
   - [Introduction](#introduction)
   - [OIMDB Functionality](#oimdb-functionality)
-  - [Switching between File- and RAM-Based Modes](#switching-between-file--and-ram-based-modes)
+  - [Switching between File- and RAM-Based Modes (Mode Transfer)](#switching-between-file--and-ram-based-modes-mode-transfer)
   - [Regular Persistency](#regular-persistency)
   - [Eventual Persistency](#eventual-persistency)
   - [Ad Hoc Persistency](#ad-hoc-persistency)
@@ -22,11 +22,11 @@
 
 * **ICQL DBA is an [SQLite](https://sqlite.org/index.html) Database Adapter with Optional In-Memory DB
   (OIMDB) functionality.**
-* Implemented using **[`better-sqlite3` (BSQLT3)](https://github.com/JoshuaWise/better-sqlite3)** to provide
-  the interface between NodeJS (JavaScript) and SQLite.
-* Because [BSQLT3 is almost fully synchronous](https://github.com/JoshuaWise/better-sqlite3/issues/262),
+* Implemented using **[`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3)** (B3 in the below)
+  to provide the interface between NodeJS (JavaScript) and SQLite.
+* Because [B3 is almost fully synchronous](https://github.com/JoshuaWise/better-sqlite3/issues/262),
   **ICQL operates almost completely synchronously**, too.
-* SQLite and BSQLT3 already provide In-Memory (IMDB) functionality. However, **ICQL DBA makes it easier to
+* SQLite/B3 already provides In-Memory (IMDB) functionality. However, **ICQL DBA makes it easier to
   switch between In-Memory (RAM) and On-Disk operational modes**, hence the O for Optional in OIMDB.
 * Using ICQL DBA, you could open a DB file, add some data which will readily be written to disk, then
   switch to RAM mode to perform some tedious data mangling, and then save the new DB state to the same
@@ -41,13 +41,13 @@
     memory becomes insufficient. Schemas *without* disk-based backup also exists; ICQL DBA users can elect
     to use either model (with the `disk: true|false` configuration) although IMO there's little reason to
     not use optional HD support.
-  * **Note**—Confusingly, to get a RAM-based DB with the original SQLite and BSQLT3 API, you either use the
-    empty string `''` to get disk support (in ase of RAM shortage) or the pseudo-path `':memory:'` to get
-    one without disk support. In ICQL DBA, you use the boolean settings `ram` and `disk` instead which is
-    much clearer. This frees the `path` argument from doing double duty, so one can use it to specify a
-    default file path to be used implicitly for the `save()` command.
+  * **Note**—Confusingly, to get a RAM-based DB with the original SQLite/B3 API, you either use the empty
+    string `''` to get disk support (in ase of RAM shortage) or the pseudo-path `':memory:'` to get one
+    without disk support. In ICQL DBA, you use the boolean settings `ram` and `disk` instead which is much
+    clearer. This frees the `path` argument from doing double duty, so one can use it to specify a default
+    file path to be used implicitly for the `save()` command.
 
-## Switching between File- and RAM-Based Modes
+## Switching between File- and RAM-Based Modes (Mode Transfer)
 
 * the `transfer()` API method may be used
   * to switch between Regular and Eventual Persistency, and to
