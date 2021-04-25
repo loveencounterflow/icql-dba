@@ -405,6 +405,7 @@ class @Dba extends Multimix
         @_schemas[ schema ] = { path, }
       @detach { schema, }
     #.......................................................................................................
+    ### TAINT use placeholders as in `attach ? as ?;` instead ###
     @execute "attach #{path_x} as #{schema_i};"
     @_schemas[ schema ] = { path, }
     return null
