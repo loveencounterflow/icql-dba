@@ -42,10 +42,10 @@
     to use either model (with the `disk: true|false` configuration) although IMO there's little reason to
     not use optional HD support.
   * **Note**—Confusingly, to get a RAM-based DB with the original SQLite and BSQLT3 API, you either use the
-    empty string to get disk support (in ase of RAM shortage) or the pseudo-path `:memory:` to get one
-    without disk support. In ICQL DBA, you use the `ram: true|false, disk: true|false` settings instead
-    which is much clearer. In addition, you can *still* optionally use the `path` setting to specify the
-    default path to be used as default for the `save()` command.
+    empty string `''` to get disk support (in ase of RAM shortage) or the pseudo-path `':memory:'` to get
+    one without disk support. In ICQL DBA, you use the boolean settings `ram` and `disk` instead which is
+    much clearer. This frees the `path` argument from doing double duty, so one can use it to specify a
+    default file path to be used implicitly for the `save()` command.
 
 ## Switching between File- and RAM-Based Modes
 
