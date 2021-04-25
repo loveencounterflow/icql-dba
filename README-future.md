@@ -5,15 +5,18 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-  - [Introduction](#introduction)
-  - [OIMDB Functionality](#oimdb-functionality)
-  - [Switching between File- and RAM-Based Modes (Mode Transfer)](#switching-between-file--and-ram-based-modes-mode-transfer)
-  - [Regular Persistency](#regular-persistency)
-  - [Eventual Persistency](#eventual-persistency)
-  - [Ad Hoc Persistency](#ad-hoc-persistency)
-  - [Regular Acquisition](#regular-acquisition)
-  - [Ad Hoc Acquisition](#ad-hoc-acquisition)
+- [Introduction](#introduction)
+- [OIMDB Functionality](#oimdb-functionality)
+- [Switching between File- and RAM-Based Modes (Mode Transfer)](#switching-between-file--and-ram-based-modes-mode-transfer)
+- [Continuous Persistency](#continuous-persistency)
+- [Eventual Persistency](#eventual-persistency)
+- [Ad Hoc Persistency](#ad-hoc-persistency)
+- [Regular Acquisition](#regular-acquisition)
+- [Ad Hoc Acquisition](#ad-hoc-acquisition)
 - [Privileged / Special Schemas: Main and Temp](#privileged--special-schemas-main-and-temp)
+- [Usage](#usage)
+  - [Create DBA Object](#create-dba-object)
+  - [Open File-Based DB](#open-file-based-db)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -53,22 +56,22 @@
   * to switch between Regular and Eventual Persistency, and to
   * associate/dissociate a DB with/from a new file path.
 
-* `transfer { schema, ram: true, [ path: 'path/to/file.db' ], }` switches from file-based Regular
+* `transfer { schema, ram: true, [ path: 'path/to/file.db' ], }` switches from file-based Continuous
   Persistency to memory-based Eventual Persistency. This is a no-op in case the DB is already memory-based.
 * Likewise, `transfer { schema, ram: false, [ path: 'path/to/file.db' ], }` switches
-  * a memory-based DB to Regular Persistency. If the DB was originally opened from a file, the `path`
+  * a memory-based DB to Continuous Persistency. If the DB was originally opened from a file, the `path`
     setting is optional. If `path` is given, the DB will now be associated with that (possibly new) on-disk
     location
 
 
-## Regular Persistency
+## Continuous Persistency
 
 * When a DB is `open()`ed (from a file) with setting `ram: false`, every change to its structure or its
   business data will be immediately reflected to disk; this, of course, is the regular mode of operation
-  for SQLite and most all RDBMSes and is, hence, known as Regular Persistency (RP).
+  for SQLite and most all RDBMSes and is, hence, known as Continuous Persistency (RP).
   * If the referenced file is non-existant, it will be auto-created unless `create: false` has been
     specified.
-* Regular Persistency always uses the [SQLite binary file format](https://sqlite.org/fileformat.html).
+* Continuous Persistency always uses the [SQLite binary file format](https://sqlite.org/fileformat.html).
 
 ## Eventual Persistency
 
@@ -106,11 +109,41 @@
 | **Regular and Eventual** |  `open()`   |  `save()`¹  |
 | **Ad Hoc**               | `import()`  | `export()`  |
 
-¹ *`save()` calls are optional no-ops for Regular Persistency*
+¹ *`save()` calls are optional no-ops for Continuous Persistency*
 
 
 
-# Privileged / Special Schemas: Main and Temp
+## Privileged / Special Schemas: Main and Temp
+
+## Usage
+
+
+### Create DBA Object
+
+```coffee
+DBA = require 'icl-dba'
+dba = new DBA.Dba()
+```
+
+### Open File-Based DB
+
+* with Continuous Persistency:
+  * use `create: false` to throw error in case file does not exit
+
+```coffee
+dba.open { path: 'path/to/my.db', schema: 'myschema', }
+```
+
+* with Eventual Persistency:
+  * use `disk: false` to avoid SQLite using temporary files
+
+```coffee
+dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
+```
+
+
+
+
 
 
 
