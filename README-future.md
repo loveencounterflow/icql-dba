@@ -115,6 +115,21 @@
 
 ## Privileged / Special Schemas: Main and Temp
 
+* SQLite has two special schemas, `main` and `temp`.
+* "The schema-names 'main' and 'temp' refer to the
+  main database and the database used for temporary tables. The main and temp databases cannot be attached
+  or detached."—[*SQLite Documentation*](https://www.sqlite.org/lang_attach.html)
+* `main` is the name of the default schema. When you [create a `better-sqlite3`
+  object](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#new-databasepath-options),
+  that data will be put into the `main` schema.
+* It is possible to circumvent the `main` schema in SQLite/B3; to do so, call either `new Database
+  ':memory:'` which will create an empty `main` schema; then, you can execute an [SQL `attach`
+  statement](https://www.sqlite.org/lang_attach.html) like `attach $path as $schema;` to open a file- or
+  RAM-based DB under another schema of your choosing.
+* This procedure is not very straightforward; compare this to how you would use `open()` in ICQL DBA.
+* When you create a temporary table as in `create temp table t;` or `create temporary table t;`, then `t`
+  will be available as `temp.t` (but *not* `temporary.t`).
+
 ## Usage
 
 
