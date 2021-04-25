@@ -119,7 +119,7 @@
 * "The schema-names 'main' and 'temp' refer to the
   main database and the database used for temporary tables. The main and temp databases cannot be attached
   or detached."—[*SQLite Documentation*](https://www.sqlite.org/lang_attach.html)
-* `main` is the name of the default schema. When you [create a `better-sqlite3`
+* When you [create a `better-sqlite3`
   object](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#new-databasepath-options),
   that data will be put into the `main` schema.
 * It is possible to circumvent the `main` schema in SQLite/B3; to do so, call either `new Database
