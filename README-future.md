@@ -21,7 +21,9 @@
     - [RAM DB with Eventual Persistency](#ram-db-with-eventual-persistency)
     - [RAM DB without Eventual Persistency](#ram-db-without-eventual-persistency)
   - [Transfer DB](#transfer-db)
-  - [Save Data (Eventual and Ad Hoc Persistency)](#save-data-eventual-and-ad-hoc-persistency)
+    - [Transfer File-Based DB to RAM](#transfer-file-based-db-to-ram)
+    - [Transfer RAM DB to file](#transfer-ram-db-to-file)
+  - [Save DB](#save-db)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -154,7 +156,11 @@ dba = new DBA.Dba()
 
 #### File-Based DB with Continuous Persistency
 
-* use `create: false` to throw error in case file does not exit
+* `path` must be a string that is a valid file system path (up to the parent directory); its final component
+  must either point to an existing SQLite DB file or be non-existant. (Write permissions are required in
+  case modifications are intended.)
+* In case the location indicated by `path` does not exist, a new SQLite DB file will be created. To prevent
+  autocreation, specify `create: false`, which will cause an error to be thrown.
 
 ```coffee
 dba.open { path: 'path/to/my.db', schema: 'myschema', }
@@ -162,7 +168,14 @@ dba.open { path: 'path/to/my.db', schema: 'myschema', }
 
 #### RAM DB with Eventual Persistency
 
-* use `disk: false` to avoid SQLite using temporary files
+* It is possible to open a file DB and transfer it to RAM by `open()`ing an SQLite file with `ram: true`.
+  This will copy the DB's structure and its data to RAM.
+* Observe that when a path is given, `ram` defaults to `false`; when no path is given ([see
+  below](#ram-db-without-eventual-persistency)), `ram` defaults to `true`.
+* Use `disk: false` to keep SQLite from using temporary files to be used in case of RAM shortage (but why
+  should you).
+* The path given will be used when `save()` is called later.
+* It is *not* allowed to call `save()` *with* `path` when DB was opened with `path`.
 
 ```coffee
 dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
@@ -170,8 +183,10 @@ dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
 
 #### RAM DB without Eventual Persistency
 
-* omit `path` argument or set to `null`
-* when `path` is missing, `ram` defaults to `true`, so may be omitted or set to `null`
+* To `open()` a RAM DB that has no inherent link to a file, omit the `path` setting (or set it to `null`).
+* Observe that when `path` is missing, `ram` defaults to `true`, so in this case it may be omitted or set to
+  `null`.
+* It is *not* allowed to call `save()` *without* `path` when DB was opened without `path`.
 
 ```coffee
 dba.open { schema: 'myschema', }
@@ -180,31 +195,32 @@ dba.open { schema: 'myschema', }
 
 ### Transfer DB
 
-* Transfer open file-based DB to RAM:
-  * `schema` is the name of the file-based DB which will become the name of the RAM DB
-  * for the duration of RAM-based operation, the connection to the file is terminated; therefore, Continuous
-    Persistency is not available
-  * user is responsible for either calling `save()` at appropriate points in time or else call
-    `transfer_to_file()` once RAM-based operation should be terminated and results saved.
+#### Transfer File-Based DB to RAM
+
+* `schema` is the name of the file-based DB which will become the name of the RAM DB
+* for the duration of RAM-based operation, the connection to the file is terminated; therefore, Continuous
+  Persistency is not available
+* user is responsible for either calling `save()` at appropriate points in time or else call
+  `transfer_to_file()` once RAM-based operation should be terminated and results saved.
 
 ```coffee
 dba.transfer_to_ram { schema: 'myschema', }
 ```
 
-* Transfer open RAM DB to file:
-  * will (1) either copy the old DB file to a new location or else delete it, depending on configuration
-    (`### TAINT` which configuration?), then (2) call `save_as()` with the original path
-  * in the future, we may allow a `path` argument to allow switching to a new destination and save the DB
-    in a single step
+#### Transfer RAM DB to file
+
+* will (1) either copy the old DB file to a new location or else delete it, depending on configuration
+  (`### TAINT` which configuration?), then (2) call `save_as()` with the original path
+* in the future, we may allow a `path` argument to allow switching to a new destination and save the DB
+  in a single step
 
 ```coffee
 dba.transfer_to_file { schema: 'myschema', }
 ```
 
-### Save Data (Eventual and Ad Hoc Persistency)
+### Save DB
 
 * File-based DBs have Continuous Persistency, no need to call `save()`.
 * RAM DBs must be `save()`d manually in order to persist changes in structure or data.
-  *
 
 
