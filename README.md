@@ -65,8 +65,8 @@ Workflow:
 * Optionally, close (i.e. detach) `file`.
 * Perform work in-memory on `main`.
 * Depending on settings, either:
-  * <ins>**#METHOD A**</ins>—Save DB in its altered state to a temporary file `tpath` (using `vacuum main to
-    $tpath`),
+  * <ins>**#METHOD A**</ins>—Save DB in its altered state to a temporary file `tpath` (using `vacuum main
+    into $tpath`),
   * remove (or rename) file at `fpath`, then move `tpath` to `fpath`
   or else
   * <ins>**#METHOD B**</ins>—Clear `file` schema
@@ -474,7 +474,7 @@ which sorts according to the string representation of the array.
       which will become the new basepath.
     * **`export { schema, path, format: 'db', overwrite: false, }`** ⮕ save to path given, in format given
       (`db`: binary DB file; `sql`: SQL dump; ...). DB does not get re-associated with new `path`.
-    * **`backup_async: { schema, path, progress, }`** ⮕ Like `save()`, but works asynchronously and has
+    * **`save_async: { schema, path, progress, }`** ⮕ Like `save()`, but works asynchronously and has
       the option to call back for progress reports. This method uses [the `better-sqlite3` API `backup()`
       method with `{ attached: schema,
       }`](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#backupdestination-options---promise).

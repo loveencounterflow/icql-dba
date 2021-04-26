@@ -29,6 +29,7 @@ Multimix                  = require 'multimix'
 L                         = @
 L._misfit                 = Symbol 'misfit'
 new_bsqlt3_connection     = require 'better-sqlite3'
+PATH                      = require 'path'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -37,56 +38,78 @@ L.pick = ( d, key, fallback, type = null ) ->
   validate[ type ] R if type?
   return R
 
+#-----------------------------------------------------------------------------------------------------------
+L._get_extension = ( path ) ->
+  return null if ( R = PATH.extname path ) is ''
+  return R[ 1 .. ]
+
+#-----------------------------------------------------------------------------------------------------------
+L._get_format = ( path, format = null ) ->
+  return format if format?
+  return @._get_extension path
+
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
 class @Dba extends Multimix
 
-  #---------------------------------------------------------------------------------------------------------
-  @_defaults:
-    sqlt:           null  ### [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/) instance ###
-    echo:           false ### whether to echo statements to the terminal ###
-    debug:          false ### whether to print additional debugging info ###
-    path:           ''
-    schema:         'main'
-    create:         true
-    timeout:        5000
-    readonly:       false
+  # #---------------------------------------------------------------------------------------------------------
+  # @_defaults:
+  #   sqlt:           null  ### [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/) instance ###
+  #   echo:           false ### whether to echo statements to the terminal ###
+  #   debug:          false ### whether to print additional debugging info ###
+  #   path:           ''
+  #   schema:         'main'
+  #   create:         true
+  #   timeout:        5000
+  #   readonly:       false
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
     @_statements  = {}
     @_schemas     = {}
-    cfg           = { @constructor._defaults..., cfg..., }
+    cfg           = { L.types.defaults.dba_constructor_cfg..., cfg..., }
     @_dbg         = { debug: cfg.debug, echo: cfg.echo, }
-    throw new Error "^icql-dba.open@445^ argument `sqlt` not supported (yet)" if cfg.sqlt?
-    path          = L.pick cfg, 'path',   @constructor._defaults.path,   'ic_path'
-    schema        = L.pick cfg, 'schema', @constructor._defaults.schema, 'ic_schema'
+    debug '^345^', cfg
+    throw new Error "^dba@333^ property `sqlt` not supported (yet)"   if cfg.sqlt?
+    throw new Error "^dba@334^ property `schema` not supported (yet)" if cfg.schema?
+    throw new Error "^dba@335^ property `path` not supported (yet)"   if cfg.path?
     bsqlt3_cfg    =
       readonly:       cfg.readonly
       fileMustExist:  not cfg.create
       timeout:        cfg.timeout
       # verbose:        ### TAINT to be done ###
     #.......................................................................................................
-    ### TAINT unify this part with `open()` ###
-    if schema is 'main'
-      @sqlt               = new_bsqlt3_connection path, bsqlt3_cfg
-      @_schemas[ schema ] = { path, }
-    else
-      @sqlt = new_bsqlt3_connection '', bsqlt3_cfg
-      @open { path, schema, }
-    #.......................................................................................................
+    @sqlt = new_bsqlt3_connection '', bsqlt3_cfg
     return undefined ### always return `undefined` from constructor ###
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
-    path        = L.pick cfg, 'path',   null, 'ic_path'
-    schema      = L.pick cfg, 'schema', null, 'ic_schema'
-    throw new Error "^icql-dba.open@445^ cannot open schema #{rpr schema} (yet)"  if schema is 'main'
-    throw new Error "^icql-dba.open@445^ schema #{rpr schema} already exists"     if @has { schema, }
-    @attach { path, schema, }
+    cfg         = { L.types.defaults.dba_open_cfg..., cfg..., }
+    validate.dba_open_cfg
+    throw new Error "^dba@336^ cannot open schema #{rpr cfg.schema} (yet)"  if cfg.schema is 'main'
+    throw new Error "^dba@337^ schema #{rpr cfg.schema} already exists"     if @has { schema: cfg.schema, }
+    @_attach { path, schema, }
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  import: ( cfg ) ->
+    cfg         = { L.types.defaults.dba_import_cfg..., cfg..., }
+    validate.dba_import_cfg cfg
+    throw new Error "^dba@338^ `save_as` not implemented" if cfg.save_as?
+    cfg.format  = L._get_format cfg.path, cfg.format
+    debug '^4587984^', { cfg, }
+    switch cfg.format
+      when 'db'
+        # tmp_schema = @_get_free_random_schema()
+        @_attach { schema: tmp_schema, path: cfg.path, }
+        throw new Error "^dba@339^ format #{rpr cfg.format} not implemented"
+      when 'sql'
+        throw new Error "^dba@340^ format #{rpr cfg.format} not implemented"
+      else
+        throw new Error "^dba@341^ unknown format #{rpr cfg.format}"
     return null
 
 
@@ -274,7 +297,7 @@ class @Dba extends Multimix
     name        = L.pick cfg, 'name', null
     validate_optional.ic_name name
     return ( has_schema = @_is_empty_schema @as_identifier schema ) unless name?
-    throw new Error "^icql-dba.is_empty@34543^ not implemented: is_empty() for anything but schemas, got #{rpr cfg}"
+    throw new Error "^dba@342^ not implemented: is_empty() for anything but schemas, got #{rpr cfg}"
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty_schema: ( schema_i ) -> (
@@ -339,7 +362,7 @@ class @Dba extends Multimix
     R = @first_value @query "select file from pragma_database_list where name = ?;", [ schema, ]
     return R if R?
     return fallback unless fallback is L._misfit
-    throw new Error "^icql-dba.attach@44822^ unknown schema #{rpr schema}"
+    throw new Error "^dba@343^ unknown schema #{rpr schema}"
 
   #---------------------------------------------------------------------------------------------------------
   type_of: ( name, schema = 'main' ) ->
@@ -385,7 +408,7 @@ class @Dba extends Multimix
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  attach: ( cfg ) ->
+  _attach: ( cfg ) ->
     schema        = L.pick cfg, 'schema', 'main', 'ic_not_temp_schema'
     path          = L.pick cfg, 'path',   '',     'ic_path'
     schema_i      = @as_identifier  schema
@@ -393,24 +416,25 @@ class @Dba extends Multimix
     #.......................................................................................................
     if @has { schema, }
       unless @_is_empty_schema schema_i
-        throw new Error "^icql-dba.attach@44834^ schema #{rpr schema} not empty"
+        throw new Error "^dba@344^ schema #{rpr schema} not empty"
       if schema is 'main'
         unless isa.ic_ram_path @_path_of_schema schema
-          throw new Error "^icql-dba.attach@44835^ schema 'main' cannot be overwritten if based on file"
+          throw new Error "^dba@345^ schema 'main' cannot be overwritten if based on file"
         tmp_schema = @_get_free_random_schema()
-        @attach { schema: tmp_schema, path, }
+        @_attach { schema: tmp_schema, path, }
         @copy_schema { from_schema: tmp_schema, to_schema: 'main', }
-        @detach { schema: tmp_schema, }
+        @_detach { schema: tmp_schema, }
         return null
         @_schemas[ schema ] = { path, }
-      @detach { schema, }
+      @_detach { schema, }
     #.......................................................................................................
+    ### TAINT use placeholders as in `attach ? as ?;` instead ###
     @execute "attach #{path_x} as #{schema_i};"
     @_schemas[ schema ] = { path, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  detach: ( cfg ) ->
+  _detach: ( cfg ) ->
     schema        = L.pick cfg, 'schema', null, 'ic_schema'
     schema_i      = @as_identifier  schema
     @execute "detach #{schema_i};"
@@ -428,7 +452,7 @@ class @Dba extends Multimix
   _copy_schema: ( cfg, detach_schema = false ) ->
     detach_from_schema = ->
       return null unless detach_schema
-      return @detach { schema: from_schema, }
+      return @_detach { schema: from_schema, }
     #.......................................................................................................
     from_schema   = L.pick cfg, 'from_schema',  'main'
     to_schema     = L.pick cfg, 'to_schema',    'main'

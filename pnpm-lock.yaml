@@ -1,7 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
-  better-sqlite3: ^7.0.1
+  better-sqlite3: ^7.1.5
   cnd: 9.2.1
   hollerith-codec: 3.0.1
   intertype: 7.6.7
@@ -11,7 +11,7 @@ specifiers:
   trash: ^7.1.1
 
 dependencies:
-  better-sqlite3: 7.1.2
+  better-sqlite3: 7.1.5
   cnd: 9.2.1
   hollerith-codec: 3.0.1
   intertype: 7.6.7
@@ -109,12 +109,12 @@ packages:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
     dev: false
 
-  /better-sqlite3/7.1.2:
-    resolution: {integrity: sha512-8FWYnJ6Bx94MBX03J5Ka7sTRlvXXMEm4FW2Op7nM8ErQZeyALYLmSlbMBnfr4cMpS0tj0aYZv0a+26G2YJuIjg==}
+  /better-sqlite3/7.1.5:
+    resolution: {integrity: sha512-HX5dN0zLllJLQOJP2tXqV42bvjXPnbe/Nl5o6nD1jj99h0148B39zbfGZVoJBLtDAd/CJc4Zdm8K+GhHIq84IQ==}
     requiresBuild: true
     dependencies:
       bindings: 1.5.0
-      prebuild-install: 5.3.6
+      prebuild-install: 6.1.1
       tar: 6.1.0
     dev: false
 
@@ -593,8 +593,8 @@ packages:
     resolution: {integrity: sha512-ONmRUqK7zj7DWX0D9ADe03wbwOBZxNAfF20PlGfCWQcD3+/MakShIHrMqx9YwPTfxDdF1zLeL+RGZiR9kGMLdg==}
     dev: false
 
-  /node-abi/2.19.3:
-    resolution: {integrity: sha512-9xZrlyfvKhWme2EXFKQhZRp1yNWT/uI1luYPr3sFl+H4keYY4xR+1jO7mvTTijIsHf1M+QDe9uWuKeEpLInIlg==}
+  /node-abi/2.21.0:
+    resolution: {integrity: sha512-smhrivuPqEM3H5LmnY3KU6HfYv0u4QklgAxfFyRNujKUzbUcYZ+Jc2EhukB9SRcD2VpqhxM7n/MIcp1Ua1/JMg==}
     dependencies:
       semver: 5.7.1
     dev: false
@@ -713,8 +713,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
-  /prebuild-install/5.3.6:
-    resolution: {integrity: sha512-s8Aai8++QQGi4sSbs/M1Qku62PFK49Jm1CbgXklGz4nmHveDq0wzJkg7Na5QbnO1uNH8K7iqx2EQ/mV0MZEmOg==}
+  /prebuild-install/6.1.1:
+    resolution: {integrity: sha512-M+cKwofFlHa5VpTWub7GLg5RLcunYIcLqtY5pKcls/u7xaAb8FrXZ520qY8rkpYy5xw90tYCyMO0MP5ggzR3Sw==}
     engines: {node: '>=6'}
     hasBin: true
     dependencies:
@@ -724,7 +724,7 @@ packages:
       minimist: 1.2.5
       mkdirp-classic: 0.5.3
       napi-build-utils: 1.0.2
-      node-abi: 2.19.3
+      node-abi: 2.21.0
       noop-logger: 0.1.1
       npmlog: 4.1.2
       pump: 3.0.0
