@@ -140,8 +140,10 @@ DBA = require 'icl-dba'
 dba = new DBA.Dba()
 ```
 
-* `dba` is not connected to any DB; the only meaningful next operation is `open()`.
-* In the future, may add configuration to create `dba` and open DB in single step.
+* `dba` is constructed with an empty `path` argument to B3, i.e. `require('better-sqlite3')('')`.
+* This means the underlying B3 instance is connected to an empty temporary database under the `main` schema.
+* `dba` is not yet connected to any file-based DB; the only meaningful next operation is `open()`.
+* In the future, may add configuration to create `dba` and open an existing DB in a single step.
 
 ### Open File-Based DB
 
@@ -159,8 +161,28 @@ dba.open { path: 'path/to/my.db', schema: 'myschema', }
 dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
 ```
 
+### Transfer DB
 
+* Transfer open file-based DB to RAM:
+  * `schema` is the name of the file-based DB which will become the name of the RAM DB
+  * for the duration of RAM-based operation, the connection to the file is terminated; therefore, Continuous
+    Persistency is not available
+  * user is responsible for either calling `save()` at appropriate points in time or else call
+    `transfer_to_file()` once RAM-based operation should be terminated and results saved.
 
+```coffee
+dba.transfer_to_ram { schema: 'myschema', }
+```
+
+* Transfer open RAM DB to file:
+  * will (1) either copy the old DB file to a new location or else delete it, depending on configuration
+    (`### TAINT` which configuration?), then (2) call `save_as()` with the original path
+  * in the future, we may allow a `path` argument to allow switching to a new destination and save the DB
+    in a single step
+
+```coffee
+dba.transfer_to_file { schema: 'myschema', }
+```
 
 
 
