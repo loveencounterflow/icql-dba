@@ -20,10 +20,13 @@
     - [File-Based DB with Continuous Persistency](#file-based-db-with-continuous-persistency)
     - [RAM DB with Eventual Persistency](#ram-db-with-eventual-persistency)
     - [RAM DB without Eventual Persistency](#ram-db-without-eventual-persistency)
+  - [Import a DB](#import-a-db)
   - [Transfer DB](#transfer-db)
     - [Transfer File-Based DB to RAM](#transfer-file-based-db-to-ram)
     - [Transfer RAM DB to file](#transfer-ram-db-to-file)
-  - [Save DB](#save-db)
+  - [Persisting a DB](#persisting-a-db)
+    - [Use `save()` to Save to Linked File](#use-save-to-save-to-linked-file)
+    - [Exporting to Binary and Textual Formats](#exporting-to-binary-and-textual-formats)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -192,6 +195,17 @@ dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
 dba.open { schema: 'myschema', }
 ```
 
+### Import a DB
+
+* Supported formats include
+  * `sqlite` for the SQLite binary file format and
+  * `sql` for SQL dumps.
+
+```coffee
+dba = new Dba()
+dba.open { schema: 'myschema', }
+dba.import { path: 'path/to/dump.sql', schema: 'myschema', }
+```
 
 ### Transfer DB
 
@@ -218,9 +232,19 @@ dba.transfer_to_ram { schema: 'myschema', }
 dba.transfer_to_file { schema: 'myschema', }
 ```
 
-### Save DB
+### Persisting a DB
 
-* File-based DBs have Continuous Persistency, no need to call `save()`.
+#### Use `save()` to Save to Linked File
+
+* File-based DBs have Continuous Persistency, no need to call `save()` (but no harm done, either).
 * RAM DBs must be `save()`d manually in order to persist changes in structure or data.
+* `save()` throws an error if `path` setting is given.
+* Use `transfer_to_file { path, }` (and `save()` after subsequent changes) to add or change the file path
+  linked to a RAM DB.
+* Can also use `export { path, overwrite: true, format: 'sqlite', }` to repeatedly save a RAM DB as an
+  SQLite binary file DB.
+
+#### Exporting to Binary and Textual Formats
+
 
 
