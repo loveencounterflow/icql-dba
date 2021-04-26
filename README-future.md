@@ -16,7 +16,12 @@
 - [Privileged / Special Schemas: Main and Temp](#privileged--special-schemas-main-and-temp)
 - [Usage](#usage)
   - [Create DBA Object](#create-dba-object)
-  - [Open File-Based DB](#open-file-based-db)
+  - [Create DB with `open()`](#create-db-with-open)
+    - [File-Based DB with Continuous Persistency](#file-based-db-with-continuous-persistency)
+    - [RAM DB with Eventual Persistency](#ram-db-with-eventual-persistency)
+    - [RAM DB without Eventual Persistency](#ram-db-without-eventual-persistency)
+  - [Transfer DB](#transfer-db)
+  - [Save Data (Eventual and Ad Hoc Persistency)](#save-data-eventual-and-ad-hoc-persistency)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -145,21 +150,33 @@ dba = new DBA.Dba()
 * `dba` is not yet connected to any file-based DB; the only meaningful next operation is `open()`.
 * In the future, may add configuration to create `dba` and open an existing DB in a single step.
 
-### Open File-Based DB
+### Create DB with `open()`
 
-* File-Based DB with Continuous Persistency:
-  * use `create: false` to throw error in case file does not exit
+#### File-Based DB with Continuous Persistency
+
+* use `create: false` to throw error in case file does not exit
 
 ```coffee
 dba.open { path: 'path/to/my.db', schema: 'myschema', }
 ```
 
-* RAM-Based DB with Eventual Persistency:
-  * use `disk: false` to avoid SQLite using temporary files
+#### RAM DB with Eventual Persistency
+
+* use `disk: false` to avoid SQLite using temporary files
 
 ```coffee
 dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
 ```
+
+#### RAM DB without Eventual Persistency
+
+* omit `path` argument or set to `null`
+* when `path` is missing, `ram` defaults to `true`, so may be omitted or set to `null`
+
+```coffee
+dba.open { schema: 'myschema', }
+```
+
 
 ### Transfer DB
 
@@ -184,8 +201,10 @@ dba.transfer_to_ram { schema: 'myschema', }
 dba.transfer_to_file { schema: 'myschema', }
 ```
 
+### Save Data (Eventual and Ad Hoc Persistency)
 
-
-
+* File-based DBs have Continuous Persistency, no need to call `save()`.
+* RAM DBs must be `save()`d manually in order to persist changes in structure or data.
+  *
 
 
