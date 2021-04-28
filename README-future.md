@@ -200,18 +200,27 @@ dba.open { schema: 'myschema', }
 * Supported formats include
   * `sqlite` for the SQLite binary file format and
   * `sql` for SQL dumps.
+* Unlike `open()`, `import()` accepts SQL dumps (and, in the future, possibly other formats).
+* Use `format: 'sqlite'` or `format: 'sql'` to explicitly specify the intended file format in case the
+  file extension does not match:
+  * `.dump`, `.sql` are recognized as `format: 'sql'`
+  * `.db`, `.sqlite` are recognized as `format: 'sqlite'`
 
 ```coffee
-dba = new Dba()
-dba.open { schema: 'myschema', }
-dba.import { path: 'path/to/dump.sql', schema: 'myschema', }
+dba     = new Dba()
+schema  = 'myschema'
+dba.open { schema, }
+dba.import { path: 'path/to/dump.sql', schema, }
 ```
 
 ### Transfer DB
 
 #### Transfer File-Based DB to RAM
 
-* `schema` is the name of the file-based DB which will become the name of the RAM DB
+* `transfer_to_ram()` allows to convert a file DB to a RAM DB.
+* Setting `schema` is a required setting that is the name of the file-based DB which will become the name of
+  the RAM DB.
+* It will throw an error if the schema given is already a RAM DB.
 * for the duration of RAM-based operation, the connection to the file is terminated; therefore, Continuous
   Persistency is not available
 * user is responsible for either calling `save()` at appropriate points in time or else call
@@ -223,13 +232,17 @@ dba.transfer_to_ram { schema: 'myschema', }
 
 #### Transfer RAM DB to file
 
+* `transfer_to_file()` allows to convert a RAM DB to a file DB.
 * will (1) either copy the old DB file to a new location or else delete it, depending on configuration
   (`### TAINT` which configuration?), then (2) call `save_as()` with the original path
-* in the future, we may allow a `path` argument to allow switching to a new destination and save the DB
-  in a single step
+* When called without a `path` setting then the schema's associated path will be used.
+* When the schema points to a file DB and the path is not given or resolves to the associated path,
+  `transfer_to_file()` is a no-op.
+* The path given becomes the associated path of the DB; this works for both file and RAM DBs. Also see
+  [`export()`](#exporting-to-binary-and-textual-formats).
 
 ```coffee
-dba.transfer_to_file { schema: 'myschema', }
+dba.transfer_to_file { schema: 'myschema', path, }
 ```
 
 ### Persisting a DB
@@ -246,5 +259,11 @@ dba.transfer_to_file { schema: 'myschema', }
 
 #### Exporting to Binary and Textual Formats
 
+* The path given will *not* become the associated path of the DB; this is different from
+  `transfer_to_file()`.
+
+```coffee
+dba.export { schema: 'myschema', path, format, overwrite, }
+```
 
 
