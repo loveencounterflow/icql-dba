@@ -77,6 +77,7 @@ intertype                 = new Intertype module.exports
   dba_constructor_cfg:
     readonly:     false
     create:       true
+    overwrite:    false
     timeout:      5000
   #.........................................................................................................
   dba_open_cfg:
