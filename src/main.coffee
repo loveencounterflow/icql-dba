@@ -31,7 +31,6 @@ L._misfit                 = Symbol 'misfit'
 new_bsqlt3_connection     = require 'better-sqlite3'
 PATH                      = require 'path'
 
-
 #-----------------------------------------------------------------------------------------------------------
 L.pick = ( d, key, fallback, type = null ) ->
   R = d?[ key ] ? fallback
@@ -70,16 +69,16 @@ class @Dba extends Multimix
     super()
     @_statements  = {}
     @_schemas     = {}
-    cfg           = { L.types.defaults.dba_constructor_cfg..., cfg..., }
-    @_dbg         = { debug: cfg.debug, echo: cfg.echo, }
-    debug '^345^', cfg
-    throw new Error "^dba@333^ property `sqlt` not supported (yet)"   if cfg.sqlt?
-    throw new Error "^dba@334^ property `schema` not supported (yet)" if cfg.schema?
-    throw new Error "^dba@335^ property `path` not supported (yet)"   if cfg.path?
+    @cfg          = LFT.freeze { L.types.defaults.dba_constructor_cfg..., cfg..., }
+    @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
+    debug '^345^', @cfg
+    throw new Error "^dba@333^ property `sqlt` not supported (yet)"   if @cfg.sqlt?
+    throw new Error "^dba@334^ property `schema` not supported (yet)" if @cfg.schema?
+    throw new Error "^dba@335^ property `path` not supported (yet)"   if @cfg.path?
     bsqlt3_cfg    =
-      readonly:       cfg.readonly
-      fileMustExist:  not cfg.create
-      timeout:        cfg.timeout
+      readonly:       @cfg.readonly
+      fileMustExist:  not @cfg.create
+      timeout:        @cfg.timeout
       # verbose:        ### TAINT to be done ###
     #.......................................................................................................
     @sqlt = new_bsqlt3_connection '', bsqlt3_cfg
