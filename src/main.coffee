@@ -98,6 +98,21 @@ class @Dba extends Multimix
     throw new Error "^icql-dba.open@445^ cannot open schema #{rpr schema} (yet)"  if schema is 'main'
     throw new Error "^icql-dba.open@445^ schema #{rpr schema} already exists"     if @has { schema, }
     @attach { path, schema, }
+  #---------------------------------------------------------------------------------------------------------
+  import: ( cfg ) ->
+    cfg         = { L.types.defaults.dba_import_cfg..., cfg..., }
+    validate.dba_import_cfg cfg
+    throw new Error "^dba@338^ `save_as` not implemented" if cfg.save_as?
+    cfg.format  = L._get_format cfg.path, cfg.format
+    debug '^4587984^', { cfg, }
+    switch cfg.format
+      when 'db'
+        @_attach { schema: tmp_schema, path: cfg.path, }
+        throw new Error "^dba@339^ format #{rpr cfg.format} not implemented"
+      when 'sql'
+        throw new Error "^dba@340^ format #{rpr cfg.format} not implemented"
+      else
+        throw new Error "^dba@341^ unknown format #{rpr cfg.format}"
     return null
 
 
