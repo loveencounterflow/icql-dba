@@ -396,7 +396,7 @@ class @Dba extends Multimix
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  attach: ( cfg ) ->
+  _attach: ( cfg ) ->
     schema        = L.pick cfg, 'schema', 'main', 'ic_not_temp_schema'
     path          = L.pick cfg, 'path',   '',     'ic_path'
     schema_i      = @as_identifier  schema
@@ -409,19 +409,19 @@ class @Dba extends Multimix
         unless isa.ic_ram_path @_path_of_schema schema
           throw new Error "^dba@345^ schema 'main' cannot be overwritten if based on file"
         tmp_schema = @_get_free_random_schema()
-        @attach { schema: tmp_schema, path, }
+        @_attach { schema: tmp_schema, path, }
         @copy_schema { from_schema: tmp_schema, to_schema: 'main', }
-        @detach { schema: tmp_schema, }
+        @_detach { schema: tmp_schema, }
         return null
         @_schemas[ schema ] = { path, }
-      @detach { schema, }
+      @_detach { schema, }
     #.......................................................................................................
     @execute "attach #{path_x} as #{schema_i};"
     @_schemas[ schema ] = { path, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  detach: ( cfg ) ->
+  _detach: ( cfg ) ->
     schema        = L.pick cfg, 'schema', null, 'ic_schema'
     schema_i      = @as_identifier  schema
     @execute "detach #{schema_i};"
@@ -439,7 +439,7 @@ class @Dba extends Multimix
   _copy_schema: ( cfg, detach_schema = false ) ->
     detach_from_schema = ->
       return null unless detach_schema
-      return @detach { schema: from_schema, }
+      return @_detach { schema: from_schema, }
     #.......................................................................................................
     from_schema   = L.pick cfg, 'from_schema',  'main'
     to_schema     = L.pick cfg, 'to_schema',    'main'
