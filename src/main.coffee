@@ -274,7 +274,7 @@ class @Dba extends Multimix
     name        = L.pick cfg, 'name', null
     validate_optional.ic_name name
     return ( has_schema = @_is_empty_schema @as_identifier schema ) unless name?
-    throw new Error "^icql-dba.is_empty@34543^ not implemented: is_empty() for anything but schemas, got #{rpr cfg}"
+    throw new Error "^dba@342^ not implemented: is_empty() for anything but schemas, got #{rpr cfg}"
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty_schema: ( schema_i ) -> (
@@ -339,7 +339,7 @@ class @Dba extends Multimix
     R = @first_value @query "select file from pragma_database_list where name = ?;", [ schema, ]
     return R if R?
     return fallback unless fallback is L._misfit
-    throw new Error "^icql-dba.attach@44822^ unknown schema #{rpr schema}"
+    throw new Error "^dba@343^ unknown schema #{rpr schema}"
 
   #---------------------------------------------------------------------------------------------------------
   type_of: ( name, schema = 'main' ) ->
@@ -393,10 +393,10 @@ class @Dba extends Multimix
     #.......................................................................................................
     if @has { schema, }
       unless @_is_empty_schema schema_i
-        throw new Error "^icql-dba.attach@44834^ schema #{rpr schema} not empty"
+        throw new Error "^dba@344^ schema #{rpr schema} not empty"
       if schema is 'main'
         unless isa.ic_ram_path @_path_of_schema schema
-          throw new Error "^icql-dba.attach@44835^ schema 'main' cannot be overwritten if based on file"
+          throw new Error "^dba@345^ schema 'main' cannot be overwritten if based on file"
         tmp_schema = @_get_free_random_schema()
         @attach { schema: tmp_schema, path, }
         @copy_schema { from_schema: tmp_schema, to_schema: 'main', }
