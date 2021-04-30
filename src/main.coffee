@@ -29,6 +29,7 @@ Multimix                  = require 'multimix'
 L                         = @
 L._misfit                 = Symbol 'misfit'
 new_bsqlt3_connection     = require 'better-sqlite3'
+PATH                      = require 'path'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -36,6 +37,16 @@ L.pick = ( d, key, fallback, type = null ) ->
   R = d?[ key ] ? fallback
   validate[ type ] R if type?
   return R
+
+#-----------------------------------------------------------------------------------------------------------
+L._get_extension = ( path ) ->
+  return null if ( R = PATH.extname path ) is ''
+  return R[ 1 .. ]
+
+#-----------------------------------------------------------------------------------------------------------
+L._get_format = ( path, format = null ) ->
+  return format if format?
+  return @._get_extension path
 
 
 #===========================================================================================================
