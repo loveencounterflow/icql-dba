@@ -31,7 +31,6 @@ L._misfit                 = Symbol 'misfit'
 new_bsqlt3_connection     = require 'better-sqlite3'
 PATH                      = require 'path'
 
-
 #-----------------------------------------------------------------------------------------------------------
 L.pick = ( d, key, fallback, type = null ) ->
   R = d?[ key ] ? fallback
@@ -54,31 +53,32 @@ L._get_format = ( path, format = null ) ->
 #-----------------------------------------------------------------------------------------------------------
 class @Dba extends Multimix
 
-  #---------------------------------------------------------------------------------------------------------
-  @_defaults:
-    sqlt:           null  ### [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/) instance ###
-    echo:           false ### whether to echo statements to the terminal ###
-    debug:          false ### whether to print additional debugging info ###
-    path:           ''
-    schema:         'main'
-    create:         true
-    timeout:        5000
-    readonly:       false
+  # #---------------------------------------------------------------------------------------------------------
+  # @_defaults:
+  #   sqlt:           null  ### [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/) instance ###
+  #   echo:           false ### whether to echo statements to the terminal ###
+  #   debug:          false ### whether to print additional debugging info ###
+  #   path:           ''
+  #   schema:         'main'
+  #   create:         true
+  #   timeout:        5000
+  #   readonly:       false
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
     @_statements  = {}
     @_schemas     = {}
-    cfg           = { @constructor._defaults..., cfg..., }
-    @_dbg         = { debug: cfg.debug, echo: cfg.echo, }
-    throw new Error "^dba@333^ property `sqlt` not supported (yet)"   if cfg.sqlt?
-    throw new Error "^dba@334^ property `schema` not supported (yet)" if cfg.schema?
-    throw new Error "^dba@335^ property `path` not supported (yet)"   if cfg.path?
+    @cfg          = LFT.freeze { L.types.defaults.dba_constructor_cfg..., cfg..., }
+    @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
+    debug '^345^', @cfg
+    throw new Error "^dba@333^ property `sqlt` not supported (yet)"   if @cfg.sqlt?
+    throw new Error "^dba@334^ property `schema` not supported (yet)" if @cfg.schema?
+    throw new Error "^dba@335^ property `path` not supported (yet)"   if @cfg.path?
     bsqlt3_cfg    =
-      readonly:       cfg.readonly
-      fileMustExist:  not cfg.create
-      timeout:        cfg.timeout
+      readonly:       @cfg.readonly
+      fileMustExist:  not @cfg.create
+      timeout:        @cfg.timeout
       # verbose:        ### TAINT to be done ###
     #.......................................................................................................
     @sqlt = new_bsqlt3_connection '', bsqlt3_cfg
@@ -102,6 +102,7 @@ class @Dba extends Multimix
     debug '^4587984^', { cfg, }
     switch cfg.format
       when 'db'
+        # tmp_schema = @_get_free_random_schema()
         @_attach { schema: tmp_schema, path: cfg.path, }
         throw new Error "^dba@339^ format #{rpr cfg.format} not implemented"
       when 'sql'
@@ -426,6 +427,7 @@ class @Dba extends Multimix
         @_schemas[ schema ] = { path, }
       @_detach { schema, }
     #.......................................................................................................
+    ### TAINT use placeholders as in `attach ? as ?;` instead ###
     @execute "attach #{path_x} as #{schema_i};"
     @_schemas[ schema ] = { path, }
     return null
