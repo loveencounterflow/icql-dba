@@ -50,6 +50,41 @@ intertype                 = new Intertype module.exports
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_list_objects_ordering', ( x ) -> ( not x? ) or ( x is 'drop' )
 
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_format', ( x ) -> x in [ 'sql', 'db', ]
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_open_cfg', tests:
+  "x is an object":                       ( x ) -> @isa.object          x
+  "x.schema is a schema but not temp":    ( x ) -> @isa.ic_not_temp_schema x.schema
+  "x.path is an ic_path":                 ( x ) -> @isa.ic_path x.path
+  "x.format? is an optional dba_format":  ( x ) -> @isa_optional.dba_format x.format
+  "x.save_as? is an optional ic_path":    ( x ) -> @isa_optional.ic_path x.save_as
+  "x.overwrite":                          ( x ) -> @isa.boolean x.overwrite
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_import_cfg', tests:
+  "x is an object":                       ( x ) -> @isa.object          x
+  "x.schema is a schema but not temp":    ( x ) -> @isa.ic_not_temp_schema x.schema
+  "x.path is an ic_path":                 ( x ) -> @isa.ic_path x.path
+  "x.format? is an optional dba_format":  ( x ) -> @isa_optional.dba_format x.format
+  "x.save_as? is an optional ic_path":    ( x ) -> @isa_optional.ic_path x.save_as
+  "x.overwrite":                          ( x ) -> @isa.boolean x.overwrite
+
+#-----------------------------------------------------------------------------------------------------------
+@defaults =
+  #.........................................................................................................
+  dba_open_cfg:
+    schema:     null
+    path:       ''
+    replace:    false
+  #.........................................................................................................
+  dba_import_cfg:
+    schema:     null
+    path:       null
+    format:     null
+    save_as:    null
+    overwrite:  false
 
 
 
