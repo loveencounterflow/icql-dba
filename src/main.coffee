@@ -72,32 +72,27 @@ class @Dba extends Multimix
     @_schemas     = {}
     cfg           = { @constructor._defaults..., cfg..., }
     @_dbg         = { debug: cfg.debug, echo: cfg.echo, }
-    throw new Error "^icql-dba.open@445^ argument `sqlt` not supported (yet)" if cfg.sqlt?
-    path          = L.pick cfg, 'path',   @constructor._defaults.path,   'ic_path'
-    schema        = L.pick cfg, 'schema', @constructor._defaults.schema, 'ic_schema'
+    throw new Error "^dba@333^ property `sqlt` not supported (yet)"   if cfg.sqlt?
+    throw new Error "^dba@334^ property `schema` not supported (yet)" if cfg.schema?
+    throw new Error "^dba@335^ property `path` not supported (yet)"   if cfg.path?
     bsqlt3_cfg    =
       readonly:       cfg.readonly
       fileMustExist:  not cfg.create
       timeout:        cfg.timeout
       # verbose:        ### TAINT to be done ###
     #.......................................................................................................
-    ### TAINT unify this part with `open()` ###
-    if schema is 'main'
-      @sqlt               = new_bsqlt3_connection path, bsqlt3_cfg
-      @_schemas[ schema ] = { path, }
-    else
-      @sqlt = new_bsqlt3_connection '', bsqlt3_cfg
-      @open { path, schema, }
-    #.......................................................................................................
+    @sqlt = new_bsqlt3_connection '', bsqlt3_cfg
     return undefined ### always return `undefined` from constructor ###
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
-    path        = L.pick cfg, 'path',   null, 'ic_path'
-    schema      = L.pick cfg, 'schema', null, 'ic_schema'
-    throw new Error "^icql-dba.open@445^ cannot open schema #{rpr schema} (yet)"  if schema is 'main'
-    throw new Error "^icql-dba.open@445^ schema #{rpr schema} already exists"     if @has { schema, }
-    @attach { path, schema, }
+    cfg         = { L.types.defaults.dba_open_cfg..., cfg..., }
+    validate.dba_open_cfg
+    throw new Error "^dba@336^ cannot open schema #{rpr cfg.schema} (yet)"  if cfg.schema is 'main'
+    throw new Error "^dba@337^ schema #{rpr cfg.schema} already exists"     if @has { schema: cfg.schema, }
+    @_attach { path, schema, }
+    return null
+
   #---------------------------------------------------------------------------------------------------------
   import: ( cfg ) ->
     cfg         = { L.types.defaults.dba_import_cfg..., cfg..., }
