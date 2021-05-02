@@ -39,7 +39,7 @@ intertype                 = new Intertype module.exports
 @declare 'ic_schema', ( x ) ->
   ### NOTE to keep things simple, only allow lower case ASCII letters, digits, underscores in schemas ###
   return false unless @isa.text x
-  return ( /^[a-z][a-z0-9_]*$/ ).test x
+  return ( /^[a-z_][a-z0-9_]*$/ ).test x
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'ic_not_temp_schema',  ( x ) -> ( @isa.ic_schema x ) and ( x isnt 'temp' )
@@ -52,6 +52,11 @@ intertype                 = new Intertype module.exports
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_format', ( x ) -> x in [ 'sql', 'db', ]
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_constructor_cfg', tests:
+  "x is an object":                       ( x ) -> @isa.object          x
+  "x._temp_prefix is a ic_schema":        ( x ) -> @isa.ic_schema       x._temp_prefix
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_open_cfg', tests:
@@ -68,17 +73,27 @@ intertype                 = new Intertype module.exports
   "x.schema is a schema but not temp":    ( x ) -> @isa.ic_not_temp_schema x.schema
   "x.path is an ic_path":                 ( x ) -> @isa.ic_path x.path
   "x.format? is an optional dba_format":  ( x ) -> @isa_optional.dba_format x.format
-  "x.save_as? is an optional ic_path":    ( x ) -> @isa_optional.ic_path x.save_as
-  "x.overwrite":                          ( x ) -> @isa.boolean x.overwrite
+  # "x.overwrite is a boolean":             ( x ) -> @isa.boolean x.overwrite
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_attach_cfg', tests:
+  "x is an object":                       ( x ) -> @isa.object              x
+  "x.schema is a schema but not temp":    ( x ) -> @isa.ic_not_temp_schema  x.schema
+  "x.path is an ic_path":                 ( x ) -> @isa.ic_path             x.path
 
 #-----------------------------------------------------------------------------------------------------------
 @defaults =
   #.........................................................................................................
   dba_constructor_cfg:
+    _temp_prefix: '_dba_temp_'
     readonly:     false
     create:       true
     overwrite:    false
     timeout:      5000
+  #.........................................................................................................
+  dba_attach_cfg:
+    schema:     null
+    path:       ''
   #.........................................................................................................
   dba_open_cfg:
     schema:     null
@@ -89,8 +104,7 @@ intertype                 = new Intertype module.exports
     schema:     null
     path:       null
     format:     null
-    save_as:    null
-    overwrite:  false
+    # overwrite:  false
 
 
 
