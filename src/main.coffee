@@ -412,23 +412,16 @@ class @Dba extends Multimix
     cfg = { L.types.defaults.dba_attach_cfg..., cfg..., }
     validate.dba_attach_cfg cfg
     #.......................................................................................................
-    if @has { schema, }
-      unless @_is_empty_schema schema_i
-        throw new Error "^dba@344^ schema #{rpr schema} not empty"
-      if schema is 'main'
-        unless isa.ic_ram_path @_path_of_schema schema
-          throw new Error "^dba@345^ schema 'main' cannot be overwritten if based on file"
-        tmp_schema = @_get_free_random_schema()
-        @_attach { schema: tmp_schema, path, }
-        @copy_schema { from_schema: tmp_schema, to_schema: 'main', }
-        @_detach { schema: tmp_schema, }
-        return null
-        @_schemas[ schema ] = { path, }
-      @_detach { schema, }
+    if @has { schema: cfg.schema, }
+      throw new Error "^dba@344^ schema #{rpr schema} already attached"
     #.......................................................................................................
-    ### TAINT use placeholders as in `attach ? as ?;` instead ###
-    @execute "attach #{path_x} as #{schema_i};"
-    @_schemas[ schema ] = { path, }
+    try
+      @run "attach ? as ?;", [ cfg.path, cfg.schema, ]
+    catch error
+      throw error unless error.code is 'SQLITE_ERROR'
+      throw error unless error.message.startsWith 'too many attached databases'
+      throw new Error "^dba@344^ #{error.message}"
+    @_schemas[ cfg.schema ] = { path: cfg.path, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
