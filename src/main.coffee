@@ -70,8 +70,9 @@ class @Dba extends Multimix
     @_statements  = {}
     @_schemas     = {}
     @cfg          = LFT.freeze { L.types.defaults.dba_constructor_cfg..., cfg..., }
+    validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
-    debug '^345^', @cfg
+    # debug '^345^', @cfg
     throw new Error "^dba@333^ property `sqlt` not supported (yet)"   if @cfg.sqlt?
     throw new Error "^dba@334^ property `schema` not supported (yet)" if @cfg.schema?
     throw new Error "^dba@335^ property `path` not supported (yet)"   if @cfg.path?
@@ -408,10 +409,8 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   _attach: ( cfg ) ->
-    schema        = L.pick cfg, 'schema', 'main', 'ic_not_temp_schema'
-    path          = L.pick cfg, 'path',   '',     'ic_path'
-    schema_i      = @as_identifier  schema
-    path_x        = @as_sql         path
+    cfg = { L.types.defaults.dba_attach_cfg..., cfg..., }
+    validate.dba_attach_cfg cfg
     #.......................................................................................................
     if @has { schema, }
       unless @_is_empty_schema schema_i
