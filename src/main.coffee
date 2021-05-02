@@ -116,17 +116,22 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   _get_free_temp_schema: -> @cfg._temp_prefix + "#{( @_max_temp_schema_number() + 1 )}"
+
+  #---------------------------------------------------------------------------------------------------------
   import: ( cfg ) ->
     cfg         = { L.types.defaults.dba_import_cfg..., cfg..., }
+    cfg.format ?= L._get_format cfg.path, cfg.format
     validate.dba_import_cfg cfg
-    throw new Error "^dba@338^ `save_as` not implemented" if cfg.save_as?
-    cfg.format  = L._get_format cfg.path, cfg.format
-    debug '^4587984^', { cfg, }
+    debug '^469465^', cfg
     switch cfg.format
       when 'db'
-        # tmp_schema = @_get_free_random_schema()
+        tmp_schema = @_get_free_temp_schema()
         @_attach { schema: tmp_schema, path: cfg.path, }
-        throw new Error "^dba@339^ format #{rpr cfg.format} not implemented"
+        debug '^469465^', @list_schemas()
+        @_attach { schema: cfg.schema, path: '', }
+        debug '^469465^', @list_schemas()
+        @copy_schema { from_schema: tmp_schema, to_schema: cfg.schema, }
+        @_detach { schema: tmp_schema, }
       when 'sql'
         throw new Error "^dba@340^ format #{rpr cfg.format} not implemented"
       else
