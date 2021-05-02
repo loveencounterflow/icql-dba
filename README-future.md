@@ -205,6 +205,11 @@ dba.open { schema: 'myschema', }
   file extension does not match:
   * `.dump`, `.sql` are recognized as `format: 'sql'`
   * `.db`, `.sqlite` are recognized as `format: 'sqlite'`
+* In the future, `import()` may accept additional arguments:
+  * `save_as` to specify a path for Continuous or Eventual Persistency
+  * `ram` will default to `false` when `save_as` is not given and to `true` otherwise
+  * `overwrite` to specify whether an existing file at the position indicated by `save_as` should be
+    overwritten.
 
 ```coffee
 dba     = new Dba()
