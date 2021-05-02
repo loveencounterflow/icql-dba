@@ -95,6 +95,27 @@ class @Dba extends Multimix
     return null
 
   #---------------------------------------------------------------------------------------------------------
+  _list_temp_schema_numbers: ->
+    matcher = @cfg._temp_prefix + '%'
+    sql     = """
+      select
+          cast( substring( name, ? ) as integer ) as n
+        from pragma_database_list
+        where name like ?;"""
+    return @all_first_values @query sql, [ @cfg._temp_prefix.length + 1, matcher, ]
+
+  #---------------------------------------------------------------------------------------------------------
+  _max_temp_schema_number: ->
+    matcher = @cfg._temp_prefix + '%'
+    sql     = """
+      select
+          max( cast( substring( name, ? ) as integer ) ) as n
+        from pragma_database_list
+        where name like ?;"""
+    return ( @first_value @query sql, [ @cfg._temp_prefix.length + 1, matcher, ] ) ? 0
+
+  #---------------------------------------------------------------------------------------------------------
+  _get_free_temp_schema: -> @cfg._temp_prefix + "#{( @_max_temp_schema_number() + 1 )}"
   import: ( cfg ) ->
     cfg         = { L.types.defaults.dba_import_cfg..., cfg..., }
     validate.dba_import_cfg cfg
