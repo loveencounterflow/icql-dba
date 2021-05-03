@@ -7,6 +7,8 @@ specifiers:
   intertype: 7.6.7
   letsfreezethat: ^3.1.0
   multimix: ^5.0.0
+  mysql-tokenizer: ^1.0.7
+  n-readlines: ^1.0.1
   tempy: ^1.0.1
   trash: ^7.1.1
 
@@ -17,6 +19,8 @@ dependencies:
   intertype: 7.6.7
   letsfreezethat: 3.1.0
   multimix: 5.0.0
+  mysql-tokenizer: 1.0.7
+  n-readlines: 1.0.1
   tempy: 1.0.1
   trash: 7.1.1
 
@@ -587,6 +591,15 @@ packages:
 
   /multimix/5.0.0:
     resolution: {integrity: sha512-N9cdGSDDD7kxOV7R6e4iZqsHTZ4F4iiSDWqMcVqx4gEH6HBtRXav39Gj3fgT1YqvBcwPCQuf0Oa5R2cDaLWK8A==}
+    dev: false
+
+  /mysql-tokenizer/1.0.7:
+    resolution: {integrity: sha512-rWqyF6BuOt4KA+76dg/nwMZKD5TZXg/O43DH6sFc0czmqZnjn6wawhxhVDFD7wdFy+6adjPO4K/S+0x243b0dA==}
+    dev: false
+
+  /n-readlines/1.0.1:
+    resolution: {integrity: sha512-z4SyAIVgMy7CkgsoNw7YVz40v0g4+WWvvqy8+ZdHrCtgevcEO758WQyrYcw3XPxcLxF+//RszTz/rO48nzD0wQ==}
+    engines: {node: '>=6.x.x'}
     dev: false
 
   /napi-build-utils/1.0.2:
