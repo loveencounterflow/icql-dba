@@ -124,18 +124,85 @@ class @Dba extends Multimix
     validate.dba_import_cfg cfg
     debug '^469465^', cfg
     switch cfg.format
-      when 'db'
-        tmp_schema = @_get_free_temp_schema()
-        @_attach { schema: tmp_schema, path: cfg.path, }
-        debug '^469465^', @list_schemas()
-        @_attach { schema: cfg.schema, path: '', }
-        debug '^469465^', @list_schemas()
-        @copy_schema { from_schema: tmp_schema, to_schema: cfg.schema, }
-        @_detach { schema: tmp_schema, }
-      when 'sql'
-        throw new Error "^dba@340^ format #{rpr cfg.format} not implemented"
+      when 'db'   then @_import_db  cfg
+      when 'sql'  then @_import_sql cfg
       else
         throw new Error "^dba@341^ unknown format #{rpr cfg.format}"
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _import_db: ( cfg ) ->
+    tmp_schema = @_get_free_temp_schema()
+    @_attach { schema: tmp_schema, path: cfg.path, }
+    debug '^469465^', @list_schemas()
+    @_attach { schema: cfg.schema, path: '', }
+    debug '^469465^', @list_schemas()
+    @copy_schema { from_schema: tmp_schema, to_schema: cfg.schema, }
+    @_detach { schema: tmp_schema, }
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _import_sql: ( cfg ) ->
+    switch cfg.method
+      when 'single' then @_import_sql_single  cfg
+      when 'batch'  then @_import_sql_batch   cfg
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  @_import_sql_single = ( cfg ) ->
+    db.exec FS.readFileSync cfg.path, { encoding: 'utf-8', }
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  @_import_sql_batch = ( cfg ) ->
+    for statements from @_walk_batches ( @_walk_statements_from_path cfg.path ), cfg.batch_size
+      compound_statement  = statements.join ''
+      count              += compound_statement.length
+      @execute compound_statement
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  @_walk_statements_from_path = ( sql_path ) ->
+    ### Given a path, iterate over SQL statements which are signalled by semicolons (`;`) that appear outside
+    of literals and comments (and the end of input). ###
+    ### thx to https://stackabuse.com/reading-a-file-line-by-line-in-node-js/ ###
+    ### thx to https://github.com/nacholibre/node-readlines ###
+    readlines       = new ( require 'n-readlines' ) sql_path
+    #.......................................................................................................
+    cfg           =
+      regExp: ( require 'mysql-tokenizer/lib/regexp-sql92' )
+    tokenize      = ( require 'mysql-tokenizer' ) cfg
+    collector     = null
+    stream        = FS.createReadStream sql_path
+    #.......................................................................................................
+    flush = ->
+      R         = collector.join ''
+      collector = null
+      return R
+    #.......................................................................................................
+    while ( line = readlines.next() ) isnt false
+      for token, cur_idx in tokenize line + '\n'
+        if token is ';'
+          ( collector ?= [] ).push token
+          yield flush()
+          continue
+        # if token.startsWith '--'
+        #   continue
+        ( collector ?= [] ).push token
+    #.......................................................................................................
+    yield flush() if collector?
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  @_walk_batches = ( iterator, batch_size = 1 ) ->
+    ### Given an iterator and a batch size, iterate over lists of values yielded by the iterator. ###
+    batch = null
+    for d from iterator
+      ( batch ?= [] ).push d
+      if batch.length >= batch_size
+        yield batch
+        batch = null
+    yield batch if batch?
     return null
 
 
