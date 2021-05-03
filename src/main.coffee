@@ -144,8 +144,8 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   _import_sql: ( cfg ) ->
     switch cfg.method
-      when 'single' then @_import_sql_single  cfg
-      when 'batch'  then @_import_sql_batch   cfg
+      when 'single' then return @_import_sql_single cfg
+      when 'batch'  then return @_import_sql_batch  cfg
     return null
 
   #---------------------------------------------------------------------------------------------------------
