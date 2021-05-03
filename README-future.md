@@ -199,11 +199,11 @@ dba.open { schema: 'myschema', }
 
 * Supported formats include
   * `sqlite` for the SQLite binary file format and
-  * `sql` for SQL dumps.
-* Unlike `open()`, `import()` accepts SQL dumps (and, in the future, possibly other formats).
+  * <del>`sql` for SQL dumps.</del>
+* <del>Unlike `open()`, `import()` accepts SQL dumps (and, in the future, possibly other formats).</del>
 * Use `format: 'sqlite'` or `format: 'sql'` to explicitly specify the intended file format in case the
   file extension does not match:
-  * `.dump`, `.sql` are recognized as `format: 'sql'`
+  * <del>`.dump`, `.sql` are recognized as `format: 'sql'`</del> (**Not yet implemented**)
   * `.db`, `.sqlite` are recognized as `format: 'sqlite'`
 * In the future, `import()` may accept additional arguments:
   * `save_as` to specify a path for Continuous or Eventual Persistency
@@ -215,7 +215,7 @@ dba.open { schema: 'myschema', }
 dba     = new Dba()
 schema  = 'myschema'
 dba.open { schema, }
-dba.import { path: 'path/to/dump.sql', schema, }
+dba.import { path: 'path/to/some.db', schema, }
 ```
 
 ### Transfer DB
