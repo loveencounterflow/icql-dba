@@ -73,6 +73,8 @@ intertype                 = new Intertype module.exports
   "x.schema is a schema but not temp":    ( x ) -> @isa.ic_not_temp_schema x.schema
   "x.path is an ic_path":                 ( x ) -> @isa.ic_path x.path
   "x.format? is an optional dba_format":  ( x ) -> @isa_optional.dba_format x.format
+  "x.method is 'single' or 'batch'":      ( x ) -> x.method in [ 'single', 'batch', ]
+  "x.batch_size? is a positive_integer":  ( x ) -> @isa_optional.positive_integer x.batch_size
   # "x.overwrite is a boolean":             ( x ) -> @isa.boolean x.overwrite
 
 #-----------------------------------------------------------------------------------------------------------
@@ -104,6 +106,8 @@ intertype                 = new Intertype module.exports
     schema:     null
     path:       null
     format:     null
+    method:     'single'
+    batch_size: 1000
     # overwrite:  false
 
 
