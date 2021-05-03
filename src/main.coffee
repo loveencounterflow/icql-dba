@@ -149,12 +149,12 @@ class @Dba extends Multimix
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  @_import_sql_single = ( cfg ) ->
-    db.exec FS.readFileSync cfg.path, { encoding: 'utf-8', }
+  _import_sql_single: ( cfg ) ->
+    @execute FS.readFileSync cfg.path, { encoding: 'utf-8', }
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  @_import_sql_batch = ( cfg ) ->
+  _import_sql_batch: ( cfg ) ->
     for statements from @_walk_batches ( @_walk_statements_from_path cfg.path ), cfg.batch_size
       compound_statement  = statements.join ''
       count              += compound_statement.length
@@ -162,7 +162,7 @@ class @Dba extends Multimix
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  @_walk_statements_from_path = ( sql_path ) ->
+  _walk_statements_from_path: ( sql_path ) ->
     ### Given a path, iterate over SQL statements which are signalled by semicolons (`;`) that appear outside
     of literals and comments (and the end of input). ###
     ### thx to https://stackabuse.com/reading-a-file-line-by-line-in-node-js/ ###
@@ -194,7 +194,7 @@ class @Dba extends Multimix
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  @_walk_batches = ( iterator, batch_size = 1 ) ->
+  _walk_batches: ( iterator, batch_size = 1 ) ->
     ### Given an iterator and a batch size, iterate over lists of values yielded by the iterator. ###
     batch = null
     for d from iterator
