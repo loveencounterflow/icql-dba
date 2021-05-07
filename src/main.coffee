@@ -122,7 +122,6 @@ class @Dba extends Multimix
     cfg         = { L.types.defaults.dba_import_cfg..., cfg..., }
     cfg.format ?= L._get_format cfg.path, cfg.format
     validate.dba_import_cfg cfg
-    debug '^469465^', cfg
     switch cfg.format
       when 'db'   then @_import_db  cfg
       when 'sql'  then @_import_sql cfg
