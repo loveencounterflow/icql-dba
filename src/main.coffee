@@ -142,6 +142,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   _import_sql: ( cfg ) ->
+    throw new Error "µ763 import format sql not yet implemented"
     switch cfg.method
       when 'single' then return @_import_sql_single cfg
       when 'batch'  then return @_import_sql_batch  cfg
