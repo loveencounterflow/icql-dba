@@ -188,7 +188,8 @@ dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
 #### New RAM DB without Eventual Persistency
 
 * To `open()` a RAM DB that has no inherent link to a file, omit the `path` setting (or set it to `null`).
-* To obtain a RAM DB from an existing file DB but *without* writing changes back to that file, use [`import()`]().
+* To obtain a RAM DB from an existing file DB but *without* writing changes back to that file, use
+  [`import()`](#import-a-db).
 * Observe that when `path` is missing, `ram` defaults to `true`, so in this case it may be omitted or set to
   `null`.
 * It is *not* allowed to call `save()` *without* `path` when DB was opened without `path`.
