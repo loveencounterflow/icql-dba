@@ -21,6 +21,7 @@
     - [RAM DB with Eventual Persistency](#ram-db-with-eventual-persistency)
     - [RAM DB without Eventual Persistency](#ram-db-without-eventual-persistency)
   - [Import a DB](#import-a-db)
+    - [Notes on `import { format: 'sql', }`](#notes-on-import--format-sql-)
   - [Transfer DB](#transfer-db)
     - [Transfer File-Based DB to RAM](#transfer-file-based-db-to-ram)
     - [Transfer RAM DB to file](#transfer-ram-db-to-file)
@@ -217,6 +218,27 @@ schema  = 'myschema'
 dba.open { schema, }
 dba.import { path: 'path/to/some.db', schema, }
 ```
+
+#### Notes on `import { format: 'sql', }`
+
+* A valid SQL script may contain arbitrary SQL statements other than such statements as are output into an
+  SQL dump and are strictly requisite to re-creating a given DB instance's state.
+* A valid SQLite SQL script may also contain dot-commands that would be interpreted by the SQLite shell and
+  are not part of SQL proper
+* Even if all dot-commands are discarded or declared errors, there's still `attach 'path/to/my.db' as
+  myschema`, so an SQL script may define structures and data in multiple schemas that may also reference
+  each other.
+* One way to deal with this is to make not only all dot-commands illegal (they don't work with
+  `dba.execute()` anyhow so no change is required), but also demand that valid SQL scripts either
+  * do not reference any schema except `main`, explicitly or implicitly, or
+  * where a schema other than `main` is intended, an explicit configuration setting like `from_schema` must
+    be included, and only that schema will be imported.
+* In any event, `imüport()`ing SQL scripts/dumps will include:
+  * setting up a temporary `dba` (or B3) instance,
+  * in case batch mode is used (for big files), crude lexing of the SQL is needed so we can delineate and
+    group statments (already implemented),
+  * `vacuum`ing of the temporary DB to an SQLite binary DB file, and
+  * `open()`ing that file from the original DBA instance.
 
 ### Transfer DB
 
