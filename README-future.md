@@ -17,15 +17,15 @@
 - [Usage](#usage)
   - [Create DBA Object](#create-dba-object)
   - [Create DB with `open()`](#create-db-with-open)
-    - [File-Based DB with Continuous Persistency](#file-based-db-with-continuous-persistency)
+    - [New or Existing File-Based DB with Continuous Persistency](#new-or-existing-file-based-db-with-continuous-persistency)
     - [RAM DB with Eventual Persistency](#ram-db-with-eventual-persistency)
-    - [RAM DB without Eventual Persistency](#ram-db-without-eventual-persistency)
+    - [New RAM DB without Eventual Persistency](#new-ram-db-without-eventual-persistency)
   - [Import a DB](#import-a-db)
     - [Notes on `import { format: 'sql', }`](#notes-on-import--format-sql-)
   - [Transfer DB](#transfer-db)
     - [Transfer File-Based DB to RAM](#transfer-file-based-db-to-ram)
     - [Transfer RAM DB to file](#transfer-ram-db-to-file)
-  - [Persisting a DB](#persisting-a-db)
+  - [Save DB](#save-db)
     - [Use `save()` to Save to Linked File](#use-save-to-save-to-linked-file)
     - [Exporting to Binary and Textual Formats](#exporting-to-binary-and-textual-formats)
 
@@ -158,7 +158,7 @@ dba = new DBA.Dba()
 
 ### Create DB with `open()`
 
-#### File-Based DB with Continuous Persistency
+#### New or Existing File-Based DB with Continuous Persistency
 
 * `path` must be a string that is a valid file system path (up to the parent directory); its final component
   must either point to an existing SQLite DB file or be non-existant. (Write permissions are required in
@@ -185,9 +185,10 @@ dba.open { path: 'path/to/my.db', schema: 'myschema', }
 dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
 ```
 
-#### RAM DB without Eventual Persistency
+#### New RAM DB without Eventual Persistency
 
 * To `open()` a RAM DB that has no inherent link to a file, omit the `path` setting (or set it to `null`).
+* To obtain a RAM DB from an existing file DB but *without* writing changes back to that file, use [`import()`]().
 * Observe that when `path` is missing, `ram` defaults to `true`, so in this case it may be omitted or set to
   `null`.
 * It is *not* allowed to call `save()` *without* `path` when DB was opened without `path`.
@@ -195,6 +196,7 @@ dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
 ```coffee
 dba.open { schema: 'myschema', }
 ```
+
 
 ### Import a DB
 
@@ -272,7 +274,7 @@ dba.transfer_to_ram { schema: 'myschema', }
 dba.transfer_to_file { schema: 'myschema', path, }
 ```
 
-### Persisting a DB
+### Save DB
 
 #### Use `save()` to Save to Linked File
 
