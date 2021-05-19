@@ -87,11 +87,18 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
-    cfg         = { L.types.defaults.dba_open_cfg..., cfg..., }
-    validate.dba_open_cfg
-    throw new Error "^dba@336^ cannot open schema #{rpr cfg.schema} (yet)"  if cfg.schema is 'main'
-    throw new Error "^dba@337^ schema #{rpr cfg.schema} already exists"     if @has { schema: cfg.schema, }
-    @_attach { path, schema, }
+    validate.dba_open_cfg ( cfg = { L.types.defaults.dba_open_cfg..., cfg..., } )
+    { path, schema, ram, }  = cfg
+    throw new Error "^dba@336^ cannot open schema #{rpr schema} (yet)"  if schema in [ 'main', 'temp', ]
+    throw new Error "^dba@337^ schema #{rpr schema} already exists"     if @has { schema, }
+    if ram
+      tmp_schema = @_get_free_temp_schema()
+      @_attach { schema: tmp_schema, path, }
+      @_attach { schema, path: '', saveas: path, }
+      @_copy_schema { from_schema: tmp_schema, to_schema: schema, }
+      @_detach { schema: tmp_schema, }
+    else
+      @_attach { path, schema, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -318,10 +325,10 @@ class @Dba extends Multimix
   transaction:    ( P...  ) -> @sqlt.transaction      P...
 
   #---------------------------------------------------------------------------------------------------------
-  get_foreign_key_state: -> not not ( @pragma "foreign_keys;" )[ 0 ].foreign_keys
+  _get_foreign_key_state: -> not not ( @pragma "foreign_keys;" )[ 0 ].foreign_keys
 
   #---------------------------------------------------------------------------------------------------------
-  set_foreign_key_state: ( onoff ) ->
+  _set_foreign_key_state: ( onoff ) ->
     validate.boolean onoff
     @pragma "foreign_keys = #{onoff};"
     return null
@@ -485,36 +492,37 @@ class @Dba extends Multimix
   #=========================================================================================================
   # DB STRUCTURE MODIFICATION
   #---------------------------------------------------------------------------------------------------------
-  ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
-  clear: ( cfg ) ->
-    schema        = L.pick cfg, 'schema', 'main'
-    validate.ic_schema schema
-    schema_i      = @as_identifier schema
-    R             = 0
-    fk_state      = @get_foreign_key_state()
-    @set_foreign_key_state off
-    for { type, name, } in @list @walk_objects { schema, _ordering: 'drop', }
-      statement = "drop #{type} if exists #{@as_identifier name};"
-      @execute statement
-      R += +1
-    @set_foreign_key_state fk_state
-    return R
+  # ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
+  # clear: ( cfg ) ->
+  #   schema        = L.pick cfg, 'schema', 'main'
+  #   validate.ic_schema schema
+  #   schema_i      = @as_identifier schema
+  #   R             = 0
+  #   fk_state      = @_get_foreign_key_state()
+  #   @_set_foreign_key_state off
+  #   for { type, name, } in @list @walk_objects { schema, _ordering: 'drop', }
+  #     statement = "drop #{type} if exists #{@as_identifier name};"
+  #     @execute statement
+  #     R += +1
+  #   @_set_foreign_key_state fk_state
+  #   return R
 
   #---------------------------------------------------------------------------------------------------------
   _attach: ( cfg ) ->
-    cfg = { L.types.defaults.dba_attach_cfg..., cfg..., }
-    validate.dba_attach_cfg cfg
+    validate.dba_attach_cfg ( cfg = { L.types.defaults.dba_attach_cfg..., cfg..., } )
+    { path, schema, saveas, }   = cfg
+    saveas                     ?= path
     #.......................................................................................................
-    if @has { schema: cfg.schema, }
+    if @has { schema, }
       throw new Error "^dba@344^ schema #{rpr schema} already attached"
     #.......................................................................................................
     try
-      @run "attach ? as ?;", [ cfg.path, cfg.schema, ]
+      @run "attach ? as ?;", [ path, schema, ]
     catch error
       throw error unless error.code is 'SQLITE_ERROR'
       throw error unless error.message.startsWith 'too many attached databases'
       throw new Error "^dba@344^ #{error.message}"
-    @_schemas[ cfg.schema ] = { path: cfg.path, }
+    @_schemas[ schema ] = { path: saveas, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -529,19 +537,17 @@ class @Dba extends Multimix
   #=========================================================================================================
   # IN-MEMORY PROCESSING
   #-----------------------------------------------------------------------------------------------------------
-  move_schema: ( cfg ) -> @_copy_schema cfg, true
-  copy_schema: ( cfg ) -> @_copy_schema cfg, false
+  _move_schema: ( cfg ) -> @_copy_or_move_schema cfg, true
+  _copy_schema: ( cfg ) -> @_copy_or_move_schema cfg, false
 
   #-----------------------------------------------------------------------------------------------------------
-  _copy_schema: ( cfg, detach_schema = false ) ->
+  _copy_or_move_schema: ( cfg, detach_schema = false ) ->
     detach_from_schema = ->
       return null unless detach_schema
       return @_detach { schema: from_schema, }
     #.......................................................................................................
-    from_schema   = L.pick cfg, 'from_schema',  'main'
-    to_schema     = L.pick cfg, 'to_schema',    'main'
-    validate.ic_schema from_schema
-    validate.ic_schema to_schema
+    validate.copy_or_move_schema_cfg ( cfg = { L.types.defaults.copy_or_move_schema_cfg..., cfg..., } )
+    { from_schema, to_schema, } = cfg
     #.......................................................................................................
     if from_schema is to_schema
       throw new Error "µ767 unable to copy schema to itself, got #{rpr cfg} (schema #{rpr from_schema})"
@@ -560,8 +566,8 @@ class @Dba extends Multimix
     to_schema_x   = @as_identifier to_schema
     from_schema_x = @as_identifier from_schema
     inserts       = []
-    fk_state      = @get_foreign_key_state()
-    @set_foreign_key_state off
+    fk_state      = @_get_foreign_key_state()
+    @_set_foreign_key_state off
     #.......................................................................................................
     for d in from_schema_objects
       continue if ( not d.sql? ) or ( d.sql is '' )
@@ -583,40 +589,41 @@ class @Dba extends Multimix
         inserts.push "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
     #.......................................................................................................
     @execute sql for sql in inserts
-    @set_foreign_key_state fk_state
+    @_set_foreign_key_state fk_state
     @pragma "#{@as_identifier to_schema}.foreign_key_check;" if fk_state
     return detach_from_schema()
 
-  #---------------------------------------------------------------------------------------------------------
-  save_as: ( cfg ) ->
-    ### TAINT add boolean `cfg.overwrite` ###
-    schema    = L.pick cfg, 'schema',     'main', 'ic_schema'
-    path      = L.pick cfg, 'path',       null,   'ic_path'
-    overwrite = L.pick cfg, 'overwrite',  false,  'boolean'
-    @_export schema, path, 'sqlitedb', overwrite
-    ### TAINT associate path with schema ###
-    return null
+  # #---------------------------------------------------------------------------------------------------------
+  ### TAINT to be replaced by `export()`, `transfer()` ###
+  # save_as: ( cfg ) ->
+  #   ### TAINT add boolean `cfg.overwrite` ###
+  #   schema    = L.pick cfg, 'schema',     'main', 'ic_schema'
+  #   path      = L.pick cfg, 'path',       null,   'ic_path'
+  #   overwrite = L.pick cfg, 'overwrite',  false,  'boolean'
+  #   @_export schema, path, 'sqlitedb', overwrite
+  #   ### TAINT associate path with schema ###
+  #   return null
 
-  #---------------------------------------------------------------------------------------------------------
-  export: ( cfg ) ->
-    ### TAINT add boolean `cfg.overwrite` ###
-    schema    = L.pick cfg, 'schema',     'main', 'ic_schema'
-    path      = L.pick cfg, 'path',       null,   'ic_path'
-    overwrite = L.pick cfg, 'overwrite',  false,  'boolean'
-    format    = @_format_from_path path
-    format    = L.pick cfg, 'format',     format, 'ic_db_file_format'
-    return @_export schema, path, format, overwrite
+  # #---------------------------------------------------------------------------------------------------------
+  # export: ( cfg ) ->
+  #   ### TAINT add boolean `cfg.overwrite` ###
+  #   schema    = L.pick cfg, 'schema',     'main', 'ic_schema'
+  #   path      = L.pick cfg, 'path',       null,   'ic_path'
+  #   overwrite = L.pick cfg, 'overwrite',  false,  'boolean'
+  #   format    = @_format_from_path path
+  #   format    = L.pick cfg, 'format',     format, 'ic_db_file_format'
+  #   return @_export schema, path, format, overwrite
 
-  #---------------------------------------------------------------------------------------------------------
-  _export: ( schema, path, format, overwrite ) ->
-    ### TAINT add boolean `cfg.overwrite` ###
-    ### TAINT implement `format` ###
-    schema_i  = @as_identifier schema
-    switch format
-      when 'sqlitedb'
-        db.$.run "vacuum #{schema_i} into ?;", [ path, ]
-      else throw new Error "µ47492 unknown format #{rpr format}"
-    return null
+  # #---------------------------------------------------------------------------------------------------------
+  # _export: ( schema, path, format, overwrite ) ->
+  #   ### TAINT add boolean `cfg.overwrite` ###
+  #   ### TAINT implement `format` ###
+  #   schema_i  = @as_identifier schema
+  #   switch format
+  #     when 'sqlitedb'
+  #       db.$.run "vacuum #{schema_i} into ?;", [ path, ]
+  #     else throw new Error "µ47492 unknown format #{rpr format}"
+  #   return null
 
 
   #=========================================================================================================
