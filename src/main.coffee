@@ -82,13 +82,22 @@ class @Dba extends Multimix
     throw new Error "^dba@336^ cannot open schema #{rpr schema} (yet)"  if schema in [ 'main', 'temp', ]
     throw new Error "^dba@337^ schema #{rpr schema} already exists"     if @has { schema, }
     if ram
-      tmp_schema = @_get_free_temp_schema()
-      @_attach { schema: tmp_schema, path, }
-      @_attach { schema, path: '', saveas: path, }
-      @_copy_schema { from_schema: tmp_schema, to_schema: schema, }
-      @_detach { schema: tmp_schema, }
+      @_open_file_db_in_ram path, schema
     else
       @_attach { path, schema, }
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _open_file_db_in_ram: ( path, schema ) ->
+    ### Given a `path` and a `schema`, create a temporary schema to open the file DB in as well as an empty
+    in-memory schema; then copy all DB objects and their contents from the temporary file schema to the RAM
+    schema. Finally, detach the file schema. Ensure the `path` given is kept around as the `saveas`
+    (implicit) path to be used for eventual persistency (`dba.save()`). ###
+    tmp_schema = @_get_free_temp_schema()
+    @_attach { schema: tmp_schema, path, }
+    @_attach { schema, path: '', saveas: path, }
+    @_copy_schema { from_schema: tmp_schema, to_schema: schema, }
+    @_detach { schema: tmp_schema, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
