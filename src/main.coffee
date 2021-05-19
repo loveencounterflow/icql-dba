@@ -24,7 +24,8 @@ HOLLERITH                 = require 'hollerith-codec'
   declare
   size_of
   type_of }               = @types
-LFT                       = require 'letsfreezethat'
+{ freeze
+  lets }                  = require 'letsfreezethat'
 Multimix                  = require 'multimix'
 L                         = @
 L._misfit                 = Symbol 'misfit'
@@ -57,8 +58,8 @@ class @Dba extends Multimix
   constructor: ( cfg ) ->
     super()
     @_statements  = {}
-    @_schemas     = {}
-    @cfg          = LFT.freeze { L.types.defaults.dba_constructor_cfg..., cfg..., }
+    @_schemas     = freeze {}
+    @cfg          = freeze { L.types.defaults.dba_constructor_cfg..., cfg..., }
     validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
     # debug '^345^', @cfg
@@ -471,7 +472,7 @@ class @Dba extends Multimix
       throw error unless error.code is 'SQLITE_ERROR'
       throw error unless error.message.startsWith 'too many attached databases'
       throw new Error "^dba@344^ #{error.message}"
-    @_schemas[ schema ] = { path: saveas, }
+    @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -479,7 +480,7 @@ class @Dba extends Multimix
     schema        = L.pick cfg, 'schema', null, 'ic_schema'
     schema_i      = @as_identifier  schema
     @execute "detach #{schema_i};"
-    delete @_schemas[ schema ]
+    @_schemas     = lets @_schemas, ( d ) => delete d[ schema ]
     return null
 
 
