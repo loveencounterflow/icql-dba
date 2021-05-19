@@ -94,6 +94,11 @@ Dba                       = null
   "@isa.ic_not_temp_schema x.to_schema":    ( x ) -> @isa.ic_not_temp_schema x.to_schema
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_is_ram_db_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba', tests:
   "x instanceof Dba":                     ( x ) -> x instanceof ( Dba ?= ( require './main' ).Dba )
 
@@ -130,5 +135,9 @@ Dba                       = null
   copy_or_move_schema_cfg:
     from_schema:  null
     to_schema:    null
+  #.........................................................................................................
+  dba_is_ram_db_cfg:
+    schema:       null
+
 
 

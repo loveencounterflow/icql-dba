@@ -116,6 +116,18 @@ class @Dba extends Multimix
     return null
 
   #---------------------------------------------------------------------------------------------------------
+  is_ram_db: ( cfg ) ->
+    validate.dba_is_ram_db_cfg ( cfg = { L.types.defaults.dba_is_ram_db_cfg..., cfg..., } )
+    { schema } = cfg
+    sql = "select file from pragma_database_list where name = ? limit 1;"
+    try
+      return L.types.isa.dba_ram_path @single_value @query sql, [ schema, ]
+    catch error
+      if /expected at least one row, got none/.test error.message
+        throw new L.Dba_error "^dba@000^ unknown schema #{rpr schema}"
+      throw error
+
+  #---------------------------------------------------------------------------------------------------------
   _list_temp_schema_numbers: ->
     matcher = @cfg._temp_prefix + '%'
     sql     = """
