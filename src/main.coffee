@@ -48,6 +48,103 @@ L._get_format = ( path, format = null ) ->
   return format if format?
   return @._get_extension path
 
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_error extends Error
+  constructor: ( ref, message ) ->
+    # super ( CND.grey ref ) + ' ' + ( CND.red CND.reverse message )
+    super ref + ' ' + message
+    @ref      = ref
+    @_message = message
+    @type     = @constructor.name.toLowerCase()
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_cfg_error extends L.Dba_error
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_schema_exists extends L.Dba_error
+  constructor: ( ref, schema ) ->
+    super ref, "schema #{rpr schema} already exists"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_schema_unknown extends L.Dba_error
+  constructor: ( ref, schema ) ->
+    super ref, "schema #{rpr schema} does not exist"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_schema_nonempty extends L.Dba_error
+  constructor: ( ref, schema ) ->
+    super ref, "schema #{rpr schema} isn't empty"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_schema_not_allowed extends L.Dba_error
+  constructor: ( ref, schema ) ->
+    super ref, "schema #{rpr schema} not allowed here"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_schema_repeated extends L.Dba_error
+  constructor: ( ref, schema ) ->
+    super ref, "unable to copy schema to itself, got #{rpr schema}"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_expected_one_row extends L.Dba_error
+  constructor: ( ref, row_count ) ->
+    super ref, "expected 1 row, got #{row_count}"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_import_format_unknown extends L.Dba_error
+  constructor: ( ref, format ) ->
+    super ref, "unknown import format #{ref format}"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_not_implemented extends L.Dba_error
+  constructor: ( ref, what ) ->
+    super ref, "#{what} isn't implemented (yet)"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_deprecated extends L.Dba_error
+  constructor: ( ref, what ) ->
+    super ref, "#{what} has been deprecated"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_unexpected_db_object_type extends L.Dba_error
+  constructor: ( ref, type, value ) ->
+    super ref, "µ769 unknown type #{rpr type} of DB object #{d}"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_sql_value_error extends L.Dba_error
+  constructor: ( ref, type, value ) ->
+    super ref, "unable to express a #{type} as SQL literal, got #{rpr x}"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_unexpected_sql extends L.Dba_error
+  constructor: ( ref, sql ) ->
+    super ref, "unexpected SQL string #{rpr sql}"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_sqlite_too_many_dbs extends L.Dba_error
+  constructor: ( ref, schema ) ->
+    super ref, "unable to attach schema #{rpr schema}: too many attached databases"
+    return undefined ### always return `undefined` from constructor ###
+
+#-----------------------------------------------------------------------------------------------------------
+class L.Dba_sqlite_error extends L.Dba_error
+  constructor: ( ref, error ) ->
+    super ref, "#{error.code ? 'SQLite error'}: #{error.message}"
+    return undefined ### always return `undefined` from constructor ###
+
 
 #===========================================================================================================
 #
@@ -63,9 +160,9 @@ class @Dba extends Multimix
     validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
     # debug '^345^', @cfg
-    throw new Error "^dba@333^ property `sqlt` not supported (yet)"   if @cfg.sqlt?
-    throw new Error "^dba@334^ property `schema` not supported (yet)" if @cfg.schema?
-    throw new Error "^dba@335^ property `path` not supported (yet)"   if @cfg.path?
+    throw new L.Dba_cfg_error '^dba@333^', "property `sqlt` not supported (yet)"   if @cfg.sqlt?
+    throw new L.Dba_cfg_error '^dba@334^', "property `schema` not supported (yet)" if @cfg.schema?
+    throw new L.Dba_cfg_error '^dba@335^', "property `path` not supported (yet)"   if @cfg.path?
     bsqlt3_cfg    =
       readonly:       @cfg.readonly
       fileMustExist:  not @cfg.create
@@ -79,8 +176,8 @@ class @Dba extends Multimix
   open: ( cfg ) ->
     validate.dba_open_cfg ( cfg = { L.types.defaults.dba_open_cfg..., cfg..., } )
     { path, schema, ram, }  = cfg
-    throw new Error "^dba@336^ cannot open schema #{rpr schema} (yet)"  if schema in [ 'main', 'temp', ]
-    throw new Error "^dba@337^ schema #{rpr schema} already exists"     if @has { schema, }
+    throw new L.Dba_schema_not_allowed  '^dba@336^', schema if schema in [ 'main', 'temp', ]
+    throw new L.Dba_schema_exists       '^dba@337^', schema if @has { schema, }
     #.......................................................................................................
     ### TAINT troublesome logic with `path` and `saveas` ###
     if path?
@@ -100,7 +197,7 @@ class @Dba extends Multimix
     in-memory schema; then copy all DB objects and their contents from the temporary file schema to the RAM
     schema. Finally, detach the file schema. Ensure the `path` given is kept around as the `saveas`
     (implicit) path to be used for eventual persistency (`dba.save()`). ###
-    # debug '^345345^', { path, schema, }
+    ### TAINT validate? ###
     { path, schema, saveas, } = cfg
     #.......................................................................................................
     if L.types.isa.dba_ram_path path
@@ -123,8 +220,7 @@ class @Dba extends Multimix
     try
       return L.types.isa.dba_ram_path @single_value @query sql, [ schema, ]
     catch error
-      if /expected at least one row, got none/.test error.message
-        throw new L.Dba_error "^dba@000^ unknown schema #{rpr schema}"
+      throw new L.Dba_schema_unknown '^dba@000^', schema if error instanceof L.Dba_expected_one_row
       throw error
 
   #---------------------------------------------------------------------------------------------------------
@@ -159,7 +255,7 @@ class @Dba extends Multimix
       when 'db'   then @_import_db  cfg
       when 'sql'  then @_import_sql cfg
       else
-        throw new Error "^dba@341^ unknown format #{rpr cfg.format}"
+        throw new L.Dba_import_format_unknown '^dba@341^', format
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -175,11 +271,11 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   _import_sql: ( cfg ) ->
-    throw new Error "µ763 import format sql not yet implemented"
-    switch cfg.method
-      when 'single' then return @_import_sql_single cfg
-      when 'batch'  then return @_import_sql_batch  cfg
-    return null
+    throw new L.Dba_import_format_unknown '^dba@763^', 'sql'
+    # switch cfg.method
+    #   when 'single' then return @_import_sql_single cfg
+    #   when 'batch'  then return @_import_sql_batch  cfg
+    # return null
 
   #---------------------------------------------------------------------------------------------------------
   _import_sql_single: ( cfg ) ->
@@ -267,7 +363,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   single_row:   ( iterator ) ->
-    throw new Error "µ763 expected at least one row, got none" if ( R = @first_row iterator ) is undefined
+    throw new L.Dba_expected_one_row 'dba@763^', 0 if ( R = @first_row iterator ) is undefined
     return R
 
   #---------------------------------------------------------------------------------------------------------
@@ -366,7 +462,7 @@ class @Dba extends Multimix
   catalog: ->
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
     primary key index in SQLite) ###
-    throw new Error "µ764 deprecated until next major version"
+    throw new L.Dba_not_implemented '^dba@764^', "method dba.catalog()"
     @query "select * from sqlite_schema order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
@@ -423,7 +519,7 @@ class @Dba extends Multimix
     name        = L.pick cfg, 'name', null
     validate_optional.ic_name name
     return ( has_schema = @_is_empty_schema @as_identifier schema ) unless name?
-    throw new Error "^dba@342^ not implemented: is_empty() for anything but schemas, got #{rpr cfg}"
+    throw new L.Dba_not_implemented '^dba@342^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty_schema: ( schema_i ) -> (
@@ -449,7 +545,7 @@ class @Dba extends Multimix
     R = @first_value @query "select file from pragma_database_list where name = ?;", [ schema, ]
     return R if R?
     return fallback unless fallback is L._misfit
-    throw new Error "^dba@343^ unknown schema #{rpr schema}"
+    throw new L.Dba_schema_unknown '^dba@343^', schema
 
   #---------------------------------------------------------------------------------------------------------
   type_of: ( name, schema = 'main' ) ->
@@ -499,14 +595,14 @@ class @Dba extends Multimix
     { path, schema, saveas, }   = cfg
     #.......................................................................................................
     if @has { schema, }
-      throw new Error "^dba@344^ schema #{rpr schema} already attached"
+      throw new L.Dba_schema_exists '^dba@344^', schema
     #.......................................................................................................
     try
       @run "attach ? as ?;", [ path, schema, ]
     catch error
       throw error unless error.code is 'SQLITE_ERROR'
-      throw error unless error.message.startsWith 'too many attached databases'
-      throw new Error "^dba@344^ #{error.message}"
+      throw new L.Dba_sqlite_too_many_dbs '^dba@344^', schema if error.message.startsWith 'too many attached databases'
+      throw new L.Dba_sqlite_error        '^dba@344^', error
     @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, }
     return null
 
@@ -535,15 +631,15 @@ class @Dba extends Multimix
     { from_schema, to_schema, } = cfg
     #.......................................................................................................
     if from_schema is to_schema
-      throw new Error "µ767 unable to copy schema to itself, got #{rpr cfg} (schema #{rpr from_schema})"
+      throw new L.Dba_schema_repeated '^dba@333^', from_schema
     #.......................................................................................................
     known_schemas     = @list_schema_names()
-    throw new Error "µ765 unknown schema #{rpr from_schema}" unless from_schema in known_schemas
-    throw new Error "µ766 unknown schema #{rpr to_schema}"   unless to_schema   in known_schemas
+    throw new L.Dba_schema_unknown '^dba@765^', from_schema unless from_schema in known_schemas
+    throw new L.Dba_schema_unknown '^dba@766^', to_schema   unless to_schema   in known_schemas
     #.......................................................................................................
     to_schema_objects = @list @walk_objects { schema: to_schema, }
     if to_schema_objects.length > 0
-      throw new Error "µ768 unable to copy to non-empty schema #{rpr to_schema}"
+      throw new L.Dba_schema_nonempty '^dba@333^', to_schema
     #.......................................................................................................
     from_schema_objects = @list @walk_objects { schema: from_schema }
     return detach_from_schema() if from_schema_objects.length is 0
@@ -560,14 +656,14 @@ class @Dba extends Multimix
       #.....................................................................................................
       ### TAINT consider to use `validate.ic_db_object_type` ###
       unless d.type in [ 'table', 'view', 'index', ]
-        throw new Error "µ769 unknown type #{rpr d.type} for DB object #{rpr d}"
+        throw new L.Dba_unexpected_db_object_type '^dba@333^', d.type, d
       #.....................................................................................................
       ### TAINT using not-so reliable string replacement as substitute for proper parsing ###
       name_x  = @as_identifier d.name
       sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
       #.....................................................................................................
       if sql is d.sql
-        throw new Error "µ770 unexpected SQL string #{rpr d.sql}"
+        throw new L.Dba_unexpected_sql '^dba@333^', d.sql
       #.....................................................................................................
       @execute sql
       if d.type is 'table'
@@ -587,7 +683,7 @@ class @Dba extends Multimix
   #   switch format
   #     when 'sqlitedb'
   #       db.$.run "vacuum #{schema_i} into ?;", [ path, ]
-  #     else throw new Error "µ47492 unknown format #{rpr format}"
+  #     else throw new L.Dba_error "µ47492 unknown format #{rpr format}"
   #   return null
 
 
@@ -611,23 +707,20 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   as_sql: ( x ) ->
     switch type = type_of x
-      when 'text'     then return "'#{@escape_text x}'"
-      when 'list'     then return "'#{@list_as_json x}'"
-      when 'float'    then return x.toString()
-      when 'boolean'  then return ( if x then '1' else '0' )
-      when 'null'     then return 'null'
-      when 'undefined'
-        throw new Error "µ771 unable to express 'undefined' as SQL literal"
-    throw new Error "µ772 unable to express a #{type} as SQL literal, got #{rpr x}"
+      when 'text'       then return "'#{@escape_text x}'"
+      when 'list'       then return "'#{@list_as_json x}'"
+      when 'float'      then return x.toString()
+      when 'boolean'    then return ( if x then '1' else '0' )
+      when 'null'       then return 'null'
+    throw new L.Dba_sql_value_error '^dba@333^', type, x
 
   #---------------------------------------------------------------------------------------------------------
-  interpolate: ( sql, Q ) ->
-    return sql.replace @_interpolation_pattern, ( $0, $1 ) =>
-      try
-        return @as_sql Q[ $1 ]
-      catch error
-        throw new Error \
-          "µ773 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
+  interpolate: ( sql, Q ) -> sql.replace @_interpolation_pattern, ( $0, $1 ) => @as_sql Q[ $1 ]
+      # try
+      #   return @as_sql Q[ $1 ]
+      # catch error
+      #   throw new L.Dba_error \
+      #     "µ773 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
   _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
 
 
