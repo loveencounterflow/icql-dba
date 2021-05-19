@@ -53,17 +53,6 @@ L._get_format = ( path, format = null ) ->
 #-----------------------------------------------------------------------------------------------------------
 class @Dba extends Multimix
 
-  # #---------------------------------------------------------------------------------------------------------
-  # @_defaults:
-  #   sqlt:           null  ### [`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3/) instance ###
-  #   echo:           false ### whether to echo statements to the terminal ###
-  #   debug:          false ### whether to print additional debugging info ###
-  #   path:           ''
-  #   schema:         'main'
-  #   create:         true
-  #   timeout:        5000
-  #   readonly:       false
-
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
@@ -403,45 +392,6 @@ class @Dba extends Multimix
   _is_empty_schema: ( schema_i ) -> (
     @list @query "select 1 from #{schema_i}.sqlite_schema limit 1;" ).length is 0
 
-  # #---------------------------------------------------------------------------------------------------------
-  # _get_size: ( cfg ) ->
-  #   ### thx to https://stackoverflow.com/a/58251635/256361 ###
-  #   ### see https://www.sqlite.org/dbstat.html ###
-  #   ### TAINT field `ncell` may not be the right one to query for row / element count (?) ###
-  #   ### NOTE SQLite must be compiled with `SQLITE_ENABLE_DBSTAT_VTAB` ###
-  #   schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
-  #   name        = L.pick cfg, 'name', null
-  #   validate_optional.ic_name name
-  #   unless name?
-  #     null
-
-  # #---------------------------------------------------------------------------------------------------------
-  # _get_all_sizes: ->
-  #   # @list @query \
-  #   "select distinct name, sum( ncell ) over ( partition by name ) from dbstat;"
-  #   "select d1.name as name, d1.ncell as row_count  from dbstat('foo',1) as d1;"
-
-  # #---------------------------------------------------------------------------------------------------------
-  # _list_objects_2: ( imagine_options_object_here ) ->
-  #   # for schema in @list_schema_names()
-  #   schema    = 'main'
-  #   validate.ic_schema schema
-  #   schema_i  = @as_identifier schema
-  #   ### thx to https://stackoverflow.com/a/53160348/256361 ###
-  #   return @list @query """
-  #     select
-  #       'main'  as schema,
-  #       'field' as type,
-  #       m.name  as relation_name,
-  #       p.name  as field_name
-  #     from
-  #       #{schema_i}.sqlite_schema as m
-  #     join
-  #       #{schema_i}.pragma_table_info( m.name ) as p
-  #     order by
-  #       m.name,
-  #       p.cid;"""
-
   #---------------------------------------------------------------------------------------------------------
   list_schemas:       -> @list @query "select * from pragma_database_list order by name;"
   list_schema_names:  -> ( d.name for d in @list_schemas() )
@@ -494,7 +444,6 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   # ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
   # clear: ( cfg ) ->
-  #   schema        = L.pick cfg, 'schema', 'main'
   #   validate.ic_schema schema
   #   schema_i      = @as_identifier schema
   #   R             = 0
@@ -594,30 +543,10 @@ class @Dba extends Multimix
     return detach_from_schema()
 
   # #---------------------------------------------------------------------------------------------------------
-  ### TAINT to be replaced by `export()`, `transfer()` ###
-  # save_as: ( cfg ) ->
-  #   ### TAINT add boolean `cfg.overwrite` ###
-  #   schema    = L.pick cfg, 'schema',     'main', 'ic_schema'
-  #   path      = L.pick cfg, 'path',       null,   'ic_path'
-  #   overwrite = L.pick cfg, 'overwrite',  false,  'boolean'
-  #   @_export schema, path, 'sqlitedb', overwrite
-  #   ### TAINT associate path with schema ###
-  #   return null
-
-  # #---------------------------------------------------------------------------------------------------------
   # export: ( cfg ) ->
   #   ### TAINT add boolean `cfg.overwrite` ###
-  #   schema    = L.pick cfg, 'schema',     'main', 'ic_schema'
-  #   path      = L.pick cfg, 'path',       null,   'ic_path'
-  #   overwrite = L.pick cfg, 'overwrite',  false,  'boolean'
   #   format    = @_format_from_path path
-  #   format    = L.pick cfg, 'format',     format, 'ic_db_file_format'
-  #   return @_export schema, path, format, overwrite
-
-  # #---------------------------------------------------------------------------------------------------------
-  # _export: ( schema, path, format, overwrite ) ->
-  #   ### TAINT add boolean `cfg.overwrite` ###
-  #   ### TAINT implement `format` ###
+  #   format   ?= L.pick cfg, 'format',     format, 'ic_db_file_format'
   #   schema_i  = @as_identifier schema
   #   switch format
   #     when 'sqlitedb'
