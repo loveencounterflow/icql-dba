@@ -18,6 +18,7 @@ info                      = CND.get_logger 'info',      badge
 jr                        = JSON.stringify
 Intertype                 = ( require 'intertype' ).Intertype
 intertype                 = new Intertype module.exports
+Dba                       = null
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'icql_settings',
@@ -82,6 +83,9 @@ intertype                 = new Intertype module.exports
   "x is an object":                       ( x ) -> @isa.object              x
   "x.schema is a schema but not temp":    ( x ) -> @isa.ic_not_temp_schema  x.schema
   "x.path is an ic_path":                 ( x ) -> @isa.ic_path             x.path
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba', tests:
+  "x instanceof Dba":                     ( x ) -> x instanceof ( Dba ?= ( require './main' ).Dba )
 
 #-----------------------------------------------------------------------------------------------------------
 @defaults =
