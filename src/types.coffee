@@ -61,12 +61,12 @@ Dba                       = null
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_open_cfg', tests:
-  "x is an object":                       ( x ) -> @isa.object          x
-  "x.schema is a schema but not temp":    ( x ) -> @isa.ic_not_temp_schema x.schema
-  "x.path is an ic_path":                 ( x ) -> @isa.ic_path x.path
-  "x.format? is an optional dba_format":  ( x ) -> @isa_optional.dba_format x.format
-  "x.save_as? is an optional ic_path":    ( x ) -> @isa_optional.ic_path x.save_as
-  "x.overwrite":                          ( x ) -> @isa.boolean x.overwrite
+  "@isa.object x":                        ( x ) -> @isa.object x
+  "@isa.ic_not_temp_schema x.schema":     ( x ) -> @isa.ic_not_temp_schema x.schema
+  "@isa.ic_path x.path":                  ( x ) -> @isa.ic_path x.path
+  "@isa.boolean x.ram":                   ( x ) -> @isa.boolean x.ram
+  # "@isa.boolean x.overwrite":             ( x ) -> @isa.boolean x.overwrite
+  # "@isa.boolean x.create":                ( x ) -> @isa.boolean x.create
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg', tests:
@@ -80,9 +80,17 @@ Dba                       = null
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_attach_cfg', tests:
-  "x is an object":                       ( x ) -> @isa.object              x
-  "x.schema is a schema but not temp":    ( x ) -> @isa.ic_not_temp_schema  x.schema
-  "x.path is an ic_path":                 ( x ) -> @isa.ic_path             x.path
+  "@isa.object x":                        ( x ) -> @isa.object x
+  "@isa.ic_not_temp_schema x.schema":     ( x ) -> @isa.ic_not_temp_schema x.schema
+  "@isa.ic_path x.path":                  ( x ) -> @isa.ic_path x.path
+  "@isa_optional.ic_path x.saveas":       ( x ) -> @isa_optional.ic_path x.saveas
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'copy_or_move_schema_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_not_temp_schema x.from_schema":  ( x ) -> @isa.ic_not_temp_schema x.from_schema
+  "@isa.ic_not_temp_schema x.to_schema":    ( x ) -> @isa.ic_not_temp_schema x.to_schema
+
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba', tests:
   "x instanceof Dba":                     ( x ) -> x instanceof ( Dba ?= ( require './main' ).Dba )
@@ -100,11 +108,14 @@ Dba                       = null
   dba_attach_cfg:
     schema:     null
     path:       ''
+    saveas:     null
   #.........................................................................................................
   dba_open_cfg:
     schema:     null
     path:       ''
-    replace:    false
+    ram:        false
+    # overwrite:  false
+    # create:     true
   #.........................................................................................................
   dba_import_cfg:
     schema:     null
@@ -113,6 +124,9 @@ Dba                       = null
     method:     'single'
     batch_size: 1000
     # overwrite:  false
-
+  #.........................................................................................................
+  copy_or_move_schema_cfg:
+    from_schema:  null
+    to_schema:    null
 
 
