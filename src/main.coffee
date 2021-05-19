@@ -81,23 +81,38 @@ class @Dba extends Multimix
     { path, schema, ram, }  = cfg
     throw new Error "^dba@336^ cannot open schema #{rpr schema} (yet)"  if schema in [ 'main', 'temp', ]
     throw new Error "^dba@337^ schema #{rpr schema} already exists"     if @has { schema, }
-    if ram
-      @_open_file_db_in_ram path, schema
+    #.......................................................................................................
+    ### TAINT troublesome logic with `path` and `saveas` ###
+    if path?
+      saveas  = path
     else
-      @_attach { path, schema, }
+      path    = '' ### TAINT or ':memory:' depending on `cfg.disk` ###
+      saveas  = null
+    #.......................................................................................................
+    if ram then @_open_file_db_in_ram { path, schema, saveas, }
+    else        @_attach              { path, schema, saveas, }
+    #.......................................................................................................
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _open_file_db_in_ram: ( path, schema ) ->
+  _open_file_db_in_ram: ( cfg ) ->
     ### Given a `path` and a `schema`, create a temporary schema to open the file DB in as well as an empty
     in-memory schema; then copy all DB objects and their contents from the temporary file schema to the RAM
     schema. Finally, detach the file schema. Ensure the `path` given is kept around as the `saveas`
     (implicit) path to be used for eventual persistency (`dba.save()`). ###
+    # debug '^345345^', { path, schema, }
+    { path, schema, saveas, } = cfg
+    #.......................................................................................................
+    if L.types.isa.dba_ram_path path
+      @_attach { schema, path, saveas, }
+      return null
+    #.......................................................................................................
     tmp_schema = @_get_free_temp_schema()
     @_attach { schema: tmp_schema, path, }
-    @_attach { schema, path: '', saveas: path, }
+    @_attach { schema, path: '', saveas, }
     @_copy_schema { from_schema: tmp_schema, to_schema: schema, }
     @_detach { schema: tmp_schema, }
+    #.......................................................................................................
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -470,7 +485,6 @@ class @Dba extends Multimix
   _attach: ( cfg ) ->
     validate.dba_attach_cfg ( cfg = { L.types.defaults.dba_attach_cfg..., cfg..., } )
     { path, schema, saveas, }   = cfg
-    saveas                     ?= path
     #.......................................................................................................
     if @has { schema, }
       throw new Error "^dba@344^ schema #{rpr schema} already attached"

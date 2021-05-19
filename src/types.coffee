@@ -45,8 +45,10 @@ Dba                       = null
 #-----------------------------------------------------------------------------------------------------------
 @declare 'ic_not_temp_schema',  ( x ) -> ( @isa.ic_schema x ) and ( x isnt 'temp' )
 @declare 'ic_path',             ( x ) -> @isa.text x
-@declare 'ic_ram_path',         ( x ) -> ( @isa.ic_path x ) and ( x not in [ '', ':memory:', ] )
 @declare 'ic_name',             ( x ) -> @isa.nonempty_text x
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_ram_path',        ( x ) -> x in [ null, '', ':memory:', ]
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_list_objects_ordering', ( x ) -> ( not x? ) or ( x is 'drop' )
@@ -63,7 +65,7 @@ Dba                       = null
 @declare 'dba_open_cfg', tests:
   "@isa.object x":                        ( x ) -> @isa.object x
   "@isa.ic_not_temp_schema x.schema":     ( x ) -> @isa.ic_not_temp_schema x.schema
-  "@isa.ic_path x.path":                  ( x ) -> @isa.ic_path x.path
+  "@isa_optional.ic_path x.path":         ( x ) -> @isa_optional.ic_path x.path
   "@isa.boolean x.ram":                   ( x ) -> @isa.boolean x.ram
   # "@isa.boolean x.overwrite":             ( x ) -> @isa.boolean x.overwrite
   # "@isa.boolean x.create":                ( x ) -> @isa.boolean x.create
@@ -80,10 +82,10 @@ Dba                       = null
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_attach_cfg', tests:
-  "@isa.object x":                        ( x ) -> @isa.object x
-  "@isa.ic_not_temp_schema x.schema":     ( x ) -> @isa.ic_not_temp_schema x.schema
-  "@isa.ic_path x.path":                  ( x ) -> @isa.ic_path x.path
-  "@isa_optional.ic_path x.saveas":       ( x ) -> @isa_optional.ic_path x.saveas
+  "@isa.object x":                                  ( x ) -> @isa.object x
+  "@isa.ic_not_temp_schema x.schema":               ( x ) -> @isa.ic_not_temp_schema x.schema
+  "@isa.ic_path x.path":                            ( x ) -> @isa.ic_path x.path
+  "( x.saveas is null ) or @isa.ic_path x.saveas":  ( x ) -> ( x.saveas is null ) or @isa.ic_path x.saveas
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'copy_or_move_schema_cfg', tests:
@@ -112,7 +114,7 @@ Dba                       = null
   #.........................................................................................................
   dba_open_cfg:
     schema:     null
-    path:       ''
+    path:       null
     ram:        false
     # overwrite:  false
     # create:     true
