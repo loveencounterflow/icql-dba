@@ -51,99 +51,42 @@ L._get_format = ( path, format = null ) ->
 #-----------------------------------------------------------------------------------------------------------
 class L.Dba_error extends Error
   constructor: ( ref, message ) ->
-    # super ( CND.grey ref ) + ' ' + ( CND.red CND.reverse message )
-    super ref + ' ' + message
+    super()
+    @message  = "#{ref} (#{@constructor.name}) #{message}"
     @ref      = ref
-    @_message = message
-    @type     = @constructor.name.toLowerCase()
-    return undefined
+    return undefined ### always return `undefined` from constructor ###
 
 #-----------------------------------------------------------------------------------------------------------
-class L.Dba_cfg_error extends L.Dba_error
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_schema_exists extends L.Dba_error
-  constructor: ( ref, schema ) ->
-    super ref, "schema #{rpr schema} already exists"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_schema_unknown extends L.Dba_error
-  constructor: ( ref, schema ) ->
-    super ref, "schema #{rpr schema} does not exist"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_schema_nonempty extends L.Dba_error
-  constructor: ( ref, schema ) ->
-    super ref, "schema #{rpr schema} isn't empty"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_schema_not_allowed extends L.Dba_error
-  constructor: ( ref, schema ) ->
-    super ref, "schema #{rpr schema} not allowed here"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_schema_repeated extends L.Dba_error
-  constructor: ( ref, schema ) ->
-    super ref, "unable to copy schema to itself, got #{rpr schema}"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_expected_one_row extends L.Dba_error
-  constructor: ( ref, row_count ) ->
-    super ref, "expected 1 row, got #{row_count}"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_import_format_unknown extends L.Dba_error
-  constructor: ( ref, format ) ->
-    super ref, "unknown import format #{ref format}"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_not_implemented extends L.Dba_error
-  constructor: ( ref, what ) ->
-    super ref, "#{what} isn't implemented (yet)"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_deprecated extends L.Dba_error
-  constructor: ( ref, what ) ->
-    super ref, "#{what} has been deprecated"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
+class L.Dba_cfg_error                 extends L.Dba_error
+  constructor: ( ref, message )     -> super ref, message
+class L.Dba_schema_exists             extends L.Dba_error
+  constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} already exists"
+class L.Dba_schema_unknown            extends L.Dba_error
+  constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} does not exist"
+class L.Dba_schema_nonempty           extends L.Dba_error
+  constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} isn't empty"
+class L.Dba_schema_not_allowed        extends L.Dba_error
+  constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} not allowed here"
+class L.Dba_schema_repeated           extends L.Dba_error
+  constructor: ( ref, schema )      -> super ref, "unable to copy schema to itself, got #{rpr schema}"
+class L.Dba_expected_one_row          extends L.Dba_error
+  constructor: ( ref, row_count )   -> super ref, "expected 1 row, got #{row_count}"
+class L.Dba_import_format_unknown     extends L.Dba_error
+  constructor: ( ref, format )      -> super ref, "unknown import format #{ref format}"
+class L.Dba_not_implemented           extends L.Dba_error
+  constructor: ( ref, what )        -> super ref, "#{what} isn't implemented (yet)"
+class L.Dba_deprecated                extends L.Dba_error
+  constructor: ( ref, what )        -> super ref, "#{what} has been deprecated"
 class L.Dba_unexpected_db_object_type extends L.Dba_error
-  constructor: ( ref, type, value ) ->
-    super ref, "µ769 unknown type #{rpr type} of DB object #{d}"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_sql_value_error extends L.Dba_error
-  constructor: ( ref, type, value ) ->
-    super ref, "unable to express a #{type} as SQL literal, got #{rpr x}"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_unexpected_sql extends L.Dba_error
-  constructor: ( ref, sql ) ->
-    super ref, "unexpected SQL string #{rpr sql}"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_sqlite_too_many_dbs extends L.Dba_error
-  constructor: ( ref, schema ) ->
-    super ref, "unable to attach schema #{rpr schema}: too many attached databases"
-    return undefined
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_sqlite_error extends L.Dba_error
-  constructor: ( ref, error ) ->
-    super ref, "#{error.code ? 'SQLite error'}: #{error.message}"
-    return undefined
+  constructor: ( ref, type, value ) -> super ref, "µ769 unknown type #{rpr type} of DB object #{d}"
+class L.Dba_sql_value_error           extends L.Dba_error
+  constructor: ( ref, type, value ) -> super ref, "unable to express a #{type} as SQL literal, got #{rpr x}"
+class L.Dba_unexpected_sql            extends L.Dba_error
+  constructor: ( ref, sql )         -> super ref, "unexpected SQL string #{rpr sql}"
+class L.Dba_sqlite_too_many_dbs       extends L.Dba_error
+  constructor: ( ref, schema )      -> super ref, "unable to attach schema #{rpr schema}: too many attached databases"
+class L.Dba_sqlite_error              extends L.Dba_error
+  constructor: ( ref, error )       -> super ref, "#{error.code ? 'SQLite error'}: #{error.message}"
 
 
 #===========================================================================================================
