@@ -31,6 +31,7 @@ L                         = @
 L._misfit                 = Symbol 'misfit'
 new_bsqlt3_connection     = require 'better-sqlite3'
 PATH                      = require 'path'
+TMP                       = require 'tempy'
 
 #-----------------------------------------------------------------------------------------------------------
 L.pick = ( d, key, fallback, type = null ) ->
@@ -157,6 +158,46 @@ class @Dba extends Multimix
     @_copy_schema { from_schema: tmp_schema, to_schema: schema, }
     @_detach { schema: tmp_schema, }
     #.......................................................................................................
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  save: ( cfg ) ->
+    # throw new L.Dba_no_arguments_allowed '^dba@333^', 'save', arity unless ( arity = arguments.length ) is 0
+    validate.dba_save_cfg ( cfg = { L.types.defaults.dba_export_cfg..., cfg..., } )
+    { schema
+      path }    = cfg
+    throw new L.Dba_argument_not_allowed '^dba@333^', 'path', path if path?
+    path        = @_schemas[ schema ]?.path ? null
+    throw new L.Dba_schema_unknown '^dba@333^', schema unless path?
+    return @export { schema, path, format: 'sqlite', }
+
+  #---------------------------------------------------------------------------------------------------------
+  export: ( cfg ) ->
+    ### TAINT add boolean `cfg.overwrite` ###
+    validate.dba_export_cfg ( cfg = { L.types.defaults.dba_export_cfg..., cfg..., } )
+    { schema
+      path
+      format }  = cfg
+    format     ?= @_format_from_path path
+    switch format
+      when 'sqlite' then @_vacuum_atomically { schema, path, }
+      ### TAINT when format derived from path, may be undefined, making the error message unintelligible ###
+      else throw new L.Dba_format_unknown '^dba@333^', format
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _vacuum_atomically: ( cfg ) ->
+    validate.dba_vacuum_atomically ( cfg = { L.types.defaults.dba_vacuum_atomically..., cfg..., } )
+    { schema
+      path }  = cfg
+    schema_i  = @as_identifier schema
+    try
+      tmpdir_path   = TMP.directory { prefix: @cfg._temp_prefix, }
+      tmpfile_path  = PATH.join tmpdir_path, PATH.basename path
+      @run "vacuum #{schema_i} into ?;", [ tmpfile_path, ]
+      FS.renameSync tmpfile_path, path
+    finally
+      FS.rmdirSync tmpdir_path
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -620,18 +661,6 @@ class @Dba extends Multimix
     @_set_foreign_key_state fk_state
     @pragma "#{@as_identifier to_schema}.foreign_key_check;" if fk_state
     return detach_from_schema()
-
-  # #---------------------------------------------------------------------------------------------------------
-  # export: ( cfg ) ->
-  #   ### TAINT add boolean `cfg.overwrite` ###
-  #   format    = @_format_from_path path
-  #   format   ?= L.pick cfg, 'format',     format, 'ic_db_file_format'
-  #   schema_i  = @as_identifier schema
-  #   switch format
-  #     when 'sqlitedb'
-  #       db.$.run "vacuum #{schema_i} into ?;", [ path, ]
-  #     else throw new L.Dba_error "µ47492 unknown format #{rpr format}"
-  #   return null
 
 
   #=========================================================================================================
