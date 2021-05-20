@@ -71,8 +71,8 @@ class L.Dba_schema_repeated           extends L.Dba_error
   constructor: ( ref, schema )      -> super ref, "unable to copy schema to itself, got #{rpr schema}"
 class L.Dba_expected_one_row          extends L.Dba_error
   constructor: ( ref, row_count )   -> super ref, "expected 1 row, got #{row_count}"
-class L.Dba_import_format_unknown     extends L.Dba_error
-  constructor: ( ref, format )      -> super ref, "unknown import format #{ref format}"
+class L.Dba_format_unknown            extends L.Dba_error
+  constructor: ( ref, format )      -> super ref, "unknown DB format #{ref format}"
 class L.Dba_not_implemented           extends L.Dba_error
   constructor: ( ref, what )        -> super ref, "#{what} isn't implemented (yet)"
 class L.Dba_deprecated                extends L.Dba_error
@@ -80,13 +80,17 @@ class L.Dba_deprecated                extends L.Dba_error
 class L.Dba_unexpected_db_object_type extends L.Dba_error
   constructor: ( ref, type, value ) -> super ref, "µ769 unknown type #{rpr type} of DB object #{d}"
 class L.Dba_sql_value_error           extends L.Dba_error
-  constructor: ( ref, type, value ) -> super ref, "unable to express a #{type} as SQL literal, got #{rpr x}"
+  constructor: ( ref, type, value ) -> super ref, "unable to express a #{type} as SQL literal, got #{rpr value}"
 class L.Dba_unexpected_sql            extends L.Dba_error
   constructor: ( ref, sql )         -> super ref, "unexpected SQL string #{rpr sql}"
 class L.Dba_sqlite_too_many_dbs       extends L.Dba_error
   constructor: ( ref, schema )      -> super ref, "unable to attach schema #{rpr schema}: too many attached databases"
 class L.Dba_sqlite_error              extends L.Dba_error
   constructor: ( ref, error )       -> super ref, "#{error.code ? 'SQLite error'}: #{error.message}"
+class L.Dba_no_arguments_allowed      extends L.Dba_error
+  constructor: ( ref, name, arity ) -> super ref, "method #{name} doesn't take arguments, got #{arity}"
+class L.Dba_argument_not_allowed      extends L.Dba_error
+  constructor: ( ref, name, value ) -> super ref, "argument #{name} not allowed, got #{rpr value}"
 
 
 #===========================================================================================================
@@ -198,7 +202,7 @@ class @Dba extends Multimix
       when 'db'   then @_import_db  cfg
       when 'sql'  then @_import_sql cfg
       else
-        throw new L.Dba_import_format_unknown '^dba@306^', format
+        throw new L.Dba_format_unknown '^dba@306^', format
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -214,7 +218,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   _import_sql: ( cfg ) ->
-    throw new L.Dba_import_format_unknown '^dba@307^', 'sql'
+    throw new L.Dba_format_unknown '^dba@307^', 'sql'
     # switch cfg.method
     #   when 'single' then return @_import_sql_single cfg
     #   when 'batch'  then return @_import_sql_batch  cfg
