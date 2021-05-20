@@ -72,13 +72,33 @@ Dba                       = null
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg', tests:
-  "x is an object":                       ( x ) -> @isa.object          x
-  "x.schema is a schema but not temp":    ( x ) -> @isa.ic_not_temp_schema x.schema
-  "x.path is an ic_path":                 ( x ) -> @isa.ic_path x.path
-  "x.format? is an optional dba_format":  ( x ) -> @isa_optional.dba_format x.format
-  "x.method is 'single' or 'batch'":      ( x ) -> x.method in [ 'single', 'batch', ]
-  "x.batch_size? is a positive_integer":  ( x ) -> @isa_optional.positive_integer x.batch_size
+  "@isa.object x":                               ( x ) -> @isa.object x
+  "@isa.ic_not_temp_schema x.schema":            ( x ) -> @isa.ic_not_temp_schema x.schema
+  "@isa.ic_path x.path":                         ( x ) -> @isa.ic_path x.path
+  "@isa_optional.dba_format x.format":           ( x ) -> @isa_optional.dba_format x.format
+  "x.method in [ 'single', 'batch', ]":          ( x ) -> x.method in [ 'single', 'batch', ]
+  "@isa_optional.positive_integer x.batch_size": ( x ) -> @isa_optional.positive_integer x.batch_size
   # "x.overwrite is a boolean":             ( x ) -> @isa.boolean x.overwrite
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_save_cfg', tests:
+  "@isa.object x":                               ( x ) -> @isa.object x
+  "@isa.ic_not_temp_schema x.schema":            ( x ) -> @isa.ic_not_temp_schema x.schema
+  "@isa_optional.ic_path x.path":                ( x ) -> @isa_optional.ic_path x.path
+  "@isa_optional.dba_format x.format":           ( x ) -> @isa_optional.dba_format x.format
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_vacuum_atomically', tests:
+  "@isa.object x":                               ( x ) -> @isa.object x
+  "@isa.ic_not_temp_schema x.schema":            ( x ) -> @isa.ic_not_temp_schema x.schema
+  "@isa_optional.ic_path x.path":                ( x ) -> @isa_optional.ic_path x.path
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_export_cfg', tests:
+  "@isa.object x":                               ( x ) -> @isa.object x
+  "@isa.ic_not_temp_schema x.schema":            ( x ) -> @isa.ic_not_temp_schema x.schema
+  "@isa.ic_path x.path":                         ( x ) -> @isa.ic_path x.path
+  "@isa_optional.dba_format x.format":           ( x ) -> @isa_optional.dba_format x.format
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_attach_cfg', tests:
@@ -123,6 +143,20 @@ Dba                       = null
     ram:        false
     # overwrite:  false
     # create:     true
+  #.........................................................................................................
+  dba_export_cfg:
+    schema:     null
+    path:       null
+    format:     null
+  #.........................................................................................................
+  dba_save_cfg:
+    schema:     null
+    path:       null
+    format:     null
+  #.........................................................................................................
+  dba_vacuum_atomically:
+    schema:     null
+    path:       null
   #.........................................................................................................
   dba_import_cfg:
     schema:     null
