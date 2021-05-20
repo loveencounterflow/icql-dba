@@ -192,7 +192,6 @@ dba.open { path: 'path/to/my.db', schema: 'myschema', ram: true, }
   [`import()`](#import-a-db).
 * Observe that when `path` is missing, `ram` defaults to `true`, so in this case it may be omitted or set to
   `null`.
-* It is *not* allowed to call `save()` *without* `path` when DB was opened without `path`.
 
 ```coffee
 dba.open { schema: 'myschema', }
@@ -282,10 +281,15 @@ dba.transfer_to_file { schema: 'myschema', path, }
 * File-based DBs have Continuous Persistency, no need to call `save()` (but no harm done, either).
 * RAM DBs must be `save()`d manually in order to persist changes in structure or data.
 * `save()` throws an error if `path` setting is given.
+* `save()` throws an error if `schema` setting isn't given or `schema` is unknown.
 * Use `transfer_to_file { path, }` (and `save()` after subsequent changes) to add or change the file path
   linked to a RAM DB.
 * Can also use `export { path, overwrite: true, format: 'sqlite', }` to repeatedly save a RAM DB as an
   SQLite binary file DB.
+
+```coffee
+dba.export { schema: 'myschema', }
+```
 
 #### Exporting to Binary and Textual Formats
 
