@@ -54,7 +54,7 @@ Dba                       = null
 @declare 'dba_list_objects_ordering', ( x ) -> ( not x? ) or ( x is 'drop' )
 
 #-----------------------------------------------------------------------------------------------------------
-@declare 'dba_format', ( x ) -> x in [ 'sql', 'db', ]
+@declare 'dba_format', ( x ) -> x in [ 'sql', 'sqlite', ]
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_constructor_cfg', tests:
