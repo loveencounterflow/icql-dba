@@ -288,8 +288,20 @@ dba.transfer_to_file { schema: 'myschema', path, }
   SQLite binary file DB.
 
 ```coffee
-dba.export { schema: 'myschema', }
+dba.save { schema: 'myschema', }
 ```
+
+* The above call is roughly equivalent to calling `dba.export()` with a few additional parameters:
+
+```coffee
+schema  = 'myschema'
+path    = dba._schemas[ schema ].path
+dba.export { schema, path, format: 'sqlite', overwrite: true, }
+```
+
+* Although calling `save()` takes fewer parameters than `export()`, the choice between the two is not so
+  much extensional (material) as it is intentional: one calls `save()` to 'persist the state of this RAM DB
+  to its associated DB file' whereas one calls `export()` to 'make a durable copy of this RAM DB'.
 
 #### Exporting to Binary and Textual Formats
 
