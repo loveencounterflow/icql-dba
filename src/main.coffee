@@ -153,7 +153,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   save: ( cfg ) ->
-    # throw new L.Dba_no_arguments_allowed '^dba@333^', 'save', arity unless ( arity = arguments.length ) is 0
+    ### TAINT could implement prohibition of `path` in type `dba_save_cfg` ###
     validate.dba_save_cfg ( cfg = { L.types.defaults.dba_export_cfg..., cfg..., } )
     { schema
       path }    = cfg
