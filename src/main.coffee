@@ -40,16 +40,6 @@ L.pick = ( d, key, fallback, type = null ) ->
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-L._get_extension = ( path ) ->
-  return null if ( R = PATH.extname path ) is ''
-  return R[ 1 .. ]
-
-#-----------------------------------------------------------------------------------------------------------
-L._get_format = ( path, format = null ) ->
-  return format if format?
-  return @._get_extension path
-
-#-----------------------------------------------------------------------------------------------------------
 class L.Dba_error extends Error
   constructor: ( ref, message ) ->
     super()
@@ -107,6 +97,7 @@ class @Dba extends Multimix
     @cfg          = freeze { L.types.defaults.dba_constructor_cfg..., cfg..., }
     validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
+    @_formats     = freeze { L.types.extensions_and_formats..., }
     # debug '^345^', @cfg
     throw new L.Dba_cfg_error '^dba@300^', "property `sqlt` not supported (yet)"   if @cfg.sqlt?
     throw new L.Dba_cfg_error '^dba@301^', "property `schema` not supported (yet)" if @cfg.schema?
@@ -698,6 +689,13 @@ class @Dba extends Multimix
       #   throw new L.Dba_error \
       #     "µ773 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
   _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
+
+
+  #=========================================================================================================
+  # FORMAT GUESSING
+  #---------------------------------------------------------------------------------------------------------
+  _extension_from_path  = ( path ) -> if ( R = PATH.extname path ) is '' then null else R[ 1 .. ]
+  _format_from_path     = ( path ) -> @_formats[ @._extension_from_path path ] ? null
 
 
   #=========================================================================================================
