@@ -99,7 +99,7 @@ class @Dba extends Multimix
     @cfg          = freeze { L.types.defaults.dba_constructor_cfg..., cfg..., }
     validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
-    @_formats     = freeze { L.types.extensions_and_formats..., }
+    @_formats     = freeze { L.types.defaults.extensions_and_formats..., }
     # debug '^345^', @cfg
     throw new L.Dba_cfg_error '^dba@300^', "property `sqlt` not supported (yet)"   if @cfg.sqlt?
     throw new L.Dba_cfg_error '^dba@301^', "property `schema` not supported (yet)" if @cfg.schema?
