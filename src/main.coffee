@@ -694,8 +694,8 @@ class @Dba extends Multimix
   #=========================================================================================================
   # FORMAT GUESSING
   #---------------------------------------------------------------------------------------------------------
-  _extension_from_path  = ( path ) -> if ( R = PATH.extname path ) is '' then null else R[ 1 .. ]
-  _format_from_path     = ( path ) -> @_formats[ @._extension_from_path path ] ? null
+  _extension_from_path: ( path ) -> if ( R = PATH.extname path ) is '' then null else R[ 1 .. ]
+  _format_from_path:    ( path ) -> @_formats[ @._extension_from_path path ] ? null
 
 
   #=========================================================================================================
