@@ -3,6 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   better-sqlite3: ^7.1.5
   cnd: 9.2.1
+  csv-parse: ^4.15.4
   hollerith-codec: 3.0.1
   intertype: 7.6.7
   letsfreezethat: ^3.1.0
@@ -15,6 +16,7 @@ specifiers:
 dependencies:
   better-sqlite3: 7.1.5
   cnd: 9.2.1
+  csv-parse: 4.15.4
   hollerith-codec: 3.0.1
   intertype: 7.6.7
   letsfreezethat: 3.1.0
@@ -205,6 +207,10 @@ packages:
   /crypto-random-string/2.0.0:
     resolution: {integrity: sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==}
     engines: {node: '>=8'}
+    dev: false
+
+  /csv-parse/4.15.4:
+    resolution: {integrity: sha512-OdBbFc0yZhOm17lSxqkirrHlFFVpKRT0wp4DAGoJelsP3LbGzV9LNr7XmM/lrr0uGkCtaqac9UhP8PDHXOAbMg==}
     dev: false
 
   /decompress-response/4.2.1:
