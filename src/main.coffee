@@ -64,6 +64,8 @@ class L.Dba_expected_one_row          extends L.Dba_error
   constructor: ( ref, row_count )   -> super ref, "expected 1 row, got #{row_count}"
 class L.Dba_format_unknown            extends L.Dba_error
   constructor: ( ref, format )      -> super ref, "unknown DB format #{ref format}"
+class L.Dba_extension_unknown         extends L.Dba_error
+  constructor: ( ref, path )        -> super ref, "extension of path #{path} is not registered for any format"
 class L.Dba_not_implemented           extends L.Dba_error
   constructor: ( ref, what )        -> super ref, "#{what} isn't implemented (yet)"
 class L.Dba_deprecated                extends L.Dba_error
@@ -170,6 +172,7 @@ class @Dba extends Multimix
       path
       format }  = cfg
     format     ?= @_format_from_path path
+    throw new L.Dba_extension_unknown '^dba@333^', path unless format?
     switch format
       when 'sqlite' then @_vacuum_atomically { schema, path, }
       ### TAINT when format derived from path, may be undefined, making the error message unintelligible ###
