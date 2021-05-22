@@ -159,9 +159,9 @@ class @Dba extends Multimix
     validate.dba_save_cfg ( cfg = { L.types.defaults.dba_export_cfg..., cfg..., } )
     { schema
       path }    = cfg
-    throw new L.Dba_argument_not_allowed '^dba@333^', 'path', path if path?
+    throw new L.Dba_argument_not_allowed '^dba@305^', 'path', path if path?
     path        = @_schemas[ schema ]?.path ? null
-    throw new L.Dba_schema_unknown '^dba@333^', schema unless path?
+    throw new L.Dba_schema_unknown '^dba@306^', schema unless path?
     return @export { schema, path, format: 'sqlite', }
 
   #---------------------------------------------------------------------------------------------------------
@@ -176,7 +176,7 @@ class @Dba extends Multimix
     switch format
       when 'sqlite' then @_vacuum_atomically { schema, path, }
       ### TAINT when format derived from path, may be undefined, making the error message unintelligible ###
-      else throw new L.Dba_format_unknown '^dba@333^', format
+      else throw new L.Dba_format_unknown '^dba@307^', format
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -202,7 +202,7 @@ class @Dba extends Multimix
     try
       return L.types.isa.dba_ram_path @single_value @query sql, [ schema, ]
     catch error
-      throw new L.Dba_schema_unknown '^dba@305^', schema if error instanceof L.Dba_expected_one_row
+      throw new L.Dba_schema_unknown '^dba@308^', schema if error instanceof L.Dba_expected_one_row
       throw error
 
   #---------------------------------------------------------------------------------------------------------
@@ -237,7 +237,7 @@ class @Dba extends Multimix
       when 'db'   then @_import_db  cfg
       when 'sql'  then @_import_sql cfg
       else
-        throw new L.Dba_format_unknown '^dba@306^', format
+        throw new L.Dba_format_unknown '^dba@309^', format
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -253,7 +253,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   _import_sql: ( cfg ) ->
-    throw new L.Dba_format_unknown '^dba@307^', 'sql'
+    throw new L.Dba_format_unknown '^dba@310^', 'sql'
     # switch cfg.method
     #   when 'single' then return @_import_sql_single cfg
     #   when 'batch'  then return @_import_sql_batch  cfg
@@ -444,7 +444,7 @@ class @Dba extends Multimix
   catalog: ->
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
     primary key index in SQLite) ###
-    throw new L.Dba_not_implemented '^dba@308^', "method dba.catalog()"
+    throw new L.Dba_not_implemented '^dba@311^', "method dba.catalog()"
     @query "select * from sqlite_schema order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
@@ -501,7 +501,7 @@ class @Dba extends Multimix
     name        = L.pick cfg, 'name', null
     validate_optional.ic_name name
     return ( has_schema = @_is_empty_schema @as_identifier schema ) unless name?
-    throw new L.Dba_not_implemented '^dba@309^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
+    throw new L.Dba_not_implemented '^dba@312^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty_schema: ( schema_i ) -> (
@@ -527,7 +527,7 @@ class @Dba extends Multimix
     R = @first_value @query "select file from pragma_database_list where name = ?;", [ schema, ]
     return R if R?
     return fallback unless fallback is L._misfit
-    throw new L.Dba_schema_unknown '^dba@310^', schema
+    throw new L.Dba_schema_unknown '^dba@313^', schema
 
   #---------------------------------------------------------------------------------------------------------
   type_of: ( name, schema = 'main' ) ->
@@ -577,14 +577,14 @@ class @Dba extends Multimix
     { path, schema, saveas, }   = cfg
     #.......................................................................................................
     if @has { schema, }
-      throw new L.Dba_schema_exists '^dba@311^', schema
+      throw new L.Dba_schema_exists '^dba@314^', schema
     #.......................................................................................................
     try
       @run "attach ? as ?;", [ path, schema, ]
     catch error
       throw error unless error.code is 'SQLITE_ERROR'
-      throw new L.Dba_sqlite_too_many_dbs '^dba@312^', schema if error.message.startsWith 'too many attached databases'
-      throw new L.Dba_sqlite_error        '^dba@313^', error
+      throw new L.Dba_sqlite_too_many_dbs '^dba@315^', schema if error.message.startsWith 'too many attached databases'
+      throw new L.Dba_sqlite_error        '^dba@316^', error
     @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, }
     return null
 
@@ -613,15 +613,15 @@ class @Dba extends Multimix
     { from_schema, to_schema, } = cfg
     #.......................................................................................................
     if from_schema is to_schema
-      throw new L.Dba_schema_repeated '^dba@314^', from_schema
+      throw new L.Dba_schema_repeated '^dba@317^', from_schema
     #.......................................................................................................
     known_schemas     = @list_schema_names()
-    throw new L.Dba_schema_unknown '^dba@315^', from_schema unless from_schema in known_schemas
-    throw new L.Dba_schema_unknown '^dba@316^', to_schema   unless to_schema   in known_schemas
+    throw new L.Dba_schema_unknown '^dba@318^', from_schema unless from_schema in known_schemas
+    throw new L.Dba_schema_unknown '^dba@319^', to_schema   unless to_schema   in known_schemas
     #.......................................................................................................
     to_schema_objects = @list @walk_objects { schema: to_schema, }
     if to_schema_objects.length > 0
-      throw new L.Dba_schema_nonempty '^dba@317^', to_schema
+      throw new L.Dba_schema_nonempty '^dba@320^', to_schema
     #.......................................................................................................
     from_schema_objects = @list @walk_objects { schema: from_schema }
     return detach_from_schema() if from_schema_objects.length is 0
@@ -638,14 +638,14 @@ class @Dba extends Multimix
       #.....................................................................................................
       ### TAINT consider to use `validate.ic_db_object_type` ###
       unless d.type in [ 'table', 'view', 'index', ]
-        throw new L.Dba_unexpected_db_object_type '^dba@318^', d.type, d
+        throw new L.Dba_unexpected_db_object_type '^dba@321^', d.type, d
       #.....................................................................................................
       ### TAINT using not-so reliable string replacement as substitute for proper parsing ###
       name_x  = @as_identifier d.name
       sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
       #.....................................................................................................
       if sql is d.sql
-        throw new L.Dba_unexpected_sql '^dba@319^', d.sql
+        throw new L.Dba_unexpected_sql '^dba@322^', d.sql
       #.....................................................................................................
       @execute sql
       if d.type is 'table'
@@ -682,7 +682,7 @@ class @Dba extends Multimix
       when 'float'      then return x.toString()
       when 'boolean'    then return ( if x then '1' else '0' )
       when 'null'       then return 'null'
-    throw new L.Dba_sql_value_error '^dba@320^', type, x
+    throw new L.Dba_sql_value_error '^dba@323^', type, x
 
   #---------------------------------------------------------------------------------------------------------
   interpolate: ( sql, Q ) -> sql.replace @_interpolation_pattern, ( $0, $1 ) => @as_sql Q[ $1 ]
