@@ -54,7 +54,7 @@ Dba                       = null
 @declare 'dba_list_objects_ordering', ( x ) -> ( not x? ) or ( x is 'drop' )
 
 #-----------------------------------------------------------------------------------------------------------
-@declare 'dba_format', ( x ) -> x in [ 'sql', 'sqlite', ]
+@declare 'dba_format', ( x ) -> x in [ 'sql', 'sqlite', 'csv', ]
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_constructor_cfg', tests:
@@ -72,13 +72,21 @@ Dba                       = null
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg', tests:
-  "@isa.object x":                               ( x ) -> @isa.object x
-  "@isa.ic_not_temp_schema x.schema":            ( x ) -> @isa.ic_not_temp_schema x.schema
-  "@isa.ic_path x.path":                         ( x ) -> @isa.ic_path x.path
-  "@isa_optional.dba_format x.format":           ( x ) -> @isa_optional.dba_format x.format
-  "x.method in [ 'single', 'batch', ]":          ( x ) -> x.method in [ 'single', 'batch', ]
-  "@isa_optional.positive_integer x.batch_size": ( x ) -> @isa_optional.positive_integer x.batch_size
+  "@isa.object x":                                ( x ) -> @isa.object x
+  "@isa.ic_not_temp_schema x.schema":             ( x ) -> @isa.ic_not_temp_schema x.schema
+  "@isa.ic_path x.path":                          ( x ) -> @isa.ic_path x.path
+  "@isa_optional.dba_format x.format":            ( x ) -> @isa_optional.dba_format x.format
+  "x.method in [ 'single', 'batch', ]":           ( x ) -> x.method in [ 'single', 'batch', ]
+  "@isa_optional.positive_integer x.batch_size":  ( x ) -> @isa_optional.positive_integer x.batch_size
   # "x.overwrite is a boolean":             ( x ) -> @isa.boolean x.overwrite
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_import_csv_cfg', tests:
+  "@isa.dba_import_cfg x":                        ( x ) -> @isa.dba_import_cfg x
+  "@isa.ic_name x.table":                         ( x ) -> @isa.ic_name x.table
+  ### NOTE see `_import_csv()`; for now only RAM DBs allowed for imported CSV ###
+  "@isa.true x.ram":                              ( x ) -> @isa.true x.ram
+  "@isa_optional.function x.transform":           ( x ) -> @isa_optional.function x.transform
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_save_cfg', tests:
@@ -164,6 +172,10 @@ Dba                       = null
     format:     null
     method:     'single'
     batch_size: 1000
+  #.........................................................................................................
+  dba_import_csv_cfg_extra:
+    table:      'main'
+    transform:  null
     # overwrite:  false
   #.........................................................................................................
   copy_or_move_schema_cfg:

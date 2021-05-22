@@ -84,6 +84,8 @@ class L.Dba_no_arguments_allowed      extends L.Dba_error
   constructor: ( ref, name, arity ) -> super ref, "method #{name} doesn't take arguments, got #{arity}"
 class L.Dba_argument_not_allowed      extends L.Dba_error
   constructor: ( ref, name, value ) -> super ref, "argument #{name} not allowed, got #{rpr value}"
+class L.Dba_empty_csv                 extends L.Dba_error
+  constructor: ( ref, path )        -> super ref, "no CSV records found in file #{path}"
 
 
 #===========================================================================================================
@@ -236,6 +238,7 @@ class @Dba extends Multimix
     switch cfg.format
       when 'db'   then @_import_db  cfg
       when 'sql'  then @_import_sql cfg
+      when 'csv'  then @_import_csv cfg
       else
         throw new L.Dba_format_unknown '^dba@309^', format
     return null
@@ -258,6 +261,55 @@ class @Dba extends Multimix
     #   when 'single' then return @_import_sql_single cfg
     #   when 'batch'  then return @_import_sql_batch  cfg
     # return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _import_csv: ( cfg ) ->
+    ### TAINT always requires `ram: true` ###
+    ### TAINT no streaming, no batching ###
+    ### TAINT no configurable CSV parsing ###
+    parse       = require 'csv-parse/lib/sync'
+    cfg         = {
+      L.types.defaults.dba_import_csv_cfg...,
+      L.types.defaults.dba_import_csv_cfg_extra...,
+      cfg..., }
+    validate.dba_import_csv_cfg cfg
+    { path
+      schema
+      transform
+      table }   = cfg
+    csv_cfg     =
+      columns:          true
+      skip_empty_lines: true
+    source  = FS.readFileSync path, { encoding: 'utf-8', }
+    rows    = parse source, csv_cfg
+    #.......................................................................................................
+    unless rows.length > 0
+      throw new L.Dba_empty_csv '^dba@333^', path
+    #.......................................................................................................
+    columns = ( k for k of rows[ 0 ] )
+    @_attach { schema, ram: true, }
+    insert  = @_create_csv_table { schema, table, columns, }
+    #.......................................................................................................
+    for row in rows
+      ### TAINT consider to use named placeholders ###
+      row = transform row if transform?
+      insert.run ( v for k, v of row )
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _create_csv_table: ( cfg ) ->
+    { schema
+      table
+      columns }     = cfg
+    schema_i        = @as_identifier schema
+    table_i         = @as_identifier table
+    columns_i       = ( @as_identifier d for d in columns )
+    columns_sql     = ( "#{ci} text"  for ci in columns_i ).join ', '
+    placeholder_sql = ( "?"           for ci in columns_i ).join ', '
+    create_sql      = "create table #{schema_i}.#{table_i} ( #{columns_sql} );"
+    @execute create_sql
+    #.......................................................................................................
+    return @prepare "insert into #{schema_i}.#{table_i} values ( #{placeholder_sql} );"
 
   #---------------------------------------------------------------------------------------------------------
   _import_sql_single: ( cfg ) ->
