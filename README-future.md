@@ -5,29 +5,30 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [Introduction](#introduction)
-- [OIMDB Functionality](#oimdb-functionality)
-- [Switching between File- and RAM-Based Modes (Mode Transfer)](#switching-between-file--and-ram-based-modes-mode-transfer)
-- [Continuous Persistency](#continuous-persistency)
-- [Eventual Persistency](#eventual-persistency)
-- [Ad Hoc Persistency](#ad-hoc-persistency)
-- [Regular Acquisition](#regular-acquisition)
-- [Ad Hoc Acquisition](#ad-hoc-acquisition)
-- [Privileged / Special Schemas: Main and Temp](#privileged--special-schemas-main-and-temp)
-- [Usage](#usage)
-  - [Create DBA Object](#create-dba-object)
-  - [Create DB with `open()`](#create-db-with-open)
-    - [New or Existing File-Based DB with Continuous Persistency](#new-or-existing-file-based-db-with-continuous-persistency)
-    - [RAM DB with Eventual Persistency](#ram-db-with-eventual-persistency)
-    - [New RAM DB without Eventual Persistency](#new-ram-db-without-eventual-persistency)
-  - [Import a DB](#import-a-db)
-    - [Notes on `import { format: 'sql', }`](#notes-on-import--format-sql-)
-  - [Transfer DB](#transfer-db)
-    - [Transfer File-Based DB to RAM](#transfer-file-based-db-to-ram)
-    - [Transfer RAM DB to file](#transfer-ram-db-to-file)
-  - [Save DB](#save-db)
-    - [Use `save()` to Save to Linked File](#use-save-to-save-to-linked-file)
-    - [Exporting to Binary and Textual Formats](#exporting-to-binary-and-textual-formats)
+  - [Introduction](#introduction)
+  - [OIMDB Functionality](#oimdb-functionality)
+  - [Switching between File- and RAM-Based Modes (Mode Transfer)](#switching-between-file--and-ram-based-modes-mode-transfer)
+  - [Continuous Persistency](#continuous-persistency)
+  - [Eventual Persistency](#eventual-persistency)
+  - [Ad Hoc Persistency](#ad-hoc-persistency)
+  - [Regular Acquisition](#regular-acquisition)
+  - [Ad Hoc Acquisition](#ad-hoc-acquisition)
+  - [Privileged / Special Schemas: Main and Temp](#privileged--special-schemas-main-and-temp)
+  - [Usage](#usage)
+    - [Create DBA Object](#create-dba-object)
+    - [Create DB with `open()`](#create-db-with-open)
+      - [New or Existing File-Based DB with Continuous Persistency](#new-or-existing-file-based-db-with-continuous-persistency)
+      - [RAM DB with Eventual Persistency](#ram-db-with-eventual-persistency)
+      - [New RAM DB without Eventual Persistency](#new-ram-db-without-eventual-persistency)
+    - [Import a DB](#import-a-db)
+      - [Notes on `import { format: 'sql', }`](#notes-on-import--format-sql-)
+    - [Transfer DB](#transfer-db)
+      - [Transfer File-Based DB to RAM](#transfer-file-based-db-to-ram)
+      - [Transfer RAM DB to file](#transfer-ram-db-to-file)
+    - [Save DB](#save-db)
+      - [Use `save()` to Save to Linked File](#use-save-to-save-to-linked-file)
+      - [Exporting to Binary and Textual Formats](#exporting-to-binary-and-textual-formats)
+- [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -311,5 +312,14 @@ dba.export { schema, path, format: 'sqlite', overwrite: true, }
 ```coffee
 dba.export { schema: 'myschema', path, format, overwrite, }
 ```
+
+# To Do
+
+* [ ] CSV import
+  * implement importing to an existing schema; this will simplify import options (no need to make `ram:
+    true` etc. configurable)
+  * implement (async) streaming with SteamPipes transforms
+  * implement batching (?)
+  * implement passing options to CSV parser
 
 
