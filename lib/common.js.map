@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/common.coffee"
+  ],
+  "names": [],
+  "mappings": "AAEA;EAAA;AAAA,MAAA,GAAA,EAAA,KAAA,EAAA,GAAA;;;EAGA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,KAAA,GAA4B,kBAL5B;;;;;;;;;;;;EAgBA,IAAC,CAAA,MAAD,GAAU,MAAA,CAAO,QAAP;AAhBV",
+  "sourcesContent": [
+    "\n\n'use strict'\n\n############################################################################################################\nCND                       = require 'cnd'\nrpr                       = CND.rpr\nbadge                     = 'ICQL-DBA/COMMON'\n# debug                     = CND.get_logger 'debug',     badge\n# warn                      = CND.get_logger 'warn',      badge\n# info                      = CND.get_logger 'info',      badge\n# urge                      = CND.get_logger 'urge',      badge\n# help                      = CND.get_logger 'help',      badge\n# whisper                   = CND.get_logger 'whisper',   badge\n# echo                      = CND.echo.bind CND\n# E                         = require './errors'\n\n#-----------------------------------------------------------------------------------------------------------\n@misfit = Symbol 'misfit'\n\n\n\n\n\n\n"
+  ]
+}
