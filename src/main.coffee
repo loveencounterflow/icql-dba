@@ -287,13 +287,19 @@ class @Dba extends Multimix
       throw new L.Dba_empty_csv '^dba@333^', path
     #.......................................................................................................
     columns = ( k for k of rows[ 0 ] )
+    columns = transform { columns, } if transform?
     @_attach { schema, ram: true, }
     insert  = @_create_csv_table { schema, table, columns, }
     #.......................................................................................................
     for row in rows
-      ### TAINT consider to use named placeholders ###
-      row = transform row if transform?
-      insert.run ( v for k, v of row )
+      if transform?
+        if isa.list ( subrows = transform { row, } )
+          for subrow in subrows
+            insert.run ( subrow[ column ] for column in columns )
+        else
+          insert.run ( subrows[ column ] for column in columns )
+        continue
+      insert.run ( row[ column ] for column in columns )
     return null
 
   #---------------------------------------------------------------------------------------------------------
