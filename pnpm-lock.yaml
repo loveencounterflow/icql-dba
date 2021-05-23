@@ -7,7 +7,6 @@ specifiers:
   hollerith-codec: 3.0.1
   intertype: 7.6.7
   letsfreezethat: ^3.1.0
-  multimix: ^5.0.0
   mysql-tokenizer: ^1.0.7
   n-readlines: ^1.0.1
   tempy: ^1.0.1
@@ -20,7 +19,6 @@ dependencies:
   hollerith-codec: 3.0.1
   intertype: 7.6.7
   letsfreezethat: 3.1.0
-  multimix: 5.0.0
   mysql-tokenizer: 1.0.7
   n-readlines: 1.0.1
   tempy: 1.0.1
