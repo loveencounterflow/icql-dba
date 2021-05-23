@@ -17,21 +17,24 @@ echo                      = CND.echo.bind CND
 FS                        = require 'fs'
 HOLLERITH                 = require 'hollerith-codec'
 #...........................................................................................................
-@types                    = require './types'
+types                     = require './types'
 { isa
   validate
   validate_optional
   declare
   size_of
-  type_of }               = @types
+  type_of }               = types
 { freeze
   lets }                  = require 'letsfreezethat'
 Multimix                  = require 'multimix'
 L                         = @
-L._misfit                 = Symbol 'misfit'
+{ misfit }                = require './common'
+E                         = require './errors'
 new_bsqlt3_connection     = require 'better-sqlite3'
 PATH                      = require 'path'
 TMP                       = require 'tempy'
+{ Import_export_mixin }   = require './import-export-mixin'
+
 
 #-----------------------------------------------------------------------------------------------------------
 L.pick = ( d, key, fallback, type = null ) ->
@@ -39,73 +42,26 @@ L.pick = ( d, key, fallback, type = null ) ->
   validate[ type ] R if type?
   return R
 
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_error extends Error
-  constructor: ( ref, message ) ->
-    super()
-    @message  = "#{ref} (#{@constructor.name}) #{message}"
-    @ref      = ref
-    return undefined ### always return `undefined` from constructor ###
-
-#-----------------------------------------------------------------------------------------------------------
-class L.Dba_cfg_error                 extends L.Dba_error
-  constructor: ( ref, message )     -> super ref, message
-class L.Dba_schema_exists             extends L.Dba_error
-  constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} already exists"
-class L.Dba_schema_unknown            extends L.Dba_error
-  constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} does not exist"
-class L.Dba_schema_nonempty           extends L.Dba_error
-  constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} isn't empty"
-class L.Dba_schema_not_allowed        extends L.Dba_error
-  constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} not allowed here"
-class L.Dba_schema_repeated           extends L.Dba_error
-  constructor: ( ref, schema )      -> super ref, "unable to copy schema to itself, got #{rpr schema}"
-class L.Dba_expected_one_row          extends L.Dba_error
-  constructor: ( ref, row_count )   -> super ref, "expected 1 row, got #{row_count}"
-class L.Dba_format_unknown            extends L.Dba_error
-  constructor: ( ref, format )      -> super ref, "unknown DB format #{ref format}"
-class L.Dba_extension_unknown         extends L.Dba_error
-  constructor: ( ref, path )        -> super ref, "extension of path #{path} is not registered for any format"
-class L.Dba_not_implemented           extends L.Dba_error
-  constructor: ( ref, what )        -> super ref, "#{what} isn't implemented (yet)"
-class L.Dba_deprecated                extends L.Dba_error
-  constructor: ( ref, what )        -> super ref, "#{what} has been deprecated"
-class L.Dba_unexpected_db_object_type extends L.Dba_error
-  constructor: ( ref, type, value ) -> super ref, "µ769 unknown type #{rpr type} of DB object #{d}"
-class L.Dba_sql_value_error           extends L.Dba_error
-  constructor: ( ref, type, value ) -> super ref, "unable to express a #{type} as SQL literal, got #{rpr value}"
-class L.Dba_unexpected_sql            extends L.Dba_error
-  constructor: ( ref, sql )         -> super ref, "unexpected SQL string #{rpr sql}"
-class L.Dba_sqlite_too_many_dbs       extends L.Dba_error
-  constructor: ( ref, schema )      -> super ref, "unable to attach schema #{rpr schema}: too many attached databases"
-class L.Dba_sqlite_error              extends L.Dba_error
-  constructor: ( ref, error )       -> super ref, "#{error.code ? 'SQLite error'}: #{error.message}"
-class L.Dba_no_arguments_allowed      extends L.Dba_error
-  constructor: ( ref, name, arity ) -> super ref, "method #{name} doesn't take arguments, got #{arity}"
-class L.Dba_argument_not_allowed      extends L.Dba_error
-  constructor: ( ref, name, value ) -> super ref, "argument #{name} not allowed, got #{rpr value}"
-class L.Dba_empty_csv                 extends L.Dba_error
-  constructor: ( ref, path )        -> super ref, "no CSV records found in file #{path}"
-
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-class @Dba extends Multimix
+class @Dba extends Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
+    @types        = types
     @_statements  = {}
     @_schemas     = freeze {}
-    @cfg          = freeze { L.types.defaults.dba_constructor_cfg..., cfg..., }
+    @cfg          = freeze { @types.defaults.dba_constructor_cfg..., cfg..., }
     validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
-    @_formats     = freeze { L.types.defaults.extensions_and_formats..., }
+    @_formats     = freeze { @types.defaults.extensions_and_formats..., }
     # debug '^345^', @cfg
-    throw new L.Dba_cfg_error '^dba@300^', "property `sqlt` not supported (yet)"   if @cfg.sqlt?
-    throw new L.Dba_cfg_error '^dba@301^', "property `schema` not supported (yet)" if @cfg.schema?
-    throw new L.Dba_cfg_error '^dba@302^', "property `path` not supported (yet)"   if @cfg.path?
+    throw new E.Dba_cfg_error '^dba@300^', "property `sqlt` not supported (yet)"   if @cfg.sqlt?
+    throw new E.Dba_cfg_error '^dba@301^', "property `schema` not supported (yet)" if @cfg.schema?
+    throw new E.Dba_cfg_error '^dba@302^', "property `path` not supported (yet)"   if @cfg.path?
     bsqlt3_cfg    =
       readonly:       @cfg.readonly
       fileMustExist:  not @cfg.create
@@ -117,10 +73,10 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
-    validate.dba_open_cfg ( cfg = { L.types.defaults.dba_open_cfg..., cfg..., } )
+    validate.dba_open_cfg ( cfg = { @types.defaults.dba_open_cfg..., cfg..., } )
     { path, schema, ram, }  = cfg
-    throw new L.Dba_schema_not_allowed  '^dba@303^', schema if schema in [ 'main', 'temp', ]
-    throw new L.Dba_schema_exists       '^dba@304^', schema if @has { schema, }
+    throw new E.Dba_schema_not_allowed  '^dba@303^', schema if schema in [ 'main', 'temp', ]
+    throw new E.Dba_schema_exists       '^dba@304^', schema if @has { schema, }
     #.......................................................................................................
     ### TAINT troublesome logic with `path` and `saveas` ###
     if path?
@@ -143,7 +99,7 @@ class @Dba extends Multimix
     ### TAINT validate? ###
     { path, schema, saveas, } = cfg
     #.......................................................................................................
-    if L.types.isa.dba_ram_path path
+    if @types.isa.dba_ram_path path
       @_attach { schema, path, saveas, }
       return null
     #.......................................................................................................
@@ -158,32 +114,32 @@ class @Dba extends Multimix
   #---------------------------------------------------------------------------------------------------------
   save: ( cfg ) ->
     ### TAINT could implement prohibition of `path` in type `dba_save_cfg` ###
-    validate.dba_save_cfg ( cfg = { L.types.defaults.dba_export_cfg..., cfg..., } )
+    validate.dba_save_cfg ( cfg = { @types.defaults.dba_export_cfg..., cfg..., } )
     { schema
       path }    = cfg
-    throw new L.Dba_argument_not_allowed '^dba@305^', 'path', path if path?
+    throw new E.Dba_argument_not_allowed '^dba@305^', 'path', path if path?
     path        = @_schemas[ schema ]?.path ? null
-    throw new L.Dba_schema_unknown '^dba@306^', schema unless path?
+    throw new E.Dba_schema_unknown '^dba@306^', schema unless path?
     return @export { schema, path, format: 'sqlite', }
 
   #---------------------------------------------------------------------------------------------------------
   export: ( cfg ) ->
     ### TAINT add boolean `cfg.overwrite` ###
-    validate.dba_export_cfg ( cfg = { L.types.defaults.dba_export_cfg..., cfg..., } )
+    validate.dba_export_cfg ( cfg = { @types.defaults.dba_export_cfg..., cfg..., } )
     { schema
       path
       format }  = cfg
     format     ?= @_format_from_path path
-    throw new L.Dba_extension_unknown '^dba@333^', path unless format?
+    throw new E.Dba_extension_unknown '^dba@333^', path unless format?
     switch format
       when 'sqlite' then @_vacuum_atomically { schema, path, }
       ### TAINT when format derived from path, may be undefined, making the error message unintelligible ###
-      else throw new L.Dba_format_unknown '^dba@307^', format
+      else throw new E.Dba_format_unknown '^dba@307^', format
     return null
 
   #---------------------------------------------------------------------------------------------------------
   _vacuum_atomically: ( cfg ) ->
-    validate.dba_vacuum_atomically ( cfg = { L.types.defaults.dba_vacuum_atomically..., cfg..., } )
+    validate.dba_vacuum_atomically ( cfg = { @types.defaults.dba_vacuum_atomically..., cfg..., } )
     { schema
       path }  = cfg
     schema_i  = @as_identifier schema
@@ -198,13 +154,13 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   is_ram_db: ( cfg ) ->
-    validate.dba_is_ram_db_cfg ( cfg = { L.types.defaults.dba_is_ram_db_cfg..., cfg..., } )
+    validate.dba_is_ram_db_cfg ( cfg = { @types.defaults.dba_is_ram_db_cfg..., cfg..., } )
     { schema } = cfg
     sql = "select file from pragma_database_list where name = ? limit 1;"
     try
-      return L.types.isa.dba_ram_path @single_value @query sql, [ schema, ]
+      return @types.isa.dba_ram_path @single_value @query sql, [ schema, ]
     catch error
-      throw new L.Dba_schema_unknown '^dba@308^', schema if error instanceof L.Dba_expected_one_row
+      throw new E.Dba_schema_unknown '^dba@308^', schema if error instanceof E.Dba_expected_one_row
       throw error
 
   #---------------------------------------------------------------------------------------------------------
@@ -231,19 +187,6 @@ class @Dba extends Multimix
   _get_free_temp_schema: -> @cfg._temp_prefix + "#{( @_max_temp_schema_number() + 1 )}"
 
   #---------------------------------------------------------------------------------------------------------
-  import: ( cfg ) ->
-    cfg         = { L.types.defaults.dba_import_cfg..., cfg..., }
-    cfg.format ?= L._get_format cfg.path, cfg.format
-    validate.dba_import_cfg cfg
-    switch cfg.format
-      when 'db'   then @_import_db  cfg
-      when 'sql'  then @_import_sql cfg
-      when 'csv'  then @_import_csv cfg
-      else
-        throw new L.Dba_format_unknown '^dba@309^', format
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
   _import_db: ( cfg ) ->
     tmp_schema = @_get_free_temp_schema()
     @_attach { schema: tmp_schema, path: cfg.path, }
@@ -256,7 +199,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   _import_sql: ( cfg ) ->
-    throw new L.Dba_format_unknown '^dba@310^', 'sql'
+    throw new E.Dba_format_unknown '^dba@310^', 'sql'
     # switch cfg.method
     #   when 'single' then return @_import_sql_single cfg
     #   when 'batch'  then return @_import_sql_batch  cfg
@@ -269,8 +212,8 @@ class @Dba extends Multimix
     ### TAINT no configurable CSV parsing ###
     parse       = require 'csv-parse/lib/sync'
     cfg         = {
-      L.types.defaults.dba_import_csv_cfg...,
-      L.types.defaults.dba_import_csv_cfg_extra...,
+      @types.defaults.dba_import_csv_cfg...,
+      @types.defaults.dba_import_csv_cfg_extra...,
       cfg..., }
     validate.dba_import_csv_cfg cfg
     { path
@@ -284,7 +227,7 @@ class @Dba extends Multimix
     rows    = parse source, csv_cfg
     #.......................................................................................................
     unless rows.length > 0
-      throw new L.Dba_empty_csv '^dba@333^', path
+      throw new E.Dba_empty_csv '^dba@333^', path
     #.......................................................................................................
     columns = ( k for k of rows[ 0 ] )
     columns = transform { columns, } if transform?
@@ -403,7 +346,7 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   single_row:   ( iterator ) ->
-    throw new L.Dba_expected_one_row 'dba@763^', 0 if ( R = @first_row iterator ) is undefined
+    throw new E.Dba_expected_one_row 'dba@763^', 0 if ( R = @first_row iterator ) is undefined
     return R
 
   #---------------------------------------------------------------------------------------------------------
@@ -502,7 +445,7 @@ class @Dba extends Multimix
   catalog: ->
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
     primary key index in SQLite) ###
-    throw new L.Dba_not_implemented '^dba@311^', "method dba.catalog()"
+    throw new E.Dba_not_implemented '^dba@311^', "method dba.catalog()"
     @query "select * from sqlite_schema order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
@@ -559,7 +502,7 @@ class @Dba extends Multimix
     name        = L.pick cfg, 'name', null
     validate_optional.ic_name name
     return ( has_schema = @_is_empty_schema @as_identifier schema ) unless name?
-    throw new L.Dba_not_implemented '^dba@312^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
+    throw new E.Dba_not_implemented '^dba@312^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty_schema: ( schema_i ) -> (
@@ -581,11 +524,11 @@ class @Dba extends Multimix
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  _path_of_schema: ( schema, fallback = L._misfit ) ->
+  _path_of_schema: ( schema, fallback = misfit ) ->
     R = @first_value @query "select file from pragma_database_list where name = ?;", [ schema, ]
     return R if R?
-    return fallback unless fallback is L._misfit
-    throw new L.Dba_schema_unknown '^dba@313^', schema
+    return fallback unless fallback is misfit
+    throw new E.Dba_schema_unknown '^dba@313^', schema
 
   #---------------------------------------------------------------------------------------------------------
   type_of: ( name, schema = 'main' ) ->
@@ -631,18 +574,18 @@ class @Dba extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   _attach: ( cfg ) ->
-    validate.dba_attach_cfg ( cfg = { L.types.defaults.dba_attach_cfg..., cfg..., } )
+    validate.dba_attach_cfg ( cfg = { @types.defaults.dba_attach_cfg..., cfg..., } )
     { path, schema, saveas, }   = cfg
     #.......................................................................................................
     if @has { schema, }
-      throw new L.Dba_schema_exists '^dba@314^', schema
+      throw new E.Dba_schema_exists '^dba@314^', schema
     #.......................................................................................................
     try
       @run "attach ? as ?;", [ path, schema, ]
     catch error
       throw error unless error.code is 'SQLITE_ERROR'
-      throw new L.Dba_sqlite_too_many_dbs '^dba@315^', schema if error.message.startsWith 'too many attached databases'
-      throw new L.Dba_sqlite_error        '^dba@316^', error
+      throw new E.Dba_sqlite_too_many_dbs '^dba@315^', schema if error.message.startsWith 'too many attached databases'
+      throw new E.Dba_sqlite_error        '^dba@316^', error
     @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, }
     return null
 
@@ -667,19 +610,19 @@ class @Dba extends Multimix
       return null unless detach_schema
       return @_detach { schema: from_schema, }
     #.......................................................................................................
-    validate.copy_or_move_schema_cfg ( cfg = { L.types.defaults.copy_or_move_schema_cfg..., cfg..., } )
+    validate.copy_or_move_schema_cfg ( cfg = { @types.defaults.copy_or_move_schema_cfg..., cfg..., } )
     { from_schema, to_schema, } = cfg
     #.......................................................................................................
     if from_schema is to_schema
-      throw new L.Dba_schema_repeated '^dba@317^', from_schema
+      throw new E.Dba_schema_repeated '^dba@317^', from_schema
     #.......................................................................................................
     known_schemas     = @list_schema_names()
-    throw new L.Dba_schema_unknown '^dba@318^', from_schema unless from_schema in known_schemas
-    throw new L.Dba_schema_unknown '^dba@319^', to_schema   unless to_schema   in known_schemas
+    throw new E.Dba_schema_unknown '^dba@318^', from_schema unless from_schema in known_schemas
+    throw new E.Dba_schema_unknown '^dba@319^', to_schema   unless to_schema   in known_schemas
     #.......................................................................................................
     to_schema_objects = @list @walk_objects { schema: to_schema, }
     if to_schema_objects.length > 0
-      throw new L.Dba_schema_nonempty '^dba@320^', to_schema
+      throw new E.Dba_schema_nonempty '^dba@320^', to_schema
     #.......................................................................................................
     from_schema_objects = @list @walk_objects { schema: from_schema }
     return detach_from_schema() if from_schema_objects.length is 0
@@ -696,14 +639,14 @@ class @Dba extends Multimix
       #.....................................................................................................
       ### TAINT consider to use `validate.ic_db_object_type` ###
       unless d.type in [ 'table', 'view', 'index', ]
-        throw new L.Dba_unexpected_db_object_type '^dba@321^', d.type, d
+        throw new E.Dba_unexpected_db_object_type '^dba@321^', d.type, d
       #.....................................................................................................
       ### TAINT using not-so reliable string replacement as substitute for proper parsing ###
       name_x  = @as_identifier d.name
       sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
       #.....................................................................................................
       if sql is d.sql
-        throw new L.Dba_unexpected_sql '^dba@322^', d.sql
+        throw new E.Dba_unexpected_sql '^dba@322^', d.sql
       #.....................................................................................................
       @execute sql
       if d.type is 'table'
@@ -740,23 +683,18 @@ class @Dba extends Multimix
       when 'float'      then return x.toString()
       when 'boolean'    then return ( if x then '1' else '0' )
       when 'null'       then return 'null'
-    throw new L.Dba_sql_value_error '^dba@323^', type, x
+    throw new E.Dba_sql_value_error '^dba@323^', type, x
 
   #---------------------------------------------------------------------------------------------------------
   interpolate: ( sql, Q ) -> sql.replace @_interpolation_pattern, ( $0, $1 ) => @as_sql Q[ $1 ]
       # try
       #   return @as_sql Q[ $1 ]
       # catch error
-      #   throw new L.Dba_error \
+      #   throw new E.Dba_error \
       #     "µ773 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
   _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
 
 
-  #=========================================================================================================
-  # FORMAT GUESSING
-  #---------------------------------------------------------------------------------------------------------
-  _extension_from_path: ( path ) -> if ( R = PATH.extname path ) is '' then null else R[ 1 .. ]
-  _format_from_path:    ( path ) -> @_formats[ @._extension_from_path path ] ? null
 
 
   #=========================================================================================================
