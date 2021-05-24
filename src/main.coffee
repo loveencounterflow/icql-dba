@@ -26,7 +26,6 @@ types                     = require './types'
   type_of }               = types
 { freeze
   lets }                  = require 'letsfreezethat'
-Multimix                  = require 'multimix'
 L                         = @
 { misfit }                = require './common'
 E                         = require './errors'
