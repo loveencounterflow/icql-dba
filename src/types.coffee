@@ -81,12 +81,19 @@ Dba                       = null
   # "x.overwrite is a boolean":             ( x ) -> @isa.boolean x.overwrite
 
 #-----------------------------------------------------------------------------------------------------------
-@declare 'dba_import_csv_cfg', tests:
+@declare 'dba_import_cfg_csv', tests:
   "@isa.dba_import_cfg x":                        ( x ) -> @isa.dba_import_cfg x
   "@isa.ic_name x.table":                         ( x ) -> @isa.ic_name x.table
   ### NOTE see `_import_csv()`; for now only RAM DBs allowed for imported CSV ###
   "@isa.true x.ram":                              ( x ) -> @isa.true x.ram
   "@isa_optional.function x.transform":           ( x ) -> @isa_optional.function x.transform
+  "@isa_optional.object x._extra":                ( x ) -> @isa_optional.object x._extra
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_import_cfg_csv_extra', tests:
+  ### see https://csv.js.org/parse/options/ ###
+  ### relying on `csv-parse` to do the right thing ###
+  "@isa_optional.object x":                       ( x ) -> @isa_optional.object x
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_save_cfg', tests:
@@ -173,10 +180,14 @@ Dba                       = null
     method:     'single'
     batch_size: 1000
   #.........................................................................................................
-  dba_import_csv_cfg_extra:
+  dba_import_cfg_csv:
     table:      'main'
     transform:  null
-    # overwrite:  false
+    _extra:     null
+  #.........................................................................................................
+  dba_import_cfg_csv_extra:
+    columns:          true
+    skip_empty_lines: true
   #.........................................................................................................
   copy_or_move_schema_cfg:
     from_schema:  null

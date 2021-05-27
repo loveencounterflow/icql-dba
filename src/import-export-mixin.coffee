@@ -69,19 +69,19 @@ E                         = require './errors'
     ### TAINT no configurable CSV parsing ###
     parse       = require 'csv-parse/lib/sync'
     cfg         = {
-      @types.defaults.dba_import_csv_cfg...,
-      @types.defaults.dba_import_csv_cfg_extra...,
+      @types.defaults.dba_import_cfg...,
+      @types.defaults.dba_import_cfg_csv...,
       cfg..., }
-    @types.validate.dba_import_csv_cfg cfg
+    @types.validate.dba_import_cfg_csv cfg
     { path
       schema
       transform
+      _extra
       table }   = cfg
-    csv_cfg     =
-      columns:          true
-      skip_empty_lines: true
-    source  = FS.readFileSync path, { encoding: 'utf-8', }
-    rows    = parse source, csv_cfg
+    csv_cfg     = { @types.defaults.dba_import_cfg_csv_extra..., _extra..., }
+    @types.validate.dba_import_cfg_csv_extra csv_cfg
+    source      = FS.readFileSync path, { encoding: 'utf-8', }
+    rows        = parse source, csv_cfg
     #.......................................................................................................
     unless rows.length > 0
       throw new E.Dba_empty_csv '^dba@333^', path
