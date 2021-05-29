@@ -62,11 +62,61 @@ E                         = require './errors'
     #   when 'batch'  then return @_import_sql_batch  cfg
     # return null
 
+  # #---------------------------------------------------------------------------------------------------------
+  # _import_csv1: ( cfg ) ->
+  #   ### TAINT always requires `ram: true` ###
+  #   ### TAINT no streaming, no batching ###
+  #   ### TAINT no configurable CSV parsing ###
+  #   parse       = require 'csv-parse/lib/sync'
+  #   cfg         = {
+  #     @types.defaults.dba_import_cfg...,
+  #     @types.defaults.dba_import_cfg_csv...,
+  #     cfg..., }
+  #   @types.validate.dba_import_cfg_csv cfg
+  #   { path
+  #     schema
+  #     transform
+  #     _extra
+  #     table }   = cfg
+  #   csv_cfg     = { @types.defaults.dba_import_cfg_csv_extra..., _extra..., }
+  #   @types.validate.dba_import_cfg_csv_extra csv_cfg
+  #   source      = FS.readFileSync path, { encoding: 'utf-8', }
+  #   rows        = parse source, csv_cfg
+  #   stop        = Symbol.for 'stop'
+  #   lnr         = 0
+  #   line        = null
+  #   #.......................................................................................................
+  #   unless rows.length > 0
+  #     throw new E.Dba_empty_csv '^dba@333^', path
+  #   #.......................................................................................................
+  #   columns = ( k for k of rows[ 0 ] )
+  #   columns = transform { columns, } if transform?
+  #   @_attach { schema, ram: true, }
+  #   insert  = @_create_csv_table { schema, table, columns, }
+  #   #.......................................................................................................
+  #   for row in rows
+  #     unless transform?
+  #       insert.run ( row[ column ] for column in columns )
+  #       continue
+  #     subrows   = transform { row, lnr, line, stop, }
+  #     break if subrows is stop
+  #     continue unless subrows?
+  #     if @types.isa.list subrows
+  #       for subrow in subrows
+  #         insert.run ( subrow[ column ] for column in columns )
+  #       continue
+  #     insert.run ( subrows[ column ] for column in columns )
+  #   return null
+
   #---------------------------------------------------------------------------------------------------------
   _import_csv: ( cfg ) ->
     ### TAINT always requires `ram: true` ###
     ### TAINT no streaming, no batching ###
     ### TAINT no configurable CSV parsing ###
+    ### NOTE optimisation: instead of n-readlines, use (unpublished) `chunkreader` that reads n bytes,
+      only looks for last newline, then parses chunk ###
+    ### NOTE optimisation: do not call `insert` for each line, but assemble big `insert .. values (...)`
+      statement (as done before, should be fastest) ###
     parse       = require 'csv-parse/lib/sync'
     cfg         = {
       @types.defaults.dba_import_cfg...,
@@ -76,30 +126,62 @@ E                         = require './errors'
     { path
       schema
       transform
+      columns
+      skip_empty
+      skip_blank
       _extra
       table }   = cfg
-    csv_cfg     = { @types.defaults.dba_import_cfg_csv_extra..., _extra..., }
+    csv_cfg     = { @types.defaults.dba_import_cfg_csv_extra..., _extra..., columns, }
     @types.validate.dba_import_cfg_csv_extra csv_cfg
-    source      = FS.readFileSync path, { encoding: 'utf-8', }
-    rows        = parse source, csv_cfg
-    #.......................................................................................................
-    unless rows.length > 0
-      throw new E.Dba_empty_csv '^dba@333^', path
-    #.......................................................................................................
-    columns = ( k for k of rows[ 0 ] )
-    columns = transform { columns, } if transform?
+    readlines   = new ( require 'n-readlines' ) path
+    stop        = Symbol.for 'stop'
+    lnr         = 0
+    buffer      = null
+    batch_size  = 10000
     @_attach { schema, ram: true, }
-    insert  = @_create_csv_table { schema, table, columns, }
+    insert      = null
     #.......................................................................................................
-    for row in rows
-      if transform?
-        if @types.isa.list ( subrows = transform { row, } )
+    flush = =>
+      return unless buffer? and buffer.length > 0
+      lines   = buffer
+      source  = lines.join '\n'
+      buffer  = null
+      rows    = parse source, csv_cfg
+      # #.......................................................................................................
+      # unless rows.length > 0
+      #   throw new E.Dba_empty_csv '^dba@333^', path
+      #.......................................................................................................
+      # columns = ( k for k of rows[ 0 ] )
+      # debug '^443^', { columns, }
+      # columns = transform { columns, } if transform?
+      ### NOTE keeping this here so we can potentially obtain columns from source ###
+      insert ?= @_create_csv_table { schema, table, columns, }
+      #.......................................................................................................
+      for row, row_idx in rows
+        unless transform?
+          insert.run ( row[ column ] for column in columns )
+          continue
+        line      = lines[ row_idx ].toString 'utf-8'
+        lnr++
+        continue if skip_empty and line is ''
+        continue if skip_blank and /^\s*$/.test line
+        subrows   = transform { row, lnr, line, stop, }
+        break if subrows is stop
+        continue unless subrows?
+        if @types.isa.list subrows
           for subrow in subrows
             insert.run ( subrow[ column ] for column in columns )
-        else
-          insert.run ( subrows[ column ] for column in columns )
-        continue
-      insert.run ( row[ column ] for column in columns )
+          continue
+        insert.run ( subrows[ column ] for column in columns )
+      return null
+    #.......................................................................................................
+    ### TAINT this use of n-readlines is inefficient as it splits the bytes into line-sized chunks which we
+    then re-assembly into strings with lines. However, it only takes up a small part of the overall time
+    it takes to parse and insert records. ###
+    while ( line = readlines.next() ) isnt false
+      ( buffer ?= [] ).push line
+      flush() if buffer.length >= batch_size
+    flush()
     return null
 
   #---------------------------------------------------------------------------------------------------------

@@ -86,6 +86,8 @@ Dba                       = null
   "@isa.ic_name x.table":                         ( x ) -> @isa.ic_name x.table
   ### NOTE see `_import_csv()`; for now only RAM DBs allowed for imported CSV ###
   "@isa.true x.ram":                              ( x ) -> @isa.true x.ram
+  "@isa.boolean x.skip_empty":                    ( x ) -> @isa.boolean x.skip_empty
+  "@isa.boolean x.skip_blank":                    ( x ) -> @isa.boolean x.skip_blank
   "@isa_optional.function x.transform":           ( x ) -> @isa_optional.function x.transform
   "@isa_optional.object x._extra":                ( x ) -> @isa_optional.object x._extra
 
@@ -181,13 +183,15 @@ Dba                       = null
     batch_size: 1000
   #.........................................................................................................
   dba_import_cfg_csv:
-    table:      'main'
-    transform:  null
-    _extra:     null
+    table:            'main'
+    transform:        null
+    _extra:           null
+    skip_empty:       true
+    skip_blank:       true
   #.........................................................................................................
   dba_import_cfg_csv_extra:
-    columns:          true
-    skip_empty_lines: true
+    columns:          false
+    skip_empty_lines: false
   #.........................................................................................................
   copy_or_move_schema_cfg:
     from_schema:  null
