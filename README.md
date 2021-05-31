@@ -316,10 +316,10 @@ dba.export { schema: 'myschema', path, format, overwrite, }
 # To Do
 
 * [ ] CSV import
-  * implement importing to an existing schema; this will simplify import options (no need to make `ram:
+  * [ ] implement importing to an existing schema; this will simplify import options (no need to make `ram:
     true` etc. configurable)
-  * implement (async) streaming with SteamPipes transforms
-  * implement batching (?)
-  * implement passing options to CSV parser
-
+  * [ ] implement (async) streaming with SteamPipes transforms
+  * [ ] implement batching (?)
+  * [ ] implement passing options to CSV parser
+* [ ] TSV import (differs only in configuration from CSV)
 
