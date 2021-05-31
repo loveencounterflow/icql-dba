@@ -28,6 +28,8 @@
     - [Save DB](#save-db)
       - [Use `save()` to Save to Linked File](#use-save-to-save-to-linked-file)
       - [Exporting to Binary and Textual Formats](#exporting-to-binary-and-textual-formats)
+- [Notes on Import Formats](#notes-on-import-formats)
+  - [CSV](#csv)
 - [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -313,6 +315,30 @@ dba.export { schema, path, format: 'sqlite', overwrite: true, }
 dba.export { schema: 'myschema', path, format, overwrite, }
 ```
 
+# Notes on Import Formats
+
+## CSV
+
+* Configuration:
+  * `transform`:  optional `function`, default: `null`
+  * `_extra`:     optional `object`, default: `null`
+  * `skip_first`: optional `boolean`, default: `false`; whether to skip the first input line.
+  * `skip_empty`: optional `boolean`, default: `true`
+  * `skip_blank`: optional `boolean`, default: `true`
+  * `input_columns`:
+    * optional `boolean` or nonempty `list of nonempty texts`, default: `null`
+    * `true`: first non-skipped row of source contains column names; rows are objects
+    * `false`: rows are lists
+    * list of `n` names: only the first `n` columns will be kept; rows are objects
+  <!-- * schema: defaults to `csv` -->
+  * `table_name`: optional `nonempty_text`, defaults to `main`
+  * `table_columns`:
+    * `null`: columns are created as `text`s depending on the first row encountered; if it is a list,
+      columns will be named `c1`, `c2`, `c3`, ..., `c${n}`
+    * `{ name: type, name: type, ..., }`: columns are created with the `name`s and `type`s given
+    * `[ name, name, ..., ]`: all columns are created as `text`
+
+
 # To Do
 
 * [ ] CSV import
@@ -320,6 +346,11 @@ dba.export { schema: 'myschema', path, format, overwrite, }
     true` etc. configurable)
   * [ ] implement (async) streaming with SteamPipes transforms
   * [ ] implement batching (?)
-  * [ ] implement passing options to CSV parser
-* [ ] TSV import (differs only in configuration from CSV)
+  * [X] implement passing options to CSV parser
+  * [ ] allow to specify column names, types for targetted table
+  * [ ] clarify wheter `skip_first` means to skip the (physical) first line of imported file or the *first
+    line that is not skipped because it was blank or empty*
+* [ ] TSV import (differs only in configuration (`delimiter`, `quotes`) from CSV)
+
+
 
