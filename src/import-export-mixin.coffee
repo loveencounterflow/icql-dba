@@ -62,51 +62,6 @@ E                         = require './errors'
     #   when 'batch'  then return @_import_sql_batch  cfg
     # return null
 
-  # #---------------------------------------------------------------------------------------------------------
-  # _import_csv1: ( cfg ) ->
-  #   ### TAINT always requires `ram: true` ###
-  #   ### TAINT no streaming, no batching ###
-  #   ### TAINT no configurable CSV parsing ###
-  #   parse       = require 'csv-parse/lib/sync'
-  #   cfg         = {
-  #     @types.defaults.dba_import_cfg...,
-  #     @types.defaults.dba_import_cfg_csv...,
-  #     cfg..., }
-  #   @types.validate.dba_import_cfg_csv cfg
-  #   { path
-  #     schema
-  #     transform
-  #     _extra
-  #     table }   = cfg
-  #   csv_cfg     = { @types.defaults.dba_import_cfg_csv_extra..., _extra..., }
-  #   @types.validate.dba_import_cfg_csv_extra csv_cfg
-  #   source      = FS.readFileSync path, { encoding: 'utf-8', }
-  #   rows        = parse source, csv_cfg
-  #   stop        = Symbol.for 'stop'
-  #   lnr         = 0
-  #   line        = null
-  #   #.......................................................................................................
-  #   unless rows.length > 0
-  #     throw new E.Dba_empty_csv '^dba@333^', path
-  #   #.......................................................................................................
-  #   columns = ( k for k of rows[ 0 ] )
-  #   columns = transform { columns, } if transform?
-  #   @_attach { schema, ram: true, }
-  #   insert  = @_create_csv_table { schema, table, columns, }
-  #   #.......................................................................................................
-  #   for row in rows
-  #     unless transform?
-  #       insert.run ( row[ column ] for column in columns )
-  #       continue
-  #     subrows   = transform { row, lnr, line, stop, }
-  #     break if subrows is stop
-  #     continue unless subrows?
-  #     if @types.isa.list subrows
-  #       for subrow in subrows
-  #         insert.run ( subrow[ column ] for column in columns )
-  #       continue
-  #     insert.run ( subrows[ column ] for column in columns )
-  #   return null
 
   #---------------------------------------------------------------------------------------------------------
   _import_csv: ( cfg ) ->
