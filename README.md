@@ -321,10 +321,15 @@ dba.export { schema: 'myschema', path, format, overwrite, }
 
 * Configuration:
   * `transform`:  optional `function`, default: `null`
-  * `_extra`:     optional `object`, default: `null`
+  * `_extra`:     optional `object`, default: `null`. This value will be passed to
+    [`csv-parse`](https://github.com/adaltas/node-csv-parse) which does the hard part of parsing CSV so you
+    can use `dba.import { ..., format: 'csv', _extra: { ... }, ...}` to directly talk to `csv-parse`. Notice
+    however that some settings may be overridden without notice by `dba.import()`. For a description of
+    options see [`csv.js.org`](https://csv.js.org/parse/options/).
   * `skip_first`: optional `boolean`, default: `false`; whether to skip the first input line.
-  * `skip_empty`: optional `boolean`, default: `true`
-  * `skip_blank`: optional `boolean`, default: `true`
+  * `skip_empty`: optional `boolean`, default: `true`; whether to skip empty lines.
+  * `skip_blank`: optional `boolean`, default: `true`; whether to skip lines that contain nothing but
+    whitespace.
   * `input_columns`:
     * optional `boolean` or nonempty `list of nonempty texts`, default: `null`
     * `true`: first non-skipped row of source contains column names; rows are objects
