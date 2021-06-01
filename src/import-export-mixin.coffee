@@ -62,6 +62,16 @@ E                         = require './errors'
     #   when 'batch'  then return @_import_sql_batch  cfg
     # return null
 
+  #---------------------------------------------------------------------------------------------------------
+  _columns_from_csv: ( path, csv_cfg ) ->
+    readlines   = new ( require 'n-readlines' ) path
+    parse       = require 'csv-parse/lib/sync'
+    while ( line = readlines.next() ) isnt false
+      line = line.toString 'utf-8'
+      debug '^33453^', rpr line
+      debug '^33453^', parse line, csv_cfg
+      break
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   _import_csv: ( cfg ) ->
@@ -81,12 +91,22 @@ E                         = require './errors'
     { path
       schema
       transform
-      columns
+      input_columns
+      table_columns
+      skip_first
       skip_empty
       skip_blank
-      _extra
-      table }   = cfg
-    csv_cfg     = { @types.defaults.dba_import_cfg_csv_extra..., _extra..., columns, }
+      table_name
+      _extra  } = cfg
+    csv_cfg     = {
+      @types.defaults.dba_import_cfg_csv_extra...,
+      _extra...,
+      columns: input_columns, }
+    if ( csv_cfg.columns is true ) and ( not table_columns? )
+      urge '^5675783^', @_columns_from_csv path, csv_cfg
+    debug '^675675^', cfg
+    debug '^675675^', csv_cfg
+    if transform? then csv_cfg.relax_column_count = true
     @types.validate.dba_import_cfg_csv_extra csv_cfg
     readlines   = new ( require 'n-readlines' ) path
     stop        = Symbol.for 'stop'
@@ -95,39 +115,54 @@ E                         = require './errors'
     batch_size  = 10000
     @_attach { schema, ram: true, }
     insert      = null
+    is_first    = true
     #.......................................................................................................
     flush = =>
       return unless buffer? and buffer.length > 0
-      lines   = buffer
-      source  = lines.join '\n'
-      buffer  = null
-      rows    = parse source, csv_cfg
-      # #.......................................................................................................
-      # unless rows.length > 0
-      #   throw new E.Dba_empty_csv '^dba@333^', path
-      #.......................................................................................................
-      # columns = ( k for k of rows[ 0 ] )
-      # debug '^443^', { columns, }
-      # columns = transform { columns, } if transform?
-      ### NOTE keeping this here so we can potentially obtain columns from source ###
-      insert ?= @_create_csv_table { schema, table, columns, }
-      #.......................................................................................................
+      lines       = buffer
+      source      = lines.join '\n'
+      buffer      = null
+      rows        = parse source, csv_cfg
+      row_columns = null
+      debug '^38690-1^', { rows, }
+      #.....................................................................................................
       for row, row_idx in rows
+        # info '^38690^', { row, meta, }
+        if is_first
+          is_first = false
+          # if columns is true
+          #   # skip_first  = true
+          #   columns     = ( k for k of row )
+          # else if ( columns is false ) or ( not columns? )
+          debug '^38690-1^', { table_columns, row_columns }
+          unless table_columns?
+            if @types.isa.list row
+              table_columns = ( "c#{col_idx}" for col_idx in [ 1 .. row.length ] )
+              row_columns   = [ 0 ... row.length ]
+            else
+              table_columns = ( k for k of row )
+              row_columns   = table_columns
+          else
+            throw new Error "^4456^ table_columns not implemented"
+          debug '^38690-2^', { table_columns, row_columns }
+          insert = @_create_csv_table { schema, table_name, table_columns, }
+        #...................................................................................................
         unless transform?
-          insert.run ( row[ column ] for column in columns )
+          insert.run ( row[ c ] for c in row_columns )
           continue
         line      = lines[ row_idx ].toString 'utf-8'
         lnr++
         continue if skip_empty and line is ''
         continue if skip_blank and /^\s*$/.test line
         subrows   = transform { row, lnr, line, stop, }
+        debug '^33442^', { subrows, }
         break if subrows is stop
         continue unless subrows?
         if @types.isa.list subrows
           for subrow in subrows
-            insert.run ( subrow[ column ] for column in columns )
+            insert.run ( subrow[ c ] for c in table_columns )
           continue
-        insert.run ( subrows[ column ] for column in columns )
+        insert.run ( subrows[ c ] for c in table_columns )
       return null
     #.......................................................................................................
     ### TAINT this use of n-readlines is inefficient as it splits the bytes into line-sized chunks which we
@@ -142,17 +177,20 @@ E                         = require './errors'
   #---------------------------------------------------------------------------------------------------------
   _create_csv_table: ( cfg ) ->
     { schema
-      table
-      columns }     = cfg
+      table_columns
+      table_name  } = cfg
     schema_i        = @as_identifier schema
-    table_i         = @as_identifier table
-    columns_i       = ( @as_identifier d for d in columns )
-    columns_sql     = ( "#{ci} text"  for ci in columns_i ).join ', '
-    placeholder_sql = ( "?"           for ci in columns_i ).join ', '
-    create_sql      = "create table #{schema_i}.#{table_i} ( #{columns_sql} );"
+    table_name_i    = @as_identifier table_name
+    if @types.isa.list table_columns
+      columns_i = ( [ ( @as_identifier d ), "'text'", ] for d in table_columns )
+    else
+      throw new Error "^69578^ not implemented"
+    columns_sql     = ( "#{ni} #{ti}" for [ ni, ti, ] in columns_i ).join ', '
+    placeholder_sql = ( "?"           for d           in columns_i ).join ', '
+    create_sql      = "create table #{schema_i}.#{table_name_i} ( #{columns_sql} );"
     @execute create_sql
     #.......................................................................................................
-    return @prepare "insert into #{schema_i}.#{table_i} values ( #{placeholder_sql} );"
+    return @prepare "insert into #{schema_i}.#{table_name_i} values ( #{placeholder_sql} );"
 
   #---------------------------------------------------------------------------------------------------------
   _import_sql_single: ( cfg ) ->

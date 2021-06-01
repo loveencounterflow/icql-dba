@@ -83,13 +83,41 @@ Dba                       = null
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg_csv', tests:
   "@isa.dba_import_cfg x":                        ( x ) -> @isa.dba_import_cfg x
-  "@isa.ic_name x.table":                         ( x ) -> @isa.ic_name x.table
+  "@isa.ic_name x.table_name":                    ( x ) -> @isa.ic_name x.table_name
   ### NOTE see `_import_csv()`; for now only RAM DBs allowed for imported CSV ###
   "@isa.true x.ram":                              ( x ) -> @isa.true x.ram
+  "@isa.boolean x.skip_first":                    ( x ) -> @isa.boolean x.skip_first
   "@isa.boolean x.skip_empty":                    ( x ) -> @isa.boolean x.skip_empty
   "@isa.boolean x.skip_blank":                    ( x ) -> @isa.boolean x.skip_blank
   "@isa_optional.function x.transform":           ( x ) -> @isa_optional.function x.transform
   "@isa_optional.object x._extra":                ( x ) -> @isa_optional.object x._extra
+  "x.table is deprecated":                        ( x ) -> x.table is undefined
+  "x.columns is deprecated":                      ( x ) -> x.columns is undefined
+  "optional input_columns isa nonempty list of nonempty text": ( x ) ->
+    { input_columns: d, } = x
+    return true if not d?
+    return true if @isa.boolean d
+    return false unless @isa.list d
+    return false unless d.length > 0
+    return false unless @isa_list_of.nonempty_text d
+    return true
+  "optional table_columns isa nonempty list of nonempty text": ( x ) ->
+    { table_columns: d, } = x
+    return true if not d?
+    switch @type_of d
+      when 'list'
+        return false unless d.length > 0
+        return false unless @isa_list_of.nonempty_text d
+      when 'object'
+        k = ( k for k, v of d )
+        return false unless k.length > 0
+        return false unless @isa_list_of.nonempty_text k
+        v = ( v for k, v of d )
+        return false unless v.length > 0
+        return false unless @isa_list_of.nonempty_text v
+      else
+        return false
+    return true
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg_csv_extra', tests:
@@ -183,15 +211,39 @@ Dba                       = null
     batch_size: 1000
   #.........................................................................................................
   dba_import_cfg_csv:
-    table:            'main'
+    table_name:       'main'
     transform:        null
     _extra:           null
+    skip_first:       false
     skip_empty:       true
     skip_blank:       true
   #.........................................................................................................
   dba_import_cfg_csv_extra:
-    columns:          false
-    skip_empty_lines: false
+    skip_empty_lines:   false
+    relax_column_count: true
+    info:               false
+
+    bom:                          false
+    cast:                         true
+    cast_date:                    false
+    columns:                      false
+    columns_duplicates_to_array:  false
+    comment:                      ''
+    delimiter:                    ','
+    encoding:                     'utf-8'
+    escape:                       '"'
+    from:                         1
+    from_line:                    1
+    ignore_last_delimiters:       false
+    info:                         false
+    ltrim:                        false
+    # max_record_size:              true
+    on_record:                    true
+    relax_column_count:           true
+    skip_empty_lines:             true
+    skip_lines_with_error:        true
+    to_line:                      true
+    trim    :                     true
   #.........................................................................................................
   copy_or_move_schema_cfg:
     from_schema:  null
