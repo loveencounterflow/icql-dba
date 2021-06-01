@@ -1,4 +1,4 @@
-# ICQL DBA
+# ICQL-DBA
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -37,15 +37,15 @@
 
 ## Introduction
 
-* **ICQL DBA is an [SQLite](https://sqlite.org/index.html) Database Adapter with Optional In-Memory DB
+* **ICQL-DBA is an [SQLite](https://sqlite.org/index.html) Database Adapter with Optional In-Memory DB
   (OIMDB) functionality.**
 * Implemented using **[`better-sqlite3`](https://github.com/JoshuaWise/better-sqlite3)** (B3 in the below)
   to provide the interface between NodeJS (JavaScript) and SQLite.
 * Because [B3 is almost fully synchronous](https://github.com/JoshuaWise/better-sqlite3/issues/262),
   **ICQL operates almost completely synchronously**, too.
-* SQLite/B3 already provides In-Memory (IMDB) functionality. However, **ICQL DBA makes it easier to
+* SQLite/B3 already provides In-Memory (IMDB) functionality. However, **ICQL-DBA makes it easier to
   switch between In-Memory (RAM) and On-Disk operational modes**, hence the O for Optional in OIMDB.
-* Using ICQL DBA, you could open a DB file, add some data which will readily be written to disk, then
+* Using ICQL-DBA, you could open a DB file, add some data which will readily be written to disk, then
   switch to RAM mode to perform some tedious data mangling, and then save the new DB state to the same
   file you opened the DB originally from.
 
@@ -55,12 +55,12 @@
   DB objects (table, view and index definitions as well as data) from that ad-hoc schema into a RAM-based
   schema using the name supplied in the `open()` call.
   * **Note**—SQLite 'temporary schemas' are *mostly* based in RAM but may use disk space in case available
-    memory becomes insufficient. Schemas *without* disk-based backup also exists; ICQL DBA users can elect
+    memory becomes insufficient. Schemas *without* disk-based backup also exists; ICQL-DBA users can elect
     to use either model (with the `disk: true|false` configuration) although IMO there's little reason to
     not use optional HD support.
   * **Note**—Confusingly, to get a RAM-based DB with the original SQLite/B3 API, you either use the empty
     string `''` to get disk support (in ase of RAM shortage) or the pseudo-path `':memory:'` to get one
-    without disk support. In ICQL DBA, you use the boolean settings `ram` and `disk` instead which is much
+    without disk support. In ICQL-DBA, you use the boolean settings `ram` and `disk` instead which is much
     clearer. This frees the `path` argument from doing double duty, so one can use it to specify a default
     file path to be used implicitly for the `save()` command.
 
@@ -90,7 +90,7 @@
 ## Eventual Persistency
 
 * While file-based SQLite DBs are permanently persistent (i.e. each change is written to disk as soon and as
-  safely as possible to make the DB resistant against unexpected interruptions), ICQL DBA's OIMDB mode is
+  safely as possible to make the DB resistant against unexpected interruptions), ICQL-DBA's OIMDB mode is
   'eventually persistent' for all states of the DB arrived at right after a `save()` command has completed
   and before any new changes have been executed.
 * Eventual Persistency to disk is implemented with synchronous calls to `vacuum $schema into $path` (no
@@ -140,7 +140,7 @@
   ':memory:'` which will create an empty `main` schema; then, you can execute an [SQL `attach`
   statement](https://www.sqlite.org/lang_attach.html) like `attach $path as $schema;` to open a file- or
   RAM-based DB under another schema of your choosing.
-* This procedure is not very straightforward; compare this to how you would use `open()` in ICQL DBA.
+* This procedure is not very straightforward; compare this to how you would use `open()` in ICQL-DBA.
 * When you create a temporary table as in `create temp table t;` or `create temporary table t;`, then `t`
   will be available as `temp.t` (but *not* `temporary.t`).
 
@@ -203,6 +203,9 @@ dba.open { schema: 'myschema', }
 
 ### Import a DB
 
+* Observe that unlike most of the ICQL-DBA API, **`dba.import()` is asynchronous**. This is mostly due to
+  the relative scarcity of synchronous parsing (and, generally, file-handling) packages for the NodeJS
+  ecosystem.
 * Supported formats include
   * `sqlite` for the SQLite binary file format and
   * <del>`sql` for SQL dumps.</del>
@@ -221,7 +224,7 @@ dba.open { schema: 'myschema', }
 dba     = new Dba()
 schema  = 'myschema'
 dba.open { schema, }
-dba.import { path: 'path/to/some.db', schema, }
+await dba.import { path: 'path/to/some.db', schema, }
 ```
 
 #### Notes on `import { format: 'sql', }`
@@ -321,11 +324,11 @@ dba.export { schema: 'myschema', path, format, overwrite, }
 
 * Configuration:
   * `transform`:  optional `function`, default: `null`
-  * `_extra`:     optional `object`, default: `null`. This value will be passed to
+<!--   * `_extra`:     optional `object`, default: `null`. This value will be passed to
     [`csv-parse`](https://github.com/adaltas/node-csv-parse) which does the hard part of parsing CSV so you
     can use `dba.import { ..., format: 'csv', _extra: { ... }, ...}` to directly talk to `csv-parse`. Notice
     however that some settings may be overridden without notice by `dba.import()`. For a description of
-    options see [`csv.js.org`](https://csv.js.org/parse/options/).
+    options see [`csv.js.org`](https://csv.js.org/parse/options/). -->
   * `skip_first`: optional `boolean`, default: `false`; whether to skip the first input line.
   * `skip_empty`: optional `boolean`, default: `true`; whether to skip empty lines.
   * `skip_blank`: optional `boolean`, default: `true`; whether to skip lines that contain nothing but
