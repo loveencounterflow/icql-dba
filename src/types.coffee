@@ -86,9 +86,9 @@ Dba                       = null
   "@isa.ic_name x.table_name":                    ( x ) -> @isa.ic_name x.table_name
   ### NOTE see `_import_csv()`; for now only RAM DBs allowed for imported CSV ###
   "@isa.true x.ram":                              ( x ) -> @isa.true x.ram
-  "@isa.boolean x.skip_first":                    ( x ) -> @isa.boolean x.skip_first
-  "@isa.boolean x.skip_empty":                    ( x ) -> @isa.boolean x.skip_empty
-  "@isa.boolean x.skip_blank":                    ( x ) -> @isa.boolean x.skip_blank
+  # "@isa.boolean x.skip_first":                    ( x ) -> @isa.boolean x.skip_first
+  # "@isa.boolean x.skip_empty":                    ( x ) -> @isa.boolean x.skip_empty
+  # "@isa.boolean x.skip_blank":                    ( x ) -> @isa.boolean x.skip_blank
   "@isa_optional.function x.transform":           ( x ) -> @isa_optional.function x.transform
   "@isa_optional.object x._extra":                ( x ) -> @isa_optional.object x._extra
   "x.table is deprecated":                        ( x ) -> x.table is undefined
@@ -214,46 +214,24 @@ Dba                       = null
     table_name:       'main'
     transform:        null
     _extra:           null
-    skip_first:       false
-    skip_empty:       true
-    skip_blank:       true
+    # skip_first:       false
+    # skip_empty:       true
+    # skip_blank:       true
   #.........................................................................................................
   dba_import_cfg_csv_extra:
-    skip_empty_lines:   false
-    relax_column_count: true
-    info:               false
-
-    bom:                          false
-    cast:                         true
-    cast_date:                    false
-    columns:                      false
-    columns_duplicates_to_array:  false
-    comment:                      ''
-    delimiter:                    ','
-    encoding:                     'utf-8'
-    escape:                       '"'
-    from:                         null
-    from_line:                    null
-    ignore_last_delimiters:       false
-    info:                         false
-    ltrim:                        false
-    max_record_size:              false
-    objname:                      null
-    on_record:                    null
-    quote:                        '"'
-    raw:                          false
-    record_delimiter:             null
-    relax:                        false
-    relax_column_count:           true
-    relax_column_count_less:      null
-    relax_column_count_more:      null
-    rtrim:                        false
-    skip_empty_lines:             false
-    skip_lines_with_empty_values: false
-    skip_lines_with_error:        false
-    to:                           null
-    to_line:                      null
-    trim:                         false
+    ### see https://github.com/mafintosh/csv-parser#options ###
+    headers:          false       # Array[String] | Boolean
+    escape:           '"'         # String, default: "
+    # mapHeaders:       null        # Function
+    # mapValues:        null        # Function (not used as it calls for each cell instead of for each row)
+    newline:          '\n'        # String, default: '\n'
+    quote:            '"'         # String, default: '"'
+    raw:              false       # Boolean, default: false
+    separator:        ','         # String, Default: ','
+    skipComments:     false       # Boolean | String, default: false
+    skipLines:        0           # Number, default: 0
+    maxRowBytes:      Infinity    # Number, Default: Number.MAX_SAFE_INTEGER
+    strict:           false       # Boolean, default: false
   #.........................................................................................................
   copy_or_move_schema_cfg:
     from_schema:  null
