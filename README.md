@@ -329,10 +329,12 @@ dba.export { schema: 'myschema', path, format, overwrite, }
     can use `await dba.import { ..., format: 'csv', _extra: { ... }, ...}` to directly talk to `csv-parser`.
     Notice however that some settings may be overridden without notice by `dba.import()`. For a description
     of options see [`csv-parser`](https://github.com/mafintosh/csv-parser#options).
-  * `skip_first`: optional `boolean`, default: `false`; whether to skip the first input line.
-  * `skip_empty`: optional `boolean`, default: `true`; whether to skip empty lines.
-  * `skip_blank`: optional `boolean`, default: `true`; whether to skip lines that contain nothing but
-    whitespace.
+  * `skip_any_null` optional `boolean`, default: `false`
+  * `skip_all_null` optional `boolean`, default: `false`
+  <!-- * `skip_first`: optional `boolean`, default: `false`; whether to skip the first input line. -->
+  <!-- * `skip_empty`: optional `boolean`, default: `true`; whether to skip empty lines. -->
+<!--   * `skip_blank`: optional `boolean`, default: `true`; whether to skip lines that contain nothing but
+    whitespace. -->
   * `input_columns`:
     * optional `boolean` or nonempty `list of nonempty texts`, default: `null`
     * `true`: first non-skipped row of source contains column names; rows are objects
