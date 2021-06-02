@@ -20,6 +20,19 @@ E                         = require './errors'
 { misfit }                = require './common'
 
 #-----------------------------------------------------------------------------------------------------------
+any_value_null = ( input_columns, object ) ->
+  for k in input_columns
+    return true unless object[ k ]?
+  return false
+
+#-----------------------------------------------------------------------------------------------------------
+all_values_null = ( input_columns, object ) ->
+  for k in input_columns
+    return false if object[ k ]?
+  return true
+
+
+#-----------------------------------------------------------------------------------------------------------
 @Import_export_mixin = ( clasz = Object ) => class extends clasz
 
   #---------------------------------------------------------------------------------------------------------
@@ -80,9 +93,8 @@ E                         = require './errors'
       transform
       input_columns
       table_columns
-      skip_first
-      skip_empty
-      skip_blank
+      skip_any_null
+      skip_all_null
       table_name
       _extra  } = cfg
     parser_cfg  = {
@@ -136,6 +148,8 @@ E                         = require './errors'
       .pipe parse_csv parser_cfg
       #.....................................................................................................
       .on 'data', ( row ) =>
+        return null if skip_all_null and all_values_null  input_columns, row
+        return null if skip_any_null and any_value_null   input_columns, row
         ( buffer ?= [] ).push row
         flush() if buffer.length >= batch_size
         return null
