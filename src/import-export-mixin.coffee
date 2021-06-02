@@ -30,9 +30,11 @@ E                         = require './errors'
     switch cfg.format
       # when 'db'   then await @_import_db  cfg
       # when 'sql'  then await @_import_sql cfg
-      when 'csv'  then await @_import_csv cfg
+      when 'csv', 'tsv' then await @_import_csv_tsv cfg
       else
-        throw new E.Dba_format_unknown '^dba@309^', format
+        if @types._import_formats.has cfg.format
+          throw new E.Dba_not_implemented '^dba@309^', "import format #{rpr cfg.format}"
+        throw new E.Dba_import_format_unknown '^dba@309^', cfg.format
     return null
 
 
@@ -59,7 +61,7 @@ E                         = require './errors'
     throw new E.Dba_format_unknown '^dba@310^', 'sql'
 
   #---------------------------------------------------------------------------------------------------------
-  _import_csv: ( cfg ) -> new Promise ( resolve, reject ) =>
+  _import_csv_tsv: ( cfg ) -> new Promise ( resolve, reject ) =>
     ### TAINT always requires `ram: true` ###
     ### TAINT no streaming, no batching ###
     ### TAINT no configurable CSV parsing ###
@@ -83,19 +85,19 @@ E                         = require './errors'
       skip_blank
       table_name
       _extra  } = cfg
-    csv_cfg     = {
+    parser_cfg  = {
       @types.defaults.dba_import_cfg_csv_extra...,
       _extra...,
       columns: input_columns, }
     #.......................................................................................................
-    if      input_columns is false  then csv_cfg.headers = false
-    else if input_columns is true   then delete csv_cfg.headers
-    else csv_cfg.headers = input_columns
+    if      input_columns is false  then parser_cfg.headers = false
+    else if input_columns is true   then delete parser_cfg.headers
+    else parser_cfg.headers = input_columns
     #.......................................................................................................
-    debug '^675675^', cfg
-    urge '^675675^', csv_cfg
-    # if transform? then csv_cfg.relax_column_count = true
-    @types.validate.dba_import_cfg_csv_extra csv_cfg
+    @types.validate.dba_import_cfg_csv_extra parser_cfg
+    if cfg.format is 'tsv'
+      parser_cfg = { parser_cfg..., separator: '\t', quote: '', escape: '', }
+    #.......................................................................................................
     stop        = Symbol.for 'stop'
     lnr         = 0
     buffer      = null
@@ -112,7 +114,7 @@ E                         = require './errors'
           table_columns } = @_create_csv_table { schema, table_name, input_columns, table_columns, }
         # debug '^324^', input_columns
         # debug '^324^', table_columns
-      return unless buffer? and buffer.length > 0
+      return unless buffer?
       #.....................................................................................................
       for row in buffer
         row_count++
@@ -131,7 +133,7 @@ E                         = require './errors'
       return null
     #.......................................................................................................
     FS.createReadStream path
-      .pipe parse_csv csv_cfg
+      .pipe parse_csv parser_cfg
       #.....................................................................................................
       .on 'data', ( row ) =>
         ( buffer ?= [] ).push row
@@ -150,18 +152,26 @@ E                         = require './errors'
       table_columns
       table_name  } = cfg
     #.......................................................................................................
+    # debug '^3534^', { table_columns, input_columns, }
     table_columns ?= input_columns
     if @types.isa.list table_columns then do =>
       _tc                 = table_columns
       table_columns       = {}
       table_columns[ k ]  = 'text' for k in _tc
+    # debug '^3534^', { table_columns, input_columns, }
     #.......................................................................................................
     schema_i        = @as_identifier schema
     table_name_i    = @as_identifier table_name
     columns_sql     = ( "#{@as_identifier n} #{@as_identifier t}" for n, t of table_columns ).join ', '
     placeholder_sql = ( "?"                                       for _    of table_columns ).join ', '
     create_sql      = "create table #{schema_i}.#{table_name_i} ( #{columns_sql} );"
-    @execute create_sql
+    try @execute create_sql catch error
+      warn CND.reverse """when trying to execute SQL:
+
+      #{create_sql}
+
+      an error was encountered: #{error.message}"""
+      throw error
     #.......................................................................................................
     insert = @prepare "insert into #{schema_i}.#{table_name_i} values ( #{placeholder_sql} );"
     return { insert, table_columns, }

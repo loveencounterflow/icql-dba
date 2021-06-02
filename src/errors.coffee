@@ -4,8 +4,8 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-# badge                     = 'ICQL-DBA/ERRORS'
-# debug                     = CND.get_logger 'debug',     badge
+badge                     = 'ICQL-DBA/ERRORS'
+debug                     = CND.get_logger 'debug',     badge
 # warn                      = CND.get_logger 'warn',      badge
 # info                      = CND.get_logger 'info',      badge
 # urge                      = CND.get_logger 'urge',      badge
@@ -37,8 +37,6 @@ class @Dba_schema_repeated           extends @Dba_error
   constructor: ( ref, schema )      -> super ref, "unable to copy schema to itself, got #{rpr schema}"
 class @Dba_expected_one_row          extends @Dba_error
   constructor: ( ref, row_count )   -> super ref, "expected 1 row, got #{row_count}"
-class @Dba_format_unknown            extends @Dba_error
-  constructor: ( ref, format )      -> super ref, "unknown DB format #{ref format}"
 class @Dba_extension_unknown         extends @Dba_error
   constructor: ( ref, path )        -> super ref, "extension of path #{path} is not registered for any format"
 class @Dba_not_implemented           extends @Dba_error
@@ -61,3 +59,14 @@ class @Dba_argument_not_allowed      extends @Dba_error
   constructor: ( ref, name, value ) -> super ref, "argument #{name} not allowed, got #{rpr value}"
 class @Dba_empty_csv                 extends @Dba_error
   constructor: ( ref, path )        -> super ref, "no CSV records found in file #{path}"
+
+### TAINT replace with more specific error, like below ###
+class @Dba_format_unknown extends @Dba_error
+  constructor: ( ref, format ) ->
+    super ref, "unknown DB format #{ref format}"
+
+class @Dba_import_format_unknown extends @Dba_error
+  constructor: ( ref, format ) ->
+    formats = [ ( require './types' )._import_formats..., ].join ', '
+    super ref, "unknown import format #{rpr format} (known formats are #{formats})"
+

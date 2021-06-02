@@ -54,9 +54,6 @@ Dba                       = null
 @declare 'dba_list_objects_ordering', ( x ) -> ( not x? ) or ( x is 'drop' )
 
 #-----------------------------------------------------------------------------------------------------------
-@declare 'dba_format', ( x ) -> x in [ 'sql', 'sqlite', 'csv', ]
-
-#-----------------------------------------------------------------------------------------------------------
 @declare 'dba_constructor_cfg', tests:
   "x is an object":                       ( x ) -> @isa.object          x
   "x._temp_prefix is a ic_schema":        ( x ) -> @isa.ic_schema       x._temp_prefix
@@ -96,7 +93,7 @@ Dba                       = null
   "optional input_columns isa nonempty list of nonempty text": ( x ) ->
     { input_columns: d, } = x
     return true if not d?
-    return true if @isa.boolean d
+    return true if d is true
     return false unless @isa.list d
     return false unless d.length > 0
     return false unless @isa_list_of.nonempty_text d
@@ -245,8 +242,14 @@ Dba                       = null
     sqlite:       'sqlite'
     sqlitedb:     'sqlite'
     sql:          'sql'
+    txt:          'tsv'
+    tsv:          'tsv'
+    csv:          'csv'
 
 
+#-----------------------------------------------------------------------------------------------------------
+@_import_formats = _import_formats = new Set Object.keys @defaults.extensions_and_formats
+@declare 'dba_format', ( x ) -> _import_formats.has x
 
 
 
