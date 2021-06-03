@@ -329,8 +329,11 @@ dba.export { schema: 'myschema', path, format, overwrite, }
     can use `await dba.import { ..., format: 'csv', _extra: { ... }, ...}` to directly talk to `csv-parser`.
     Notice however that some settings may be overridden without notice by `dba.import()`. For a description
     of options see [`csv-parser`](https://github.com/mafintosh/csv-parser#options).
-  * `skip_any_null` optional `boolean`, default: `false`
-  * `skip_all_null` optional `boolean`, default: `false`
+  * You can skip incomplete lines when they have empty fields, which are expressed as `null` values, either
+    when *all* fields are `null` or when *any* field is `null`. Observe that this is only tested against the
+    columns that were selected with `input_columns` (where set explicitly):
+    * `skip_any_null` optional `boolean`, default: `false`
+    * `skip_all_null` optional `boolean`, default: `false`
   <!-- * `skip_first`: optional `boolean`, default: `false`; whether to skip the first input line. -->
   <!-- * `skip_empty`: optional `boolean`, default: `true`; whether to skip empty lines. -->
 <!--   * `skip_blank`: optional `boolean`, default: `true`; whether to skip lines that contain nothing but
@@ -360,6 +363,9 @@ dba.export { schema: 'myschema', path, format, overwrite, }
   * [ ] allow to specify column names, types for targetted table
   * [ ] clarify wheter `skip_first` means to skip the (physical) first line of imported file or the *first
     line that is not skipped because it was blank or empty*
+  * [ ] ensure that all unquoted fields are trimmed
+  * [ ] ensure that all empty fields contain `null` instead of an empty string
+  * [ ] implement skipping comments
 * [ ] TSV import (differs only in configuration (`delimiter`, `quotes`) from CSV)
 
 
