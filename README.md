@@ -334,10 +334,12 @@ dba.export { schema: 'myschema', path, format, overwrite, }
     columns that were selected with `input_columns` (where set explicitly):
     * `skip_any_null` optional `boolean`, default: `false`
     * `skip_all_null` optional `boolean`, default: `false`
-  <!-- * `skip_first`: optional `boolean`, default: `false`; whether to skip the first input line. -->
-  <!-- * `skip_empty`: optional `boolean`, default: `true`; whether to skip empty lines. -->
-<!--   * `skip_blank`: optional `boolean`, default: `true`; whether to skip lines that contain nothing but
-    whitespace. -->
+  * `trim` optional `boolean`, default: `true`. Whether to remove leading and trailing whitespace from
+    field values.
+  * `default_value` optional; van be any value, default: `null`. This value will be applied to all fields
+    that are found to be (the) empty (string) (after optional trimming). Observe that quoting a field value
+    will not prevent trimming.
+  * `quote` optional
   * `input_columns`:
     * optional `boolean` or nonempty `list of nonempty texts`, default: `null`
     * `true`: first non-skipped row of source contains column names; rows are objects
