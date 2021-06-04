@@ -150,6 +150,12 @@ all_values_null = ( input_columns, object ) ->
       .pipe parse_csv parser_cfg
       #.....................................................................................................
       .on 'data', ( row ) =>
+        for column in input_columns
+          v = row[ column ] ? null
+          return null if skip_any_null and v is null
+          v = v.trim() if v? and cfg.trim
+          return null if skip_any_null and v is ''
+          row[ column ] = if v in [ null, '', ] then cfg.default_value else v
         return null if skip_all_null and all_values_null  input_columns, row
         return null if skip_any_null and any_value_null   input_columns, row
         ( buffer ?= [] ).push row
