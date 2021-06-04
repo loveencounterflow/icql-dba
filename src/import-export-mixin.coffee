@@ -106,6 +106,8 @@ all_values_null = ( input_columns, object ) ->
     else if input_columns is true   then delete parser_cfg.headers
     else parser_cfg.headers = input_columns
     #.......................................................................................................
+    parser_cfg.skipComments = cfg.skip_comments
+    #.......................................................................................................
     @types.validate.dba_import_cfg_csv_extra parser_cfg
     if cfg.format is 'tsv'
       parser_cfg = { parser_cfg..., separator: '\t', quote: '', escape: '', }

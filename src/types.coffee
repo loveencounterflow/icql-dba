@@ -92,6 +92,8 @@ Dba                       = null
   "@isa_optional.object x._extra":                ( x ) -> @isa_optional.object x._extra
   "x.table is deprecated":                        ( x ) -> x.table is undefined
   "x.columns is deprecated":                      ( x ) -> x.columns is undefined
+  "x.skip_comments is a boolean or a nonempty_text": ( x ) ->
+    ( @isa.boolean x.skip_comments ) or ( @isa.nonempty_text x.skip_comments )
   "optional input_columns isa nonempty list of nonempty text": ( x ) ->
     { input_columns: d, } = x
     return true if not d?
