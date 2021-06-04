@@ -32,6 +32,7 @@ E                         = require './errors'
 new_bsqlt3_connection     = require 'better-sqlite3'
 PATH                      = require 'path'
 TMP                       = require 'tempy'
+{ Sql_mixin }             = require './sql-mixin'
 { Import_export_mixin }   = require './import-export-mixin'
 
 
@@ -45,7 +46,7 @@ L.pick = ( d, key, fallback, type = null ) ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-class @Dba extends Import_export_mixin()
+class @Dba extends Import_export_mixin Sql_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
@@ -525,42 +526,6 @@ class @Dba extends Import_export_mixin()
     @pragma "#{@as_identifier to_schema}.foreign_key_check;" if fk_state
     return detach_from_schema()
 
-
-  #=========================================================================================================
-  # SQL CONSTRUCTION
-  #---------------------------------------------------------------------------------------------------------
-  as_identifier:  ( x  ) ->
-    validate.text x
-    return '"' + ( x.replace /"/g, '""' ) + '"'
-
-  #---------------------------------------------------------------------------------------------------------
-  escape_text: ( x ) ->
-    validate.text x
-    return x.replace /'/g, "''"
-
-  #---------------------------------------------------------------------------------------------------------
-  list_as_json: ( x ) ->
-    validate.list x
-    return JSON.stringify x
-
-  #---------------------------------------------------------------------------------------------------------
-  as_sql: ( x ) ->
-    switch type = type_of x
-      when 'text'       then return "'#{@escape_text x}'"
-      when 'list'       then return "'#{@list_as_json x}'"
-      when 'float'      then return x.toString()
-      when 'boolean'    then return ( if x then '1' else '0' )
-      when 'null'       then return 'null'
-    throw new E.Dba_sql_value_error '^dba@323^', type, x
-
-  #---------------------------------------------------------------------------------------------------------
-  interpolate: ( sql, Q ) -> sql.replace @_interpolation_pattern, ( $0, $1 ) => @as_sql Q[ $1 ]
-      # try
-      #   return @as_sql Q[ $1 ]
-      # catch error
-      #   throw new E.Dba_error \
-      #     "µ773 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
-  _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
 
 
 
