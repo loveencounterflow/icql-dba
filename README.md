@@ -361,11 +361,11 @@ dba.export { schema: 'myschema', path, format, overwrite, }
   * [ ] implement batching (?)
   * [X] implement passing options to CSV parser
   * [ ] allow to specify column names, types for targetted table
-  * [ ] clarify wheter `skip_first` means to skip the (physical) first line of imported file or the *first
+  * [ ] clarify whether `skip_first` means to skip the (physical) first line of imported file or the *first
     line that is not skipped because it was blank or empty*
   * [ ] ensure that all unquoted fields are trimmed
-  * [ ] ensure that all empty fields contain `null` instead of an empty string
-  * [ ] implement skipping comments
+  * [X] ensure that all empty fields contain `null` instead of an empty string
+  * [X] implement skipping comments
 * [ ] TSV import (differs only in configuration (`delimiter`, `quotes`) from CSV)
 
 
