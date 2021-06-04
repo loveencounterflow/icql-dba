@@ -219,6 +219,7 @@ Dba                       = null
     _extra:           null
     skip_any_null:    false
     skip_all_null:    false
+    skip_comments:    false
     trim:             true
     default_value:    null
     # skip_first:       false
@@ -235,6 +236,21 @@ Dba                       = null
     quote:            '"'         # String, default: '"'
     raw:              false       # Boolean, default: false
     separator:        ','         # String, Default: ','
+    skipComments:     false       # Boolean | String, default: false
+    skipLines:        0           # Number, default: 0
+    maxRowBytes:      Infinity    # Number, Default: Number.MAX_SAFE_INTEGER
+    strict:           false       # Boolean, default: false
+  #.........................................................................................................
+  dba_import_cfg_tsv_extra:
+    ### see https://github.com/mafintosh/csv-parser#options ###
+    headers:          false       # Array[String] | Boolean
+    escape:           ''          # String, default: "
+    # mapHeaders:       null        # Function
+    # mapValues:        null        # Function (not used as it calls for each cell instead of for each row)
+    newline:          '\n'        # String, default: '\n'
+    quote:            ''          # String, default: '"'
+    raw:              false       # Boolean, default: false
+    separator:        '\t'         # String, Default: ','
     skipComments:     false       # Boolean | String, default: false
     skipLines:        0           # Number, default: 0
     maxRowBytes:      Infinity    # Number, Default: Number.MAX_SAFE_INTEGER

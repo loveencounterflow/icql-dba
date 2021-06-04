@@ -19,17 +19,17 @@ FS                        = require 'fs'
 E                         = require './errors'
 { misfit }                = require './common'
 
-#-----------------------------------------------------------------------------------------------------------
-any_value_null = ( input_columns, object ) ->
-  for k in input_columns
-    return true unless object[ k ]?
-  return false
+# #-----------------------------------------------------------------------------------------------------------
+# any_value_null = ( input_columns, object ) ->
+#   for k in input_columns
+#     return true unless object[ k ]?
+#   return false
 
-#-----------------------------------------------------------------------------------------------------------
-all_values_null = ( input_columns, object ) ->
-  for k in input_columns
-    return false if object[ k ]?
-  return true
+# #-----------------------------------------------------------------------------------------------------------
+# all_values_null = ( input_columns, object ) ->
+#   for k in input_columns
+#     return false if object[ k ]?
+#   return true
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -97,20 +97,18 @@ all_values_null = ( input_columns, object ) ->
       skip_all_null
       table_name
       _extra  } = cfg
+    if cfg.format is 'tsv' then parser_cfg_defaults = @types.defaults.dba_import_cfg_tsv_extra
+    else                        parser_cfg_defaults = @types.defaults.dba_import_cfg_csv_extra
     parser_cfg  = {
-      @types.defaults.dba_import_cfg_csv_extra...,
+      parser_cfg_defaults...,
       _extra...,
       columns: input_columns, }
     #.......................................................................................................
     if      input_columns is false  then parser_cfg.headers = false
     else if input_columns is true   then delete parser_cfg.headers
     else parser_cfg.headers = input_columns
-    #.......................................................................................................
     parser_cfg.skipComments = cfg.skip_comments
-    #.......................................................................................................
     @types.validate.dba_import_cfg_csv_extra parser_cfg
-    if cfg.format is 'tsv'
-      parser_cfg = { parser_cfg..., separator: '\t', quote: '', escape: '', }
     #.......................................................................................................
     stop        = Symbol.for 'stop'
     lnr         = 0
@@ -150,15 +148,22 @@ all_values_null = ( input_columns, object ) ->
       .pipe parse_csv parser_cfg
       #.....................................................................................................
       .on 'data', ( row ) =>
+        all_columns_null  = true
+        new_row           = {}
+        #...................................................................................................
         for column in input_columns
           v = row[ column ] ? null
-          return null if skip_any_null and v is null
           v = v.trim() if v? and cfg.trim
-          return null if skip_any_null and v is ''
-          row[ column ] = if v in [ null, '', ] then cfg.default_value else v
-        return null if skip_all_null and all_values_null  input_columns, row
-        return null if skip_any_null and any_value_null   input_columns, row
-        ( buffer ?= [] ).push row
+          v = null if v is ''
+          if v is null
+            return null if skip_any_null
+            new_row[ column ] = cfg.default_value
+          else
+            all_columns_null  = false
+            new_row[ column ] = v
+        #...................................................................................................
+        return null if skip_all_null and all_columns_null
+        ( buffer ?= [] ).push new_row
         flush() if buffer.length >= batch_size
         return null
       #.....................................................................................................
