@@ -113,7 +113,7 @@ E                         = require './errors'
     stop        = Symbol.for 'stop'
     lnr         = 0
     buffer      = null
-    batch_size  = 10000
+    batch_size  = 1_000
     @_attach { schema, ram: true, }
     insert      = null
     is_first    = true
@@ -131,8 +131,10 @@ E                         = require './errors'
         # debug '^324^', input_columns
         # debug '^324^', table_columns
       return unless buffer?
+      rows    = buffer
+      buffer  = null
       #.....................................................................................................
-      for row in buffer
+      for row in rows
         row_count++
         unless transform?
           insert.run ( row[ column ] ? null for column of table_columns )
@@ -152,7 +154,21 @@ E                         = require './errors'
           continue
         insert.run ( subrows[ column ] for column of table_columns )
       return null
-    #.......................................................................................................
+    # #.......................................................................................................
+    # echo '^3423^'
+    # ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ###
+    # t2 = require '../../hengist/node_modules/through2'
+    # ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ###
+    # xxx = true
+    # xxx = false
+    # if xxx
+    #   source  = FS.createReadStream path, { highWaterMark: 10, }
+    #   stream  = source.pipe t2 ( chunk, encoding, callback ) ->
+    #     # debug '^333442^', chunk.length
+    #     @push chunk
+    #     callback()
+    #   stream  = stream.pipe parse_csv parser_cfg
+    # else
     source  = FS.createReadStream path
     stream  = source.pipe parse_csv parser_cfg
     #.......................................................................................................
