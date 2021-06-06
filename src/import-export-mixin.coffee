@@ -138,7 +138,7 @@ E                         = require './errors'
           insert.run ( row[ column ] ? null for column of table_columns )
           continue
         #...................................................................................................
-        subrows = transform { row, stop, }
+        subrows = await transform { row, stop, }
         if subrows is stop
           has_stopped = true
           source.destroy()
@@ -174,11 +174,11 @@ E                         = require './errors'
       #.....................................................................................................
       return null if skip_all_null and all_columns_null
       ( buffer ?= [] ).push new_row
-      flush() if buffer.length >= batch_size
+      await flush() if buffer.length >= batch_size
       return null
     #.......................................................................................................
     stream.on 'headers', ( headers )  => input_columns = headers
-    stream.on 'end',                  => flush(); resolve { row_count, }
+    stream.on 'end',                  => await flush(); resolve { row_count, }
     #.......................................................................................................
     return null
 

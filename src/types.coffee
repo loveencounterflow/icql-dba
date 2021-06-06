@@ -90,10 +90,14 @@ Dba                       = null
   "@isa.boolean x.skip_all_null":                 ( x ) -> @isa.boolean x.skip_all_null
   "@isa.boolean x.trim":                          ( x ) -> @isa.boolean x.trim
   "@isa.any x.default_value":                     ( x ) -> true
-  "@isa_optional.function x.transform":           ( x ) -> @isa_optional.function x.transform
   "@isa_optional.object x._extra":                ( x ) -> @isa_optional.object x._extra
   "x.table is deprecated":                        ( x ) -> x.table is undefined
   "x.columns is deprecated":                      ( x ) -> x.columns is undefined
+  "x.transform is a function (sync or async)":    ( x ) ->
+    return true if ( not x.transform? )
+    return true if @isa.asyncfunction x.transform
+    return true if @isa.function x.transform
+    return false
   "x.skip_comments is a boolean or a nonempty_text": ( x ) ->
     ( @isa.boolean x.skip_comments ) or ( @isa.nonempty_text x.skip_comments )
   "optional input_columns isa nonempty list of nonempty text": ( x ) ->
