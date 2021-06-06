@@ -118,8 +118,12 @@ E                         = require './errors'
     insert      = null
     is_first    = true
     row_count   = 0
+    has_stopped = false
+    source      = null
+    stream      = null
     #.......................................................................................................
     flush = =>
+      return null if has_stopped
       if is_first
         is_first = false
         { insert
@@ -134,8 +138,13 @@ E                         = require './errors'
           insert.run ( row[ column ] ? null for column of table_columns )
           continue
         #...................................................................................................
-        subrows   = transform { row, stop, }
-        return null if subrows is stop
+        subrows = transform { row, stop, }
+        if subrows is stop
+          has_stopped = true
+          source.destroy()
+          stream.destroy()
+          stream.emit 'end'
+          return null
         continue unless subrows?
         if @types.isa.list subrows
           for subrow in subrows
@@ -144,31 +153,32 @@ E                         = require './errors'
         insert.run ( subrows[ column ] for column of table_columns )
       return null
     #.......................................................................................................
-    FS.createReadStream path
-      .pipe parse_csv parser_cfg
+    source  = FS.createReadStream path
+    stream  = source.pipe parse_csv parser_cfg
+    #.......................................................................................................
+    stream.on 'data', ( row ) =>
+      return null if has_stopped
+      all_columns_null  = true
+      new_row           = {}
       #.....................................................................................................
-      .on 'data', ( row ) =>
-        all_columns_null  = true
-        new_row           = {}
-        #...................................................................................................
-        for column in input_columns
-          v = row[ column ] ? null
-          v = v.trim() if v? and cfg.trim
-          v = null if v is ''
-          if v is null
-            return null if skip_any_null
-            new_row[ column ] = cfg.default_value
-          else
-            all_columns_null  = false
-            new_row[ column ] = v
-        #...................................................................................................
-        return null if skip_all_null and all_columns_null
-        ( buffer ?= [] ).push new_row
-        flush() if buffer.length >= batch_size
-        return null
+      for column in input_columns
+        v = row[ column ] ? null
+        v = v.trim() if v? and cfg.trim
+        v = null if v is ''
+        if v is null
+          return null if skip_any_null
+          new_row[ column ] = cfg.default_value
+        else
+          all_columns_null  = false
+          new_row[ column ] = v
       #.....................................................................................................
-      .on 'headers', ( headers )  => input_columns = headers
-      .on 'end',                  => flush(); resolve { row_count, }
+      return null if skip_all_null and all_columns_null
+      ( buffer ?= [] ).push new_row
+      flush() if buffer.length >= batch_size
+      return null
+    #.......................................................................................................
+    stream.on 'headers', ( headers )  => input_columns = headers
+    stream.on 'end',                  => flush(); resolve { row_count, }
     #.......................................................................................................
     return null
 
