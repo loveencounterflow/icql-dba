@@ -369,6 +369,15 @@ dba.export { schema: 'myschema', path, format, overwrite, }
   * [X] ensure that all empty fields contain `null` instead of an empty string
   * [X] implement skipping comments
 * [ ] TSV import (differs only in configuration (`delimiter`, `quotes`) from CSV)
+* [ ] Consider to use B3 `serialize()` for `export { format: 'sqlite', }`
+* [ ] Allow to `open()` RAM DB without path
+* [ ] Re-implement Hollerith codec for `int32` only, making it faster and smaller; add documentation along
+  the lines of `"DBA: VNRs"` (in hengist dev) how to efficiently sort VNRs
+
+
+
+
+
 
 
 
