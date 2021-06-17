@@ -32,7 +32,6 @@ E                         = require './errors'
 new_bsqlt3_connection     = require 'better-sqlite3'
 PATH                      = require 'path'
 TMP                       = require 'tempy'
-{ Sql_mixin }             = require './sql-mixin'
 { Import_export_mixin }   = require './import-export-mixin'
 
 
@@ -46,7 +45,7 @@ L.pick = ( d, key, fallback, type = null ) ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-class @Dba extends Import_export_mixin Sql_mixin()
+class @Dba extends Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
@@ -54,6 +53,7 @@ class @Dba extends Import_export_mixin Sql_mixin()
     @types        = types
     @_statements  = {}
     @_schemas     = freeze {}
+    @sql          = new ( require './sql' ).Sql()
     @cfg          = freeze { @types.defaults.dba_constructor_cfg..., cfg..., }
     validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
@@ -142,7 +142,7 @@ class @Dba extends Import_export_mixin Sql_mixin()
     validate.dba_vacuum_atomically ( cfg = { @types.defaults.dba_vacuum_atomically..., cfg..., } )
     { schema
       path }  = cfg
-    schema_i  = @as_identifier schema
+    schema_i  = @sql.I schema
     try
       tmpdir_path   = TMP.directory { prefix: @cfg._temp_prefix, }
       tmpfile_path  = PATH.join tmpdir_path, PATH.basename path
@@ -324,8 +324,8 @@ class @Dba extends Import_export_mixin Sql_mixin()
     return @_walk_all_objects() unless schema?
     validate_optional.ic_schema schema
     validate_optional.dba_list_objects_ordering ordering
-    schema_i    = @as_identifier  schema
-    schema_s    = @as_sql         schema
+    schema_i    = @sql.I  schema
+    schema_s    = @sql.L  schema
     ordering_x  = if ( ordering is 'drop' ) then 'desc' else 'asc'
     seq         = @first_value @query "select seq from pragma_database_list where name = #{schema_s};"
     #.......................................................................................................
@@ -349,8 +349,8 @@ class @Dba extends Import_export_mixin Sql_mixin()
       schemas[ row.name ] = row
     #.......................................................................................................
     for schema, d of schemas
-      schema_i    = @as_identifier  schema
-      schema_s  = @as_sql         schema
+      schema_i    = @sql.I  schema
+      schema_s    = @sql.L  schema
       parts.push """select
           #{d.seq} as seq,
           #{schema_s} as schema,
@@ -370,7 +370,7 @@ class @Dba extends Import_export_mixin Sql_mixin()
     schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
     name        = L.pick cfg, 'name', null
     validate_optional.ic_name name
-    return ( has_schema = @_is_empty_schema @as_identifier schema ) unless name?
+    return ( has_schema = @_is_empty_schema @sql.I schema ) unless name?
     throw new E.Dba_not_implemented '^dba@312^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
 
   #---------------------------------------------------------------------------------------------------------
@@ -416,7 +416,7 @@ class @Dba extends Import_export_mixin Sql_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   _dependencies_of: ( table, schema = 'main' ) ->
-    return @query "pragma #{@as_identifier schema}.foreign_key_list( #{@as_identifier table} )"
+    return @query "pragma #{@sql.I schema}.foreign_key_list( #{@sql.I table} )"
 
   #---------------------------------------------------------------------------------------------------------
   dependencies_of:  ( table, schema = 'main' ) ->
@@ -430,12 +430,12 @@ class @Dba extends Import_export_mixin Sql_mixin()
   # ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
   # clear: ( cfg ) ->
   #   validate.ic_schema schema
-  #   schema_i      = @as_identifier schema
+  #   schema_i      = @sql.I schema
   #   R             = 0
   #   fk_state      = @_get_foreign_key_state()
   #   @_set_foreign_key_state off
   #   for { type, name, } in @list @walk_objects { schema, _ordering: 'drop', }
-  #     statement = "drop #{type} if exists #{@as_identifier name};"
+  #     statement = "drop #{type} if exists #{@sql.I name};"
   #     @execute statement
   #     R += +1
   #   @_set_foreign_key_state fk_state
@@ -461,7 +461,7 @@ class @Dba extends Import_export_mixin Sql_mixin()
   #---------------------------------------------------------------------------------------------------------
   _detach: ( cfg ) ->
     schema        = L.pick cfg, 'schema', null, 'ic_schema'
-    schema_i      = @as_identifier  schema
+    schema_i      = @sql.I  schema
     @execute "detach #{schema_i};"
     @_schemas     = lets @_schemas, ( d ) => delete d[ schema ]
     return null
@@ -496,8 +496,8 @@ class @Dba extends Import_export_mixin Sql_mixin()
     from_schema_objects = @list @walk_objects { schema: from_schema }
     return detach_from_schema() if from_schema_objects.length is 0
     #.......................................................................................................
-    to_schema_x   = @as_identifier to_schema
-    from_schema_x = @as_identifier from_schema
+    to_schema_x   = @sql.I to_schema
+    from_schema_x = @sql.I from_schema
     inserts       = []
     fk_state      = @_get_foreign_key_state()
     @_set_foreign_key_state off
@@ -511,7 +511,7 @@ class @Dba extends Import_export_mixin Sql_mixin()
         throw new E.Dba_unexpected_db_object_type '^dba@321^', d.type, d
       #.....................................................................................................
       ### TAINT using not-so reliable string replacement as substitute for proper parsing ###
-      name_x  = @as_identifier d.name
+      name_x  = @sql.I d.name
       sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
       #.....................................................................................................
       if sql is d.sql
@@ -523,7 +523,7 @@ class @Dba extends Import_export_mixin Sql_mixin()
     #.......................................................................................................
     @execute sql for sql in inserts
     @_set_foreign_key_state fk_state
-    @pragma "#{@as_identifier to_schema}.foreign_key_check;" if fk_state
+    @pragma "#{@sql.I to_schema}.foreign_key_check;" if fk_state
     return detach_from_schema()
 
 

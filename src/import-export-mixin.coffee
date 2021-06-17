@@ -213,9 +213,9 @@ E                         = require './errors'
       table_columns[ k ]  = 'text' for k in _tc
     # debug '^3534^', { table_columns, input_columns, }
     #.......................................................................................................
-    schema_i        = @as_identifier schema
-    table_name_i    = @as_identifier table_name
-    columns_sql     = ( "#{@as_identifier n} #{@as_identifier t}" for n, t of table_columns ).join ', '
+    schema_i        = @sql.I schema
+    table_name_i    = @sql.I table_name
+    columns_sql     = ( "#{@sql.I n} #{@sql.I t}" for n, t of table_columns ).join ', '
     placeholder_sql = ( "?"                                       for _    of table_columns ).join ', '
     create_sql      = "create table #{schema_i}.#{table_name_i} ( #{columns_sql} );"
     try @execute create_sql catch error

@@ -47,6 +47,8 @@ class @Dba_unexpected_db_object_type extends @Dba_error
   constructor: ( ref, type, value ) -> super ref, "µ769 unknown type #{rpr type} of DB object #{d}"
 class @Dba_sql_value_error           extends @Dba_error
   constructor: ( ref, type, value ) -> super ref, "unable to express a #{type} as SQL literal, got #{rpr value}"
+class @Dba_sql_not_a_list_error      extends @Dba_error
+  constructor: ( ref, type, value ) -> super ref, "expected a list, got a #{type}"
 class @Dba_unexpected_sql            extends @Dba_error
   constructor: ( ref, sql )         -> super ref, "unexpected SQL string #{rpr sql}"
 class @Dba_sqlite_too_many_dbs       extends @Dba_error
