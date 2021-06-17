@@ -51,9 +51,6 @@ Dba                       = null
 @declare 'dba_ram_path',        ( x ) -> x in [ null, '', ':memory:', ]
 
 #-----------------------------------------------------------------------------------------------------------
-@declare 'dba_list_objects_ordering', ( x ) -> ( not x? ) or ( x is 'drop' )
-
-#-----------------------------------------------------------------------------------------------------------
 @declare 'dba_constructor_cfg', tests:
   "x is an object":                       ( x ) -> @isa.object          x
   "x._temp_prefix is a ic_schema":        ( x ) -> @isa.ic_schema       x._temp_prefix
@@ -171,6 +168,28 @@ Dba                       = null
   "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_detach_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_has_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_is_empty_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+  "@isa.nonempty_text x.name":              ( x ) -> @isa.nonempty_text x.name
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_walk_objects_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+  "x._ordering is optionally 'drop'":       ( x ) -> ( not x._ordering? ) or ( x._ordering is 'drop' )
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba', tests:
   "x instanceof Dba":                     ( x ) -> x instanceof ( Dba ?= ( require './main' ).Dba )
 
@@ -188,6 +207,12 @@ Dba                       = null
     schema:     null
     path:       ''
     saveas:     null
+  #.........................................................................................................
+  dba_detach_cfg:
+    schema:     null
+  #.........................................................................................................
+  dba_has_cfg:
+    schema:     null
   #.........................................................................................................
   dba_open_cfg:
     schema:     null
@@ -266,6 +291,14 @@ Dba                       = null
   #.........................................................................................................
   dba_is_ram_db_cfg:
     schema:       null
+  #.........................................................................................................
+  dba_walk_objects_cfg:
+    schema:       null
+    _ordering:    null
+  #.........................................................................................................
+  dba_walk_objects_cfg:
+    schema:       null
+    null:         null
   #.........................................................................................................
   extensions_and_formats:
     db:           'sqlite'

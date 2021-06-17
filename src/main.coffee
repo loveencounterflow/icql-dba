@@ -35,11 +35,6 @@ TMP                       = require 'tempy'
 { Import_export_mixin }   = require './import-export-mixin'
 
 
-#-----------------------------------------------------------------------------------------------------------
-L.pick = ( d, key, fallback, type = null ) ->
-  R = d?[ key ] ? fallback
-  validate[ type ] R if type?
-  return R
 
 
 #===========================================================================================================
@@ -319,24 +314,24 @@ class @Dba extends Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   walk_objects: ( cfg ) ->
-    schema      = L.pick cfg, 'schema',     null
-    ordering    = L.pick cfg, '_ordering',  null
+    validate.dba_walk_objects_cfg ( cfg = { @types.defaults.dba_walk_objects_cfg..., cfg..., } )
+    schema      = cfg.schema
+    ordering    = cfg._ordering
     return @_walk_all_objects() unless schema?
-    validate_optional.ic_schema schema
-    validate_optional.dba_list_objects_ordering ordering
     schema_i    = @sql.I  schema
     schema_s    = @sql.L  schema
     ordering_x  = if ( ordering is 'drop' ) then 'desc' else 'asc'
-    seq         = @first_value @query "select seq from pragma_database_list where name = #{schema_s};"
+    seq         = @first_value @query \
+      @sql.SQL"select seq from pragma_database_list where name = #{@sql.L schema};"
     #.......................................................................................................
-    return @query """
+    return @query @sql.SQL"""
       select
-          #{seq}    as seq,
-          #{schema_s} as schema,
-          name      as name,
-          type      as type,
-          sql       as sql
-        from #{schema_i}.sqlite_schema
+          #{seq}            as seq,
+          #{@sql.L schema}  as schema,
+          name              as name,
+          type              as type,
+          sql               as sql
+        from #{@sql.I schema}.sqlite_schema
         order by seq, type #{ordering_x}, name;"""
 
   #---------------------------------------------------------------------------------------------------------
@@ -367,9 +362,7 @@ class @Dba extends Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   is_empty: ( cfg ) ->
-    schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
-    name        = L.pick cfg, 'name', null
-    validate_optional.ic_name name
+    validate.dba_is_empty_cfg ( cfg = { @types.defaults.dba_is_empty_cfg..., cfg..., } )
     return ( has_schema = @_is_empty_schema @sql.I schema ) unless name?
     throw new E.Dba_not_implemented '^dba@312^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
 
@@ -383,8 +376,8 @@ class @Dba extends Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   has: ( cfg ) ->
-    schema = L.pick cfg, 'schema', null, 'ic_schema'
-    return schema in @list_schema_names()
+    validate.dba_has_cfg ( cfg = { @types.defaults.dba_has_cfg..., cfg..., } )
+    return cfg.schema in @list_schema_names()
 
   #---------------------------------------------------------------------------------------------------------
   get_schemas: ->
@@ -460,10 +453,9 @@ class @Dba extends Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   _detach: ( cfg ) ->
-    schema        = L.pick cfg, 'schema', null, 'ic_schema'
-    schema_i      = @sql.I  schema
-    @execute "detach #{schema_i};"
-    @_schemas     = lets @_schemas, ( d ) => delete d[ schema ]
+    validate.dba_detach_cfg ( cfg = { @types.defaults.dba_detach_cfg..., cfg..., } )
+    @execute @sql.SQL"detach #{@sql.I cfg.schema};"
+    @_schemas     = lets @_schemas, ( d ) => delete d[ cfg.schema ]
     return null
 
 
