@@ -30,6 +30,7 @@
       - [Exporting to Binary and Textual Formats](#exporting-to-binary-and-textual-formats)
 - [Notes on Import Formats](#notes-on-import-formats)
   - [CSV](#csv)
+- [SQL Submodule](#sql-submodule)
 - [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -352,6 +353,24 @@ dba.export { schema: 'myschema', path, format, overwrite, }
       columns will be named `c1`, `c2`, `c3`, ..., `c${n}`
     * `{ name: type, name: type, ..., }`: columns are created with the `name`s and `type`s given
     * `[ name, name, ..., ]`: all columns are created as `text`
+
+# SQL Submodule
+
+```coffee
+dba = new Dba()
+{ SQL, I, L, X, } = dba.sql
+table   = 'mytable'
+value   = 'something'
+sql     = SQL"select * from #{I table} where x == #{L value};"
+# == select * from "mytable" where x == 'something';
+```
+
+* `SQL`: currently a no-op, but can be used (e.g. with
+  [coffeeplus](https://github.com/loveencounterflow/coffeeplus)) to signal text highlighting the language
+  used in the string literal.
+* `I`: format a text as an SQL identifier (using double quotes)
+* `L`: format a value as an SQL literal
+* `X`: format a flat list as an [SQL row value](https://www.sqlite.org/rowvalue.html) (a.k.a. a vector)
 
 
 # To Do
