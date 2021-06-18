@@ -392,7 +392,10 @@ sql     = SQL"select * from #{I table} where x == #{L value};"
 * [ ] Allow to `open()` RAM DB without path
 * [ ] Re-implement Hollerith codec for `int32` only, making it faster and smaller; add documentation along
   the lines of `"DBA: VNRs"` (in hengist dev) how to efficiently sort VNRs
-
+* [ ] we (temporarily?) accept a `path` argument in `new Dba { path, }`; this is used to attach the `main`
+  schema. Alternatively, and to keep the API mosre consistent(?), we could remove that argument and
+  stipulate that the first `dba.open()` call implicitly creates the `dba.sqlt` object; if the `schema` given
+  in that call is not `main`, then `main` will be a RAM DB.
 
 
 
