@@ -83,7 +83,7 @@
 
 * When a DB is `open()`ed (from a file) with setting `ram: false`, every change to its structure or its
   business data will be immediately reflected to disk; this, of course, is the regular mode of operation
-  for SQLite and most all RDBMSes and is, hence, known as Continuous Persistency (RP).
+  for SQLite and most all RDBMSes and is, hence, known as Continuous Persistency.
   * If the referenced file is non-existant, it will be auto-created unless `create: false` has been
     specified.
 * Continuous Persistency always uses the [SQLite binary file format](https://sqlite.org/fileformat.html).
@@ -306,9 +306,9 @@ path    = dba._schemas[ schema ].path
 dba.export { schema, path, format: 'sqlite', overwrite: true, }
 ```
 
-* Although calling `save()` takes fewer parameters than `export()`, the choice between the two is not so
-  much extensional (material) as it is intentional: one calls `save()` to 'persist the state of this RAM DB
-  to its associated DB file' whereas one calls `export()` to 'make a durable copy of this RAM DB'.
+* The choice between `save()` and `export()` is rather intentional (conceptual) than extensional (material):
+  * one calls `save { schema, }` to 'persist the state of a schema to its associated DB file', whereas
+  * one calls `export { schema, path, }` to 'make a durable copy of this RAM DB'.
 
 #### Exporting to Binary and Textual Formats
 
