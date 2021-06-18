@@ -181,7 +181,7 @@ Dba                       = null
 @declare 'dba_is_empty_cfg', tests:
   "@isa.object x":                          ( x ) -> @isa.object x
   "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
-  "@isa.nonempty_text x.name":              ( x ) -> @isa.nonempty_text x.name
+  "@isa.nonempty_text x.name":              ( x ) -> @isa_optional.ic_name x.name
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_walk_objects_cfg', tests:
