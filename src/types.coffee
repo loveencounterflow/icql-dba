@@ -215,7 +215,7 @@ Dba                       = null
     schema:     null
   #.........................................................................................................
   dba_open_cfg:
-    schema:     null
+    schema:     'main'
     path:       null
     ram:        false
     # overwrite:  false
