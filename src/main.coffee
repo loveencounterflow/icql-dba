@@ -62,25 +62,32 @@ class @Dba extends Import_export_mixin()
     validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
     @_formats     = freeze { @types.defaults.extensions_and_formats..., }
-    # debug '^345^', @cfg
-    throw new E.Dba_cfg_error '^dba@300^', "property `sqlt` not supported (yet)"   if @cfg.sqlt?
-    throw new E.Dba_cfg_error '^dba@301^', "property `schema` not supported (yet)" if @cfg.schema?
-    throw new E.Dba_cfg_error '^dba@302^', "property `path` not supported (yet)"   if @cfg.path?
-    bsqlt3_cfg    =
+    throw new E.Dba_cfg_error '^dba@300^', "property `sqlt` not supported"   if @cfg.sqlt?
+    throw new E.Dba_cfg_error '^dba@301^', "property `schema` not supported" if @cfg.schema?
+    throw new E.Dba_cfg_error '^dba@302^', "property `path` not supported"   if @cfg.path?
+    @_bsqlt3_cfg  = freeze {
       readonly:       @cfg.readonly
       fileMustExist:  not @cfg.create
-      timeout:        @cfg.timeout
+      timeout:        @cfg.timeout }
       # verbose:        ### TAINT to be done ###
+    @_initialized = false
     #.......................................................................................................
-    @sqlt = new_bsqlt3_connection '', bsqlt3_cfg
+    def_oneoff @, 'sqlt', =>
+      debug '^443^', "get sqlt"
+      @_initialized = true
+      return new_bsqlt3_connection '', @_bsqlt3_cfg
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
     validate.dba_open_cfg ( cfg = { @types.defaults.dba_open_cfg..., cfg..., } )
     { path, schema, ram, }  = cfg
-    throw new E.Dba_schema_not_allowed  '^dba@303^', schema if schema in [ 'main', 'temp', ]
-    throw new E.Dba_schema_exists       '^dba@304^', schema if @has { schema, }
+    # if @_initialized
+    #   # throw new E.Dba_schema_not_allowed  '^dba@303^', schema if schema in [ 'main', 'temp', ]
+    #   throw new E.Dba_schema_exists       '^dba@304^', schema if @has { schema, }
+    # else
+
+    #   @_initialized = true
     #.......................................................................................................
     ### TAINT troublesome logic with `path` and `saveas` ###
     if path?
@@ -91,27 +98,6 @@ class @Dba extends Import_export_mixin()
     #.......................................................................................................
     if ram then @_open_file_db_in_ram { path, schema, saveas, }
     else        @_attach              { path, schema, saveas, }
-    #.......................................................................................................
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  _open_file_db_in_ram: ( cfg ) ->
-    ### Given a `path` and a `schema`, create a temporary schema to open the file DB in as well as an empty
-    in-memory schema; then copy all DB objects and their contents from the temporary file schema to the RAM
-    schema. Finally, detach the file schema. Ensure the `path` given is kept around as the `saveas`
-    (implicit) path to be used for eventual persistency (`dba.save()`). ###
-    ### TAINT validate? ###
-    { path, schema, saveas, } = cfg
-    #.......................................................................................................
-    if @types.isa.dba_ram_path path
-      @_attach { schema, path, saveas, }
-      return null
-    #.......................................................................................................
-    tmp_schema = @_get_free_temp_schema()
-    @_attach { schema: tmp_schema, path, }
-    @_attach { schema, path: '', saveas, }
-    @_copy_schema { from_schema: tmp_schema, to_schema: schema, }
-    @_detach { schema: tmp_schema, }
     #.......................................................................................................
     return null
 
@@ -444,9 +430,52 @@ class @Dba extends Import_export_mixin()
   #   return R
 
   #---------------------------------------------------------------------------------------------------------
+  _open_file_db_in_ram: ( cfg ) ->
+    ### Given a `path` and a `schema`, create a temporary schema to open the file DB in as well as an empty
+    in-memory schema; then copy all DB objects and their contents from the temporary file schema to the RAM
+    schema. Finally, detach the file schema. Ensure the `path` given is kept around as the `saveas`
+    (implicit) path to be used for eventual persistency (`dba.save()`). ###
+    ### TAINT validate? ###
+    { path, schema, saveas, } = cfg
+    #.......................................................................................................
+    if @types.isa.dba_ram_path path
+      @_attach { schema, path, saveas, }
+      return null
+    #.......................................................................................................
+    tmp_schema = @_get_free_temp_schema()
+    @_attach { schema: tmp_schema, path, }
+    @_attach { schema, path: '', saveas, }
+    @_copy_schema { from_schema: tmp_schema, to_schema: schema, }
+    @_detach { schema: tmp_schema, }
+    #.......................................................................................................
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
   _attach: ( cfg ) ->
+    ###
+
+    xxx Given a `path` and a `schema`, execute SQL"attach $path as $schema". This will fail
+    * if `schema` already exists, or
+    * if the maximum number of schemas (10 by default) has already been attached, or
+    * if the schema name is `main` and the DBA is `@_initialized`.
+
+    If `@_initialized` is `false`, then a
+
+    In case schema is `main`, this
+    will only work as long as the DBA instance is  not .
+
+    ###
     validate.dba_attach_cfg ( cfg = { @types.defaults.dba_attach_cfg..., cfg..., } )
     { path, schema, saveas, }   = cfg
+    #.......................................................................................................
+    unless @_initialized
+      if schema is 'main'
+        # @sqlt = new_bsqlt3_connection path, @_bsqlt3_cfg
+        def @, 'sqlt', enumerable: true, configurable: false, value: new_bsqlt3_connection path, @_bsqlt3_cfg
+        @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, }
+        return null
+      ignore = @sqlt
+      # @sqlt = new_bsqlt3_connection '', @_bsqlt3_cfg
     #.......................................................................................................
     if @has { schema, }
       throw new E.Dba_schema_exists '^dba@314^', schema
