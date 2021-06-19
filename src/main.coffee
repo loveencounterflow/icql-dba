@@ -33,6 +33,15 @@ new_bsqlt3_connection     = require 'better-sqlite3'
 PATH                      = require 'path'
 TMP                       = require 'tempy'
 { Import_export_mixin }   = require './import-export-mixin'
+def                       = Object.defineProperty
+def_oneoff                = ( object, name, method ) ->
+  def object, name,
+    enumerable:   true
+    configurable: true
+    get: ->
+      R = method()
+      def object, name, enumerable: true, configurable: false, value: R
+      return R
 
 
 
