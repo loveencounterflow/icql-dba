@@ -73,7 +73,6 @@ class @Dba extends Import_export_mixin()
     @_initialized = false
     #.......................................................................................................
     def_oneoff @, 'sqlt', =>
-      debug '^443^', "get sqlt"
       @_initialized = true
       return new_bsqlt3_connection '', @_bsqlt3_cfg
     #.......................................................................................................
@@ -431,18 +430,18 @@ class @Dba extends Import_export_mixin()
     schema. Finally, detach the file schema. Ensure the `path` given is kept around as the `saveas`
     (implicit) path to be used for eventual persistency (`dba.save()`). ###
     ### TAINT validate? ###
+    schema_main_allowed = not @_initialized
     { path, schema, saveas, } = cfg
-    #.......................................................................................................
-    if @types.isa.dba_ram_path path
-      @_attach { schema, path, saveas, }
-      return null
+    return @_attach { schema, path, saveas, } if @types.isa.dba_ram_path path
     #.......................................................................................................
     tmp_schema = @_get_free_temp_schema()
     @_attach { schema: tmp_schema, path, }
-    @_attach { schema, path: '', saveas, }
+    unless ( schema is 'main' ) and schema_main_allowed
+      @_attach { schema, path: '', saveas, }
     @_copy_schema { from_schema: tmp_schema, to_schema: schema, }
     @_detach { schema: tmp_schema, }
     #.......................................................................................................
+    @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, } ### TAINT use API call ###
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -467,7 +466,7 @@ class @Dba extends Import_export_mixin()
       if schema is 'main'
         # @sqlt = new_bsqlt3_connection path, @_bsqlt3_cfg
         def @, 'sqlt', enumerable: false, configurable: false, value: new_bsqlt3_connection path, @_bsqlt3_cfg
-        @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, }
+        @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, } ### TAINT use API call ###
         return null
       ignore = @sqlt
       # @sqlt = new_bsqlt3_connection '', @_bsqlt3_cfg
@@ -481,7 +480,7 @@ class @Dba extends Import_export_mixin()
       throw error unless error.code is 'SQLITE_ERROR'
       throw new E.Dba_sqlite_too_many_dbs '^dba@315^', schema if error.message.startsWith 'too many attached databases'
       throw new E.Dba_sqlite_error        '^dba@316^', error
-    @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, }
+    @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, } ### TAINT use API call ###
     return null
 
   #---------------------------------------------------------------------------------------------------------
