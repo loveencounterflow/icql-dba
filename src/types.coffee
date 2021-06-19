@@ -54,6 +54,7 @@ Dba                       = null
 @declare 'dba_constructor_cfg', tests:
   "x is an object":                       ( x ) -> @isa.object          x
   "x._temp_prefix is a ic_schema":        ( x ) -> @isa.ic_schema       x._temp_prefix
+  # "@isa_optional.nonempty_text x.path":   ( x ) -> @isa_optional.nonempty_text x.path
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_open_cfg', tests:
@@ -202,6 +203,7 @@ Dba                       = null
     create:       true
     overwrite:    false
     timeout:      5000
+    # path:         null
   #.........................................................................................................
   dba_attach_cfg:
     schema:     null
