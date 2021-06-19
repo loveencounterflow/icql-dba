@@ -40,7 +40,7 @@ def_oneoff                = ( object, name, method ) ->
     configurable: true
     get: ->
       R = method()
-      def object, name, enumerable: true, configurable: false, value: R
+      def object, name, enumerable: false, configurable: false, value: R
       return R
 
 
@@ -54,10 +54,10 @@ class @Dba extends Import_export_mixin()
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
-    @types        = types
-    @_statements  = {}
+    def @, 'types',       { enumerable: false, value: types, }
+    def @, '_statements', { enumerable: false, value: {}, }
+    def @, 'sql',         { enumerable: false, value: ( new ( require './sql' ).Sql() ), }
     @_schemas     = freeze {}
-    @sql          = new ( require './sql' ).Sql()
     @cfg          = freeze { @types.defaults.dba_constructor_cfg..., cfg..., }
     validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
@@ -76,18 +76,13 @@ class @Dba extends Import_export_mixin()
       debug '^443^', "get sqlt"
       @_initialized = true
       return new_bsqlt3_connection '', @_bsqlt3_cfg
+    #.......................................................................................................
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
     validate.dba_open_cfg ( cfg = { @types.defaults.dba_open_cfg..., cfg..., } )
     { path, schema, ram, }  = cfg
-    # if @_initialized
-    #   # throw new E.Dba_schema_not_allowed  '^dba@303^', schema if schema in [ 'main', 'temp', ]
-    #   throw new E.Dba_schema_exists       '^dba@304^', schema if @has { schema, }
-    # else
-
-    #   @_initialized = true
     #.......................................................................................................
     ### TAINT troublesome logic with `path` and `saveas` ###
     if path?
@@ -452,18 +447,18 @@ class @Dba extends Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   _attach: ( cfg ) ->
-    ###
+    ### Given a `path` and a `schema`, execute SQL"attach $path as $schema".
 
-    xxx Given a `path` and a `schema`, execute SQL"attach $path as $schema". This will fail
-    * if `schema` already exists, or
-    * if the maximum number of schemas (10 by default) has already been attached, or
-    * if the schema name is `main` and the DBA is `@_initialized`.
+    `_attach()` will fail
+      * if `schema` already exists, or
+      * if the maximum number of schemas (10 by default) has already been attached, or
+      * if the schema name is `main` and the DBA is `@_initialized`.
 
-    If `@_initialized` is `false`, then a
-
-    In case schema is `main`, this
-    will only work as long as the DBA instance is  not .
-
+    If `@_initialized` is `false`, then a new `better-sqlite3` instance with a `main` schema will be
+    created;
+      * if the `schema` passed in is `main`, it will be opened from the `path` given.
+      * If `schema` is not `main`, `amin` will be opened as an empty RAM DB, and `schema` will be attached
+        from the file given.
     ###
     validate.dba_attach_cfg ( cfg = { @types.defaults.dba_attach_cfg..., cfg..., } )
     { path, schema, saveas, }   = cfg
@@ -471,7 +466,7 @@ class @Dba extends Import_export_mixin()
     unless @_initialized
       if schema is 'main'
         # @sqlt = new_bsqlt3_connection path, @_bsqlt3_cfg
-        def @, 'sqlt', enumerable: true, configurable: false, value: new_bsqlt3_connection path, @_bsqlt3_cfg
+        def @, 'sqlt', enumerable: false, configurable: false, value: new_bsqlt3_connection path, @_bsqlt3_cfg
         @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, }
         return null
       ignore = @sqlt
