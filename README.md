@@ -31,6 +31,7 @@
 - [Notes on Import Formats](#notes-on-import-formats)
   - [CSV](#csv)
 - [SQL Submodule](#sql-submodule)
+- [Similar Projects](#similar-projects)
 - [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -372,6 +373,9 @@ sql     = SQL"select * from #{I table} where x == #{L value};"
 * `L`: format a value as an SQL literal
 * `X`: format a flat list as an [SQL row value](https://www.sqlite.org/rowvalue.html) (a.k.a. a vector)
 
+# Similar Projects
+
+* Datasette
 
 # To Do
 
@@ -396,10 +400,35 @@ sql     = SQL"select * from #{I table} where x == #{L value};"
   schema. Alternatively, and to keep the API mosre consistent(?), we could remove that argument and
   stipulate that the first `dba.open()` call implicitly creates the `dba.sqlt` object; if the `schema` given
   in that call is not `main`, then `main` will be a RAM DB.
+* [ ] discuss project focus and non-goals
+  * [ ] while ICQL-DBA may gain some support for generated SQL, building kind-of-an-ORM is not one of its
+    goals. Cf. [Datasette](https://sqlite-utils.datasette.io/en/stable/python-api.html#listing-rows) allows
+    constructs à la `for row in db["dogs"].rows_where(select='name, age'): ...` which already shows one of
+    the general disadvantages of ORMs, namely, that one has to suddenly re-create parts of SQL in a more
+    awkward way. Instead of
 
+    ```sql
+    select name, age from dogs where age > 1 order by age desc;
+    ```
 
+    now you have to write
 
+    ```py
+    db[ 'dogs' ].rows_where( 'age > 1', select = 'name, age', order_by = 'age desc' )
+    ```
 
+    which is considerably longer, more convoluted, and has an appreciably larger API surface than
+    `dba.query()`.
+
+    Observe that all of the arguments are really SQL fragments so in reality you still have to write SQL.
+
+    Worse, now the equivalent to that one SQL string `"select name, age from dogs where age > 1 order by age
+    desc;"` has been diluted into four micro strings: `'dogs'`, `'age > 1'`, `'name, age'`, and `'age
+    desc'`, plus three Python identifiers: `rows_where`, `select`, and `order_by`.
+
+    Worse again, you still *don't get column and table name parametrization* (you *can* replace `'name,
+    age'` with an interpolated string and variables, but you'll have to provide proper escaping (quotes,
+    spaces, capitalization) and concatenation (commas) yourself).
 
 
 
