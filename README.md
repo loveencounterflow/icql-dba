@@ -31,6 +31,7 @@
 - [Notes on Import Formats](#notes-on-import-formats)
   - [CSV](#csv)
 - [SQL Submodule](#sql-submodule)
+- [Rave Reviews](#rave-reviews)
 - [Similar Projects](#similar-projects)
 - [To Do](#to-do)
 
@@ -372,6 +373,37 @@ sql     = SQL"select * from #{I table} where x == #{L value};"
 * `I`: format a text as an SQL identifier (using double quotes)
 * `L`: format a value as an SQL literal
 * `X`: format a flat list as an [SQL row value](https://www.sqlite.org/rowvalue.html) (a.k.a. a vector)
+
+
+# Rave Reviews
+
+For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, which probably nobody uses):
+
+> We use SQLite in-memory databases for executing 100% of our business logic these days. Letting the
+> business write all the rules in SQL is the biggest win of my career so far.
+>
+> Also, if you think SQLite might be too constrained for your business case, you can expose any arbitrary
+> application function to it. E.g.:
+>
+> https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/user-defined-functions
+>
+> The very first thing we did was pipe DateTime into SQLite as a UDF. Imagine instantly having the full
+> power of .NET6 available from inside SQLite.
+>
+> Note that these functions do NOT necessarily have to avoid side effects either. You can use a procedural
+> DSL via SELECT statements that invokes any arbitrary business method with whatever parameters from the
+> domain data.
+>
+> The process is so simple I am actually disappointed that we didn't think of it sooner. You just put a
+> template database in memory w/ the schema pre-loaded, then make a copy of this each time you want to map
+> domain state for SQL execution.
+>
+> You can do conditionals, strings, arrays of strings, arrays of CSVs, etc. Any shape of thing you need to
+> figure out a conditional or dynamic presentation of business facts.
+>
+> Oh and you can also use views to build arbitrary layers of abstraction so the business can focus on their
+> relevant pieces.—https://news.ycombinator.com/item?id=27568537
+
 
 # Similar Projects
 
