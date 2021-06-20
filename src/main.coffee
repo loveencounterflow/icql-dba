@@ -101,9 +101,9 @@ class @Dba extends Import_export_mixin()
     validate.dba_save_cfg ( cfg = { @types.defaults.dba_export_cfg..., cfg..., } )
     { schema
       path }    = cfg
-    throw new E.Dba_argument_not_allowed '^dba@305^', 'path', path if path?
+    throw new E.Dba_argument_not_allowed '^dba@303^', 'path', path if path?
     path        = @_schemas[ schema ]?.path ? null
-    throw new E.Dba_schema_unknown '^dba@306^', schema unless path?
+    throw new E.Dba_schema_unknown '^dba@304^', schema unless path?
     return @export { schema, path, format: 'sqlite', }
 
   #---------------------------------------------------------------------------------------------------------
@@ -114,11 +114,11 @@ class @Dba extends Import_export_mixin()
       path
       format }  = cfg
     format     ?= @_format_from_path path
-    throw new E.Dba_extension_unknown '^dba@333^', path unless format?
+    throw new E.Dba_extension_unknown '^dba@305^', path unless format?
     switch format
       when 'sqlite' then @_vacuum_atomically { schema, path, }
       ### TAINT when format derived from path, may be undefined, making the error message unintelligible ###
-      else throw new E.Dba_format_unknown '^dba@307^', format
+      else throw new E.Dba_format_unknown '^dba@306^', format
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -144,7 +144,7 @@ class @Dba extends Import_export_mixin()
     try
       return @types.isa.dba_ram_path @single_value @query sql, [ schema, ]
     catch error
-      throw new E.Dba_schema_unknown '^dba@308^', schema if error instanceof E.Dba_expected_one_row
+      throw new E.Dba_schema_unknown '^dba@307^', schema if error instanceof E.Dba_expected_one_row
       throw error
 
   #---------------------------------------------------------------------------------------------------------
@@ -353,7 +353,7 @@ class @Dba extends Import_export_mixin()
   is_empty: ( cfg ) ->
     validate.dba_is_empty_cfg ( cfg = { @types.defaults.dba_is_empty_cfg..., cfg..., } )
     return ( has_schema = @_is_empty_schema @sql.I schema ) unless name?
-    throw new E.Dba_not_implemented '^dba@312^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
+    throw new E.Dba_not_implemented '^dba@310^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
 
   #---------------------------------------------------------------------------------------------------------
   _is_empty_schema: ( schema_i ) -> (
@@ -379,7 +379,7 @@ class @Dba extends Import_export_mixin()
     R = @first_value @query "select file from pragma_database_list where name = ?;", [ schema, ]
     return R if R?
     return fallback unless fallback is misfit
-    throw new E.Dba_schema_unknown '^dba@313^', schema
+    throw new E.Dba_schema_unknown '^dba@311^', schema
 
   #---------------------------------------------------------------------------------------------------------
   type_of: ( name, schema = 'main' ) ->
@@ -472,14 +472,14 @@ class @Dba extends Import_export_mixin()
       # @sqlt = new_bsqlt3_connection '', @_bsqlt3_cfg
     #.......................................................................................................
     if @has { schema, }
-      throw new E.Dba_schema_exists '^dba@314^', schema
+      throw new E.Dba_schema_exists '^dba@312^', schema
     #.......................................................................................................
     try
       @run "attach ? as ?;", [ path, schema, ]
     catch error
       throw error unless error.code is 'SQLITE_ERROR'
-      throw new E.Dba_sqlite_too_many_dbs '^dba@315^', schema if error.message.startsWith 'too many attached databases'
-      throw new E.Dba_sqlite_error        '^dba@316^', error
+      throw new E.Dba_sqlite_too_many_dbs '^dba@313^', schema if error.message.startsWith 'too many attached databases'
+      throw new E.Dba_sqlite_error        '^dba@314^', error
     @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, } ### TAINT use API call ###
     return null
 
@@ -507,15 +507,15 @@ class @Dba extends Import_export_mixin()
     { from_schema, to_schema, } = cfg
     #.......................................................................................................
     if from_schema is to_schema
-      throw new E.Dba_schema_repeated '^dba@317^', from_schema
+      throw new E.Dba_schema_repeated '^dba@315^', from_schema
     #.......................................................................................................
     known_schemas     = @list_schema_names()
-    throw new E.Dba_schema_unknown '^dba@318^', from_schema unless from_schema in known_schemas
-    throw new E.Dba_schema_unknown '^dba@319^', to_schema   unless to_schema   in known_schemas
+    throw new E.Dba_schema_unknown '^dba@316^', from_schema unless from_schema in known_schemas
+    throw new E.Dba_schema_unknown '^dba@317^', to_schema   unless to_schema   in known_schemas
     #.......................................................................................................
     to_schema_objects = @list @walk_objects { schema: to_schema, }
     if to_schema_objects.length > 0
-      throw new E.Dba_schema_nonempty '^dba@320^', to_schema
+      throw new E.Dba_schema_nonempty '^dba@318^', to_schema
     #.......................................................................................................
     from_schema_objects = @list @walk_objects { schema: from_schema }
     return detach_from_schema() if from_schema_objects.length is 0
@@ -532,14 +532,14 @@ class @Dba extends Import_export_mixin()
       #.....................................................................................................
       ### TAINT consider to use `validate.ic_db_object_type` ###
       unless d.type in [ 'table', 'view', 'index', ]
-        throw new E.Dba_unexpected_db_object_type '^dba@321^', d.type, d
+        throw new E.Dba_unexpected_db_object_type '^dba@319^', d.type, d
       #.....................................................................................................
       ### TAINT using not-so reliable string replacement as substitute for proper parsing ###
       name_x  = @sql.I d.name
       sql     = d.sql.replace /\s*CREATE\s*(TABLE|INDEX|VIEW)\s*/i, "create #{d.type} #{to_schema_x}."
       #.....................................................................................................
       if sql is d.sql
-        throw new E.Dba_unexpected_sql '^dba@322^', d.sql
+        throw new E.Dba_unexpected_sql '^dba@320^', d.sql
       #.....................................................................................................
       @execute sql
       if d.type is 'table'
