@@ -259,7 +259,8 @@ class @Dba extends Import_export_mixin()
     return if Q? then ( statement.iterate Q ) else statement.iterate()
 
   #---------------------------------------------------------------------------------------------------------
-  execute: ( sql  ) ->
+  execute: ( sql ) ->
+    throw new E.Dba_argument_not_allowed '^dba@308^', "extra", rpr x if ( x = arguments[ 1 ] )?
     @_echo 'execute', sql
     return @sqlt.exec sql
 
