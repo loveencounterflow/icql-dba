@@ -55,11 +55,11 @@ class @Sql
     throw new E.Dba_sql_not_a_list_error '^dba@405^', type, x unless ( type = type_of x ) is 'list'
     return '( ' + ( ( @L e for e in x ).join ', ' ) + ' )'
 
-  #---------------------------------------------------------------------------------------------------------
-  interpolate: ( sql, Q ) -> sql.replace @_interpolation_pattern, ( $0, $1 ) => @as_sql Q[ $1 ]
-      # try
-      #   return @as_sql Q[ $1 ]
-      # catch error
-      #   throw new E.Dba_error \
-      #     "µ773 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
-  _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
+  # #---------------------------------------------------------------------------------------------------------
+  # interpolate: ( sql, Q ) -> sql.replace @_interpolation_pattern, ( $0, $1 ) => @as_sql Q[ $1 ]
+  #     # try
+  #     #   return @as_sql Q[ $1 ]
+  #     # catch error
+  #     #   throw new E.Dba_error \
+  #     #     "µ773 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
+  # _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
