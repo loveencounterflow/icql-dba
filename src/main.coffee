@@ -299,7 +299,7 @@ class @Dba extends Import_export_mixin()
   catalog: ->
     ### TAINT kludge: we sort by descending types so views, tables come before indexes (b/c you can't drop a
     primary key index in SQLite) ###
-    throw new E.Dba_not_implemented '^dba@311^', "method dba.catalog()"
+    throw new E.Dba_not_implemented '^dba@309^', "method dba.catalog()"
     @query "select * from sqlite_schema order by type desc, name;"
 
   #---------------------------------------------------------------------------------------------------------
