@@ -292,6 +292,10 @@ class @Dba extends Import_export_mixin()
     @pragma "foreign_keys = #{onoff};"
     return null
 
+  #---------------------------------------------------------------------------------------------------------
+  do_unsafe:        ( f ) -> @sqlt.unsafeMode true; try return       f() finally @sqlt.unsafeMode false
+  do_unsafe_async:  ( f ) -> @sqlt.unsafeMode true; try return await f() finally @sqlt.unsafeMode false
+
 
   #=========================================================================================================
   # DB STRUCTURE REPORTING
