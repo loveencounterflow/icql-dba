@@ -30,8 +30,9 @@
       - [Exporting to Binary and Textual Formats](#exporting-to-binary-and-textual-formats)
 - [Notes on Import Formats](#notes-on-import-formats)
   - [CSV](#csv)
+- [API](#api)
 - [SQL Submodule](#sql-submodule)
-- [Rave Reviews](#rave-reviews)
+- [Rave Reviews (albeit for the concept, not this software)](#rave-reviews-albeit-for-the-concept-not-this-software)
 - [Similar Projects](#similar-projects)
 - [To Do](#to-do)
 
@@ -356,6 +357,19 @@ dba.export { schema: 'myschema', path, format, overwrite, }
     * `{ name: type, name: type, ..., }`: columns are created with the `name`s and `type`s given
     * `[ name, name, ..., ]`: all columns are created as `text`
 
+# API
+
+**TBD**
+
+* **`dba.do_unsafe: ( f ) ->`**—given a synchronous function `f`, set `unsafeMode` to `true`, call `f()`,
+  then set `unsafeMode` to `false`. Used judiciously, this allows e.g. to update rows in a table while
+  iterating over a result set. To ensure proper functioning with predictable results and avoiding endless
+  loops (caused by new rows being added to the result set), it is suggested to add a field `lck boolean not
+  null default false` (for 'locked') to tables for which concurrent updates are planned. Set `lck` of all or
+  a subset of rows to `true` and add `where lck` to your `select` statement; any inserted rows will then
+  have the default `lck = false` value and be cleanly separated from the result set.
+* **`dba.do_unsafe_async: ( f ) ->`**—Same as `dba.do_unsafe()` but for async functions.
+
 # SQL Submodule
 
 ```coffee
@@ -375,7 +389,7 @@ sql     = SQL"select * from #{I table} where x == #{L value};"
 * `X`: format a flat list as an [SQL row value](https://www.sqlite.org/rowvalue.html) (a.k.a. a vector)
 
 
-# Rave Reviews
+# Rave Reviews (albeit for the concept, not this software)
 
 For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, which probably nobody uses):
 
