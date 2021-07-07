@@ -85,6 +85,18 @@ Dba                       = null
   "@isa.boolean x.directOnly":      ( x ) -> @isa.boolean x.directOnly
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_create_window_function_cfg', tests:
+  "@isa.object x":                    ( x ) -> @isa.object x
+  "@isa.nonempty_text x.name":        ( x ) -> @isa.nonempty_text x.name
+  # "@isa.any x.start":                 ( x ) -> @isa.any x.start
+  "@isa.function x.step":             ( x ) -> @isa.function x.step
+  "@isa.function x.inverse":          ( x ) -> @isa.function x.inverse
+  "@isa_optional.function x.result":  ( x ) -> @isa_optional.function x.result
+  "@isa.boolean x.deterministic":     ( x ) -> @isa.boolean x.deterministic
+  "@isa.boolean x.varargs":           ( x ) -> @isa.boolean x.varargs
+  "@isa.boolean x.directOnly":        ( x ) -> @isa.boolean x.directOnly
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg', tests:
   "@isa.object x":                                ( x ) -> @isa.object x
   "@isa.ic_not_temp_schema x.schema":             ( x ) -> @isa.ic_not_temp_schema x.schema
@@ -258,6 +270,12 @@ Dba                       = null
     directOnly:     false
   #.........................................................................................................
   dba_create_aggregate_function_cfg:
+    deterministic:  true
+    varargs:        false
+    directOnly:     false
+    start:          null
+  #.........................................................................................................
+  dba_create_window_function_cfg:
     deterministic:  true
     varargs:        false
     directOnly:     false

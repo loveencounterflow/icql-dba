@@ -318,6 +318,19 @@ class @Dba extends Import_export_mixin()
       varargs }     = cfg
     return @sqlt.aggregate name, { start, step, deterministic, varargs, directOnly, }
 
+  #---------------------------------------------------------------------------------------------------------
+  create_window_function: ( cfg ) ->
+    validate.dba_create_window_function_cfg ( cfg = { @types.defaults.dba_create_window_function_cfg..., cfg..., } )
+    { name
+      start
+      step
+      inverse
+      result
+      directOnly
+      deterministic
+      varargs }     = cfg
+    return @sqlt.aggregate name, { start, step, inverse, result, deterministic, varargs, directOnly, }
+
   #=========================================================================================================
   # DB STRUCTURE REPORTING
   #---------------------------------------------------------------------------------------------------------
