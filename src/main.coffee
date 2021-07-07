@@ -273,7 +273,6 @@ class @Dba extends Import_export_mixin()
   #=========================================================================================================
   # OTHER
   #---------------------------------------------------------------------------------------------------------
-  aggregate:      ( P...  ) -> @sqlt.aggregate        P...
   backup:         ( P...  ) -> @sqlt.backup           P...
   checkpoint:     ( P...  ) -> @sqlt.checkpoint       P...
   close:          ( P...  ) -> @sqlt.close            P...
@@ -303,10 +302,21 @@ class @Dba extends Import_export_mixin()
     validate.dba_create_function_cfg ( cfg = { @types.defaults.dba_create_function_cfg..., cfg..., } )
     { name
       call
+      directOnly
       deterministic
       varargs }     = cfg
-    return @sqlt.function name, { deterministic, varargs, }, call
+    return @sqlt.function name, { deterministic, varargs, directOnly, }, call
 
+  #---------------------------------------------------------------------------------------------------------
+  create_aggregate_function: ( cfg ) ->
+    validate.dba_create_aggregate_function_cfg ( cfg = { @types.defaults.dba_create_aggregate_function_cfg..., cfg..., } )
+    { name
+      start
+      step
+      directOnly
+      deterministic
+      varargs }     = cfg
+    return @sqlt.aggregate name, { start, step, deterministic, varargs, directOnly, }
 
   #=========================================================================================================
   # DB STRUCTURE REPORTING
