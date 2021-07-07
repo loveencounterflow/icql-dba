@@ -479,7 +479,7 @@ For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, wh
 * [ ] re/define APIs for
   * [ ] single-valued functions: `dba.create_function()` (<del>`dba.function()`</del>)
   * [ ] table-valued functions: `dba.create_table_function()`
+  * [ ] window functions: `dba.create_window_function()`
   * [ ] virtual tables: `dba.create_virtual_table()`
-  * [ ] aggregate functions: `dba.create_aggregate_function()`
-
+  * [ ] aggregate functions: `dba.create_aggregate_function()` (<del>`dba.aggregate()`</del>)
 
