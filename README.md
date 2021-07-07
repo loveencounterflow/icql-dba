@@ -477,9 +477,9 @@ For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, wh
     spaces, capitalization) and concatenation (commas) yourself).
 
 * [ ] re/define APIs for
-  * [ ] single-valued functions: `dba.create_function()` (<del>`dba.function()`</del>)
-  * [ ] table-valued functions: `dba.create_table_function()`
-  * [ ] window functions: `dba.create_window_function()`
+  * [X] single-valued functions: `dba.create_function()` (<del>`dba.function()`</del>)
+  * [X] aggregate functions: `dba.create_aggregate_function()` (<del>`dba.aggregate()`</del>)
+  * [X] window functions: `dba.create_window_function()`
+  * [X] table-valued functions: `dba.create_table_function()`
   * [ ] virtual tables: `dba.create_virtual_table()`
-  * [ ] aggregate functions: `dba.create_aggregate_function()` (<del>`dba.aggregate()`</del>)
 
