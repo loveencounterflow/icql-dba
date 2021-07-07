@@ -369,6 +369,11 @@ dba.export { schema: 'myschema', path, format, overwrite, }
   a subset of rows to `true` and add `where lck` to your `select` statement; any inserted rows will then
   have the default `lck = false` value and be cleanly separated from the result set.
 * **`dba.do_unsafe_async: ( f ) ->`**—Same as `dba.do_unsafe()` but for async functions.
+* **`dba.create_function: ( cfg ) ->`** single-valued functions
+* **`dba.create_aggregate_function: ( cfg ) ->`** aggregate functions
+* **`dba.create_window_function: ( cfg ) ->`** window functions
+* **`dba.create_table_function: ( cfg ) ->`** table-valued functions
+* **`dba.create_virtual_table: ( cfg ) ->`** virtual tables
 
 # SQL Submodule
 
