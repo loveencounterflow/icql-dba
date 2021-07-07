@@ -97,6 +97,17 @@ Dba                       = null
   "@isa.boolean x.directOnly":        ( x ) -> @isa.boolean x.directOnly
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_create_table_function_cfg', tests:
+  "@isa.object x":                    ( x ) -> @isa.object x
+  "@isa.nonempty_text x.name":        ( x ) -> @isa.nonempty_text x.name
+  "@isa_optional.list x.columns":     ( x ) -> @isa_optional.list x.columns
+  "@isa_optional.list x.parameters":  ( x ) -> @isa_optional.list x.parameters
+  "@isa.()generatorfunction x.rows":  ( x ) -> ( @isa.function x.rows ) or ( @isa.generatorfunction x.rows )
+  "@isa.boolean x.deterministic":     ( x ) -> @isa.boolean x.deterministic
+  "@isa.boolean x.varargs":           ( x ) -> @isa.boolean x.varargs
+  "@isa.boolean x.directOnly":        ( x ) -> @isa.boolean x.directOnly
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg', tests:
   "@isa.object x":                                ( x ) -> @isa.object x
   "@isa.ic_not_temp_schema x.schema":             ( x ) -> @isa.ic_not_temp_schema x.schema
@@ -280,6 +291,11 @@ Dba                       = null
     varargs:        false
     directOnly:     false
     start:          null
+  #.........................................................................................................
+  dba_create_table_function_cfg:
+    deterministic:  true
+    varargs:        false
+    directOnly:     false
   #.........................................................................................................
   dba_vacuum_atomically:
     schema:     null

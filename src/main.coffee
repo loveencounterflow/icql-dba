@@ -331,6 +331,21 @@ class @Dba extends Import_export_mixin()
       varargs }     = cfg
     return @sqlt.aggregate name, { start, step, inverse, result, deterministic, varargs, directOnly, }
 
+  #---------------------------------------------------------------------------------------------------------
+  create_table_function: ( cfg ) ->
+    debug '^587^', cfg
+    debug '^587^', isa.function cfg.rows
+    validate.dba_create_table_function_cfg ( cfg = { @types.defaults.dba_create_table_function_cfg..., cfg..., } )
+    { name
+      parameters
+      columns
+      rows
+      directOnly
+      deterministic
+      varargs }     = cfg
+    return @sqlt.table name, { parameters, columns, rows, deterministic, varargs, directOnly, }
+
+
   #=========================================================================================================
   # DB STRUCTURE REPORTING
   #---------------------------------------------------------------------------------------------------------
