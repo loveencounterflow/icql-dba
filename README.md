@@ -476,5 +476,10 @@ For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, wh
     age'` with an interpolated string and variables, but you'll have to provide proper escaping (quotes,
     spaces, capitalization) and concatenation (commas) yourself).
 
+* [ ] re/define APIs for
+  * [ ] single-valued functions: `dba.create_function()` (<del>`dba.function()`</del>)
+  * [ ] table-valued functions: `dba.create_table_function()`
+  * [ ] virtual tables: `dba.create_virtual_table()`
+  * [ ] aggregate functions: `dba.create_aggregate_function()`
 
 
