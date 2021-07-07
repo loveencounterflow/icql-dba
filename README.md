@@ -31,6 +31,7 @@
 - [Notes on Import Formats](#notes-on-import-formats)
   - [CSV](#csv)
 - [API](#api)
+  - [User-Defined Functions](#user-defined-functions)
 - [SQL Submodule](#sql-submodule)
 - [Rave Reviews (albeit for the concept, not this software)](#rave-reviews-albeit-for-the-concept-not-this-software)
 - [Similar Projects](#similar-projects)
@@ -369,6 +370,27 @@ dba.export { schema: 'myschema', path, format, overwrite, }
   a subset of rows to `true` and add `where lck` to your `select` statement; any inserted rows will then
   have the default `lck = false` value and be cleanly separated from the result set.
 * **`dba.do_unsafe_async: ( f ) ->`**—Same as `dba.do_unsafe()` but for async functions.
+
+## User-Defined Functions
+
+User-Defined Functions (UDFs) is one feature that sets SQLite apart from other RDBMSes because unlike other
+databases, SQLite allows users to define functions in *user code*, *on the connection*. Therefore, NodeJS
+users can define and use UDFs that are written in JavaScript or WASM and that can access the current
+machine's environment (e.g. the file system). On the one hand, this is probably somewhat slower than e.g.
+using a compiled PostgreSQL extension written in C, but on the other hand, userspace functions are orders of
+magnitude easier to write than a Posgres C extension; also, such functions can take advantage of the
+existing NodeJS ecosystem which is a huge plus and any speed penalty incurred by using JavaScript for 'hot'
+UDFs might be offset by an re-implementation in, say, Rust.
+
+One downside—or, shall we say, "characteristic aspect"—of defining UDFs on the client side (as opposed to
+writing them embedded in SQL) is that your DB or at least some aspects of it may become unusable without
+suitable initialization of the connection. It is to be expected, though, that in a complex application some
+parts are not bound to function properly without other parts being in place—the application code as such
+won't work when the database of a DB-based app is missing, and the DB may not fully work without the
+application code. (This, by the way, is exactly true for [Fossil SCM-based
+repositories](https://fossil-scm.org), which might be regarded as the poster child of an application built
+around an SQLite database.)
+
 * **`dba.create_function: ( cfg ) ->`** single-valued functions
 * **`dba.create_aggregate_function: ( cfg ) ->`** aggregate functions
 * **`dba.create_window_function: ( cfg ) ->`** window functions
