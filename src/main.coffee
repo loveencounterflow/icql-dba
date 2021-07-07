@@ -333,8 +333,6 @@ class @Dba extends Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   create_table_function: ( cfg ) ->
-    debug '^587^', cfg
-    debug '^587^', isa.function cfg.rows
     validate.dba_create_table_function_cfg ( cfg = { @types.defaults.dba_create_table_function_cfg..., cfg..., } )
     { name
       parameters
@@ -344,6 +342,12 @@ class @Dba extends Import_export_mixin()
       deterministic
       varargs }     = cfg
     return @sqlt.table name, { parameters, columns, rows, deterministic, varargs, directOnly, }
+
+  #---------------------------------------------------------------------------------------------------------
+  create_virtual_table: ( cfg ) ->
+    validate.dba_create_virtual_table_cfg ( cfg = { @types.defaults.dba_create_virtual_table_cfg..., cfg..., } )
+    { name, create, } = cfg
+    return @sqlt.table name, create
 
 
   #=========================================================================================================
