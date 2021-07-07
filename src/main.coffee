@@ -278,7 +278,6 @@ class @Dba extends Import_export_mixin()
   checkpoint:     ( P...  ) -> @sqlt.checkpoint       P...
   close:          ( P...  ) -> @sqlt.close            P...
   read:           ( path  ) -> @sqlt.exec FS.readFileSync path, { encoding: 'utf-8', }
-  function:       ( P...  ) -> @sqlt.function         P...
   load_extension: ( P...  ) -> @sqlt.loadExtension    P...
   pragma:         ( P...  ) -> @sqlt.pragma           P...
   transaction:    ( P...  ) -> @sqlt.transaction      P...
@@ -295,6 +294,18 @@ class @Dba extends Import_export_mixin()
   #---------------------------------------------------------------------------------------------------------
   do_unsafe:        ( f ) -> @sqlt.unsafeMode true; try return       f() finally @sqlt.unsafeMode false
   do_unsafe_async:  ( f ) -> @sqlt.unsafeMode true; try return await f() finally @sqlt.unsafeMode false
+
+
+  #=========================================================================================================
+  # USER-DEFINED FUNCTIONS
+  #---------------------------------------------------------------------------------------------------------
+  create_function: ( cfg ) ->
+    validate.dba_create_function_cfg ( cfg = { @types.defaults.dba_create_function_cfg..., cfg..., } )
+    { name
+      call
+      deterministic
+      varargs }     = cfg
+    return @sqlt.function name, { deterministic, varargs, }, call
 
 
   #=========================================================================================================

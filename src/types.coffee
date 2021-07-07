@@ -66,6 +66,14 @@ Dba                       = null
   # "@isa.boolean x.create":                ( x ) -> @isa.boolean x.create
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_create_function_cfg', tests:
+  "@isa.object x":                  ( x ) -> @isa.object x
+  "@isa.nonempty_text x.name":      ( x ) -> @isa.nonempty_text x.name
+  "@isa.function x.call":           ( x ) -> @isa.function x.call
+  "@isa.boolean x.deterministic":   ( x ) -> @isa.boolean x.deterministic
+  "@isa.boolean x.varargs":         ( x ) -> @isa.boolean x.varargs
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg', tests:
   "@isa.object x":                                ( x ) -> @isa.object x
   "@isa.ic_not_temp_schema x.schema":             ( x ) -> @isa.ic_not_temp_schema x.schema
@@ -232,6 +240,10 @@ Dba                       = null
     schema:     null
     path:       null
     format:     null
+  #.........................................................................................................
+  dba_create_function_cfg:
+    deterministic:  true
+    varargs:        false
   #.........................................................................................................
   dba_vacuum_atomically:
     schema:     null
