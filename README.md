@@ -510,3 +510,20 @@ For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, wh
   * [X] table-valued functions: `dba.create_table_function()`
   * [X] virtual tables: `dba.create_virtual_table()`
 
+* [ ] add simple facilities to construct basic SQL clauses and statements such as inserts, `values` clauses
+  &c. Syntax could use dollar, format, colon, name (`$X:name`) for named insertions and question mark,
+  format, colon (`?X:`) `""` for positional inseertions. These would have to be processed before
+  `dba.prepare sql` is called. The format parameter is optional and defaults to `I` for 'identifier', as
+  constructing statements with parametrized table and column names is the expected primary use case for
+  interpolation. Other values for format are `L` (for 'literal') and `V` (for 'values', i.e. round brackets
+  around a comma-delimited list of literals).
+
+  Examples:
+
+  ```coffee
+  dba.query "select $:col_a, $:col_b where $:col_b in $V:choices", \
+    { col_a: 'foo', col_b: 'bar', choices: [ 1, 2, 3, ], }
+  ```
+
+
+
