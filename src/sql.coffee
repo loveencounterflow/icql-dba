@@ -71,5 +71,5 @@ class @Sql
         when '', 'I'  then return @I value
         when 'L'      then return @L value
         when 'V'      then return @V value
-      throw new E.Dba_interpolation_format_unknown '^dba@320^', format
+      throw new E.Dba_interpolation_format_unknown '^dba@406^', format
   _interpolation_pattern: /(?<opener>[$?])(?<format>.?):(?<name>\w*)/g
