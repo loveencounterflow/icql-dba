@@ -524,7 +524,7 @@ For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, wh
   dba.query "select $:col_a, $:col_b where $:col_b in $V:choices", \
     { col_a: 'foo', col_b: 'bar', choices: [ 1, 2, 3, ], }
   dba.query "select ?:, ?: where ?: in ?V:", \
-    [ 'foo', 'bar', [ 1, 2, 3, ], ]
+    [ 'foo', 'bar', 'bar', [ 1, 2, 3, ], ]
   ```
 
 
