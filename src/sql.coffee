@@ -51,15 +51,25 @@ class @Sql
     throw new E.Dba_sql_value_error '^dba@404^', type, x
 
   #---------------------------------------------------------------------------------------------------------
-  X: ( x ) =>
+  V: ( x ) =>
     throw new E.Dba_sql_not_a_list_error '^dba@405^', type, x unless ( type = type_of x ) is 'list'
     return '( ' + ( ( @L e for e in x ).join ', ' ) + ' )'
 
-  # #---------------------------------------------------------------------------------------------------------
-  # interpolate: ( sql, Q ) -> sql.replace @_interpolation_pattern, ( $0, $1 ) => @as_sql Q[ $1 ]
-  #     # try
-  #     #   return @as_sql Q[ $1 ]
-  #     # catch error
-  #     #   throw new E.Dba_error \
-  #     #     "µ773 when trying to express placeholder #{rpr $1} as SQL literal, an error occurred: #{rpr error.message}"
-  # _interpolation_pattern: /// \$ (?: ( .+? ) \b | \{ ( [^}]+ ) \} ) ///g
+  #---------------------------------------------------------------------------------------------------------
+  interpolate: ( sql, values ) ->
+    idx = -1
+    return sql.replace @_interpolation_pattern, ( $0, opener, format, name ) =>
+      idx++
+      switch opener
+        when '$'
+          validate.nonempty_text name
+          key = name
+        when '?'
+          key = idx
+      value = values[ key ]
+      switch format
+        when '', 'I'  then return @I value
+        when 'L'      then return @L value
+        when 'V'      then return @V value
+      throw new E.Dba_interpolation_format_unknown '^dba@320^', format
+  _interpolation_pattern: /(?<opener>[$?])(?<format>.?):(?<name>\w*)/g

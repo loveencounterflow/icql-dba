@@ -61,6 +61,8 @@ class @Dba_argument_not_allowed      extends @Dba_error
   constructor: ( ref, name, value ) -> super ref, "argument #{name} not allowed, got #{rpr value}"
 class @Dba_empty_csv                 extends @Dba_error
   constructor: ( ref, path )        -> super ref, "no CSV records found in file #{path}"
+class @Dba_interpolation_format_unknown extends @Dba_error
+  constructor: ( ref, format )       -> super ref, "unknown interpolation format #{rpr format}"
 
 ### TAINT replace with more specific error, like below ###
 class @Dba_format_unknown extends @Dba_error
