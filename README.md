@@ -530,4 +530,11 @@ For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, wh
 * [X] enable 'concurrent UDFs' (user-defined functions that execute SQL statements)
   *  From v7.1.0 on ICQL/DBA uses a recent algamation from https://sqlite.com/download.html with
      `SQLITE_USE_URI` set to `1` so concurrent UDFs are possible.
+* [ ] make it so that RAM DBs may be opened with a `name` parameter in `cfg` that is then used to build a
+  file URL like `file:#{name}?mode=memory&cache=shared` where `name` becomes the identifier for shared
+  memory across all `better-sqlite3` instances running in the same process.
+  * [ ] where a RAM DB is opened without a `name` parameter in `cfg`, assign a randomly chosen name like
+    `rnd_4f333589dc3ae799`; this can be recovered from a `dba` instance so that a second conncetion can be
+    instantiated.
+  * [ ] to make results more predictable, deprecate use of `path`s like `''` and `':memory:'`.
 
