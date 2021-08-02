@@ -410,7 +410,7 @@ class @Dba extends Import_export_mixin()
   #---------------------------------------------------------------------------------------------------------
   is_empty: ( cfg ) ->
     validate.dba_is_empty_cfg ( cfg = { @types.defaults.dba_is_empty_cfg..., cfg..., } )
-    return ( has_schema = @_is_empty_schema @sql.I schema ) unless name?
+    return ( has_schema = @_is_empty_schema @sql.I cfg.schema ) unless name?
     throw new E.Dba_not_implemented '^dba@310^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
 
   #---------------------------------------------------------------------------------------------------------
