@@ -5,7 +5,8 @@
   "main": "lib/main.js",
   "scripts": {
     "build": "coffee --map -o lib -c src",
-    "test": "echo see 'https://github.com/loveencounterflow/hengist/tree/master/dev/datom'"
+    "test": "echo see 'https://github.com/loveencounterflow/hengist/tree/master/dev/datom'",
+    "preinstall": "npm install better-sqlite3@'^7.4.3' --no-save --build-from-source --sqlite3=\"$(pwd)/sqlite-snapshot-202107191400\""
   },
   "repository": {
     "type": "git",
@@ -24,7 +25,6 @@
   },
   "homepage": "https://github.com/loveencounterflow/icql-dba#readme",
   "dependencies": {
-    "better-sqlite3": "7.4.3",
     "cnd": "9.2.2",
     "csv-parser": "^3.0.0",
     "hollerith-codec": "3.0.1",
