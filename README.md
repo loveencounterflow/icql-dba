@@ -527,5 +527,7 @@ For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, wh
     [ 'foo', 'bar', 'bar', [ 1, 2, 3, ], ]
   ```
 
-
+* [X] enable 'concurrent UDFs' (user-defined functions that execute SQL statements)
+  *  From v7.1.0 on ICQL/DBA uses a recent algamation from https://sqlite.com/download.html with
+     `SQLITE_USE_URI` set to `1` so concurrent UDFs are possible.
 
