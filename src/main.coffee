@@ -522,12 +522,10 @@ class @Dba extends Import_export_mixin()
     #.......................................................................................................
     unless @_initialized
       if schema is 'main'
-        # @sqlt = new_bsqlt3_connection path, @_bsqlt3_cfg
         def @, 'sqlt', enumerable: false, configurable: false, value: new_bsqlt3_connection path, @_bsqlt3_cfg
         @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, } ### TAINT use API call ###
         return null
-      ignore = @sqlt
-      # @sqlt = new_bsqlt3_connection '', @_bsqlt3_cfg
+      ignore = @sqlt ### NOTE retrieve dynamic attribute for side effect, ignore its value ###
     #.......................................................................................................
     if @has { schema, }
       throw new E.Dba_schema_exists '^dba@312^', schema
