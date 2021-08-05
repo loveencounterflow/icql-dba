@@ -81,7 +81,7 @@ class @Dba extends Import_export_mixin()
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  @initialize_sqlt ( sqlt ) ->
+  initialize_sqlt: ( sqlt ) ->
     sqlt.pragma "foreign_keys = true;"
     return null
 
