@@ -73,10 +73,17 @@ class @Dba extends Import_export_mixin()
     @_initialized = false
     #.......................................................................................................
     def_oneoff @, 'sqlt', =>
+      connection    = new_bsqlt3_connection '', @_bsqlt3_cfg
+      @initialize_sqlt connection
       @_initialized = true
-      return new_bsqlt3_connection '', @_bsqlt3_cfg
+      return connection
     #.......................................................................................................
     return undefined
+
+  #---------------------------------------------------------------------------------------------------------
+  @initialize_sqlt ( sqlt ) ->
+    sqlt.pragma "foreign_keys = true;"
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
@@ -514,7 +521,7 @@ class @Dba extends Import_export_mixin()
     If `@_initialized` is `false`, then a new `better-sqlite3` instance with a `main` schema will be
     created;
       * if the `schema` passed in is `main`, it will be opened from the `path` given.
-      * If `schema` is not `main`, `amin` will be opened as an empty RAM DB, and `schema` will be attached
+      * If `schema` is not `main`, `main` will be opened as an empty RAM DB, and `schema` will be attached
         from the file given.
     ###
     validate.dba_attach_cfg ( cfg = { @types.defaults.dba_attach_cfg..., cfg..., } )
@@ -522,7 +529,9 @@ class @Dba extends Import_export_mixin()
     #.......................................................................................................
     unless @_initialized
       if schema is 'main'
-        def @, 'sqlt', enumerable: false, configurable: false, value: new_bsqlt3_connection path, @_bsqlt3_cfg
+        connection = new_bsqlt3_connection path, @_bsqlt3_cfg
+        @initialize_sqlt connection
+        def @, 'sqlt', enumerable: false, configurable: false, value: connection
         @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, } ### TAINT use API call ###
         return null
       ignore = @sqlt ### NOTE retrieve dynamic attribute for side effect, ignore its value ###
