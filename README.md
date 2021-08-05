@@ -32,6 +32,7 @@
   - [CSV](#csv)
 - [API](#api)
   - [User-Defined Functions](#user-defined-functions)
+  - [Connection Initialization](#connection-initialization)
 - [SQL Submodule](#sql-submodule)
 - [Rave Reviews (albeit for the concept, not this software)](#rave-reviews-albeit-for-the-concept-not-this-software)
 - [Similar Projects](#similar-projects)
@@ -397,6 +398,25 @@ around an SQLite database.)
 * **`dba.create_table_function: ( cfg ) ->`** table-valued functions
 * **`dba.create_virtual_table: ( cfg ) ->`** virtual tables
 
+## Connection Initialization
+
+Right after a connection to an SQLite DB has been instantiated, an initialization method `@initialize_sqlt
+connection` is called. By overriding this method in a derived class, one can configure the connection e.g.
+by calling `better-sqlite3`'s `pragme()` method. When doing so, *observe that the call happens **before**
+the `dba.sqlt` attribute is set*, so *avoid to access the `dba` (`this`/`@`) instance*. You're on the safe
+side if you restrict yourself to accessing the first argument to `initialize_sqlt()`. The default
+implementation of the method looks like this:
+
+```coffee
+initialize_sqlt: ( sqlt ) ->
+  sqlt.pragma "foreign_keys = true;"
+  return null
+```
+
+In your own implementation, **do not forget to call `super sqlt` to get the default configuration for the
+connection**.
+
+
 # SQL Submodule
 
 ```coffee
@@ -537,4 +557,6 @@ For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, wh
     `rnd_4f333589dc3ae799`; this can be recovered from a `dba` instance so that a second conncetion can be
     instantiated.
   * [ ] to make results more predictable, deprecate use of `path`s like `''` and `':memory:'`.
+
+* [X] implement `dba.initialize_sqlt()`
 
