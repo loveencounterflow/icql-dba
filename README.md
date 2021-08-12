@@ -34,7 +34,7 @@
   - [User-Defined Functions](#user-defined-functions)
   - [Connection Initialization](#connection-initialization)
 - [SQL Submodule](#sql-submodule)
-- [ICQL-DBA Extensions](#icql-dba-extensions)
+- [ICQL-DBA Plugins](#icql-dba-plugins)
 - [Rave Reviews (albeit for the concept, not this software)](#rave-reviews-albeit-for-the-concept-not-this-software)
 - [Similar Projects](#similar-projects)
 - [To Do](#to-do)
@@ -436,9 +436,9 @@ sql     = SQL"select * from #{I table} where x == #{L value};"
 * `L`: format a value as an SQL literal
 * `X`: format a flat list as an [SQL row value](https://www.sqlite.org/rowvalue.html) (a.k.a. a vector)
 
-# ICQL-DBA Extensions
+# ICQL-DBA Plugins
 
-see [extensions/README.md](extensions/README.md)
+see [README-plugins.md](README-plugins.md)
 
 # Rave Reviews (albeit for the concept, not this software)
 
