@@ -16,7 +16,25 @@
 
 * all objects created with `prefix`, ex. table `variables` of `icql-dba-vars` created as `v_variables`
   by default (i.e. `v_` is the default prefix)
-* must provide existing `Dba` instance: `new Dbx { dba, prefix, }`
+* when instantiating, *must* provide existing `Dba` instance and an option prefix (a string that will be
+  prepended to the names of all DB objects that the plugin creates)
+* typical usage:
+
+  ```coffee
+  { Dbx } = require 'icql-dba-exiting'
+
+  class Foo_user
+    constructor: ( cfg ) ->
+      @cfg          = cfg
+      @cfg.prefix  ?= 'foo'
+      @dba          = new Dba cfg
+      @dbx          = new Dbx { dba: @dba, prefix, }
+      return undefined
+  ```
+
+* plugins (should) never depend on `icql-dba`, consumers must always 'bring their own'
+* plugins *may* extend class `Dba_plugins`
+
 
 
 
