@@ -34,6 +34,7 @@
   - [User-Defined Functions](#user-defined-functions)
   - [Connection Initialization](#connection-initialization)
 - [SQL Submodule](#sql-submodule)
+- [ICQL-DBA Extensions](#icql-dba-extensions)
 - [Rave Reviews (albeit for the concept, not this software)](#rave-reviews-albeit-for-the-concept-not-this-software)
 - [Similar Projects](#similar-projects)
 - [To Do](#to-do)
@@ -435,6 +436,9 @@ sql     = SQL"select * from #{I table} where x == #{L value};"
 * `L`: format a value as an SQL literal
 * `X`: format a flat list as an [SQL row value](https://www.sqlite.org/rowvalue.html) (a.k.a. a vector)
 
+# ICQL-DBA Extensions
+
+see [extensions/README.md](extensions/README.md)
 
 # Rave Reviews (albeit for the concept, not this software)
 
@@ -559,4 +563,31 @@ For the *concept* of using in-memory SQLite DBs (*not* specifically ICQL-DBA, wh
   * [ ] to make results more predictable, deprecate use of `path`s like `''` and `':memory:'`.
 
 * [X] implement `dba.initialize_sqlt()`
+* [ ] remove dependency on `hollerith-codec`, replace with simpler, faster implementation, publish as
+  `icql-dba-vnr`.
+* [ ] consider to replace `tempy` with a leaner module:
 
+```
+npx howfat -r table icql-dba
+icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
+╭───────────────────────┬──────────────┬──────────┬───────╮
+│ Name                  │ Dependencies │     Size │ Files │
+├───────────────────────┼──────────────┼──────────┼───────┤
+│ hollerith-codec@3.0.1 │            3 │ 967.28kb │    91 │
+├───────────────────────┼──────────────┼──────────┼───────┤
+│ tempy@1.0.1           │           50 │  919.3kb │   396 │
+├───────────────────────┼──────────────┼──────────┼───────┤
+│ intertype@7.6.7       │            1 │ 509.95kb │    41 │
+├───────────────────────┼──────────────┼──────────┼───────┤
+│ cnd@9.2.2             │            1 │ 270.78kb │    38 │
+├───────────────────────┼──────────────┼──────────┼───────┤
+│ mysql-tokenizer@1.0.7 │            0 │   98.6kb │    15 │
+├───────────────────────┼──────────────┼──────────┼───────┤
+│ n-readlines@1.0.3     │            0 │  96.01kb │    16 │
+├───────────────────────┼──────────────┼──────────┼───────┤
+│ csv-parser@3.0.0      │            1 │  58.66kb │    29 │
+├───────────────────────┼──────────────┼──────────┼───────┤
+│ letsfreezethat@3.1.0  │            0 │  40.27kb │     8 │
+╰───────────────────────┴──────────────┴──────────┴───────╯
+
+```
