@@ -233,6 +233,11 @@ Dba                       = null
   "@isa.nonempty_text x.name":              ( x ) -> @isa_optional.ic_name x.name
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_clear_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba_walk_objects_cfg', tests:
   "@isa.object x":                          ( x ) -> @isa.object x
   "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
@@ -366,13 +371,12 @@ Dba                       = null
   dba_is_ram_db_cfg:
     schema:       null
   #.........................................................................................................
-  dba_walk_objects_cfg:
+  dba_clear_cfg:
     schema:       null
-    _ordering:    null
   #.........................................................................................................
   dba_walk_objects_cfg:
     schema:       null
-    null:         null
+    _ordering:    null
   #.........................................................................................................
   extensions_and_formats:
     db:           'sqlite'

@@ -474,19 +474,20 @@ class @Dba extends Import_export_mixin()
   #=========================================================================================================
   # DB STRUCTURE MODIFICATION
   #---------------------------------------------------------------------------------------------------------
-  # ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
-  # clear: ( cfg ) ->
-  #   validate.ic_schema schema
-  #   schema_i      = @sql.I schema
-  #   R             = 0
-  #   fk_state      = @_get_foreign_key_state()
-  #   @_set_foreign_key_state off
-  #   for { type, name, } in @list @walk_objects { schema, _ordering: 'drop', }
-  #     statement = "drop #{type} if exists #{@sql.I name};"
-  #     @execute statement
-  #     R += +1
-  #   @_set_foreign_key_state fk_state
-  #   return R
+  ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
+  clear: ( cfg ) ->
+    validate.dba_clear_cfg ( cfg = { @types.defaults.dba_clear_cfg..., cfg..., } )
+    { schema, }   = cfg
+    schema_i      = @sql.I schema
+    R             = 0
+    fk_state      = @_get_foreign_key_state()
+    @_set_foreign_key_state off
+    for { type, name, } in @list @walk_objects { schema, _ordering: 'drop', }
+      statement = "drop #{type} if exists #{@sql.I name};"
+      @execute statement
+      R += +1
+    @_set_foreign_key_state fk_state
+    return R
 
   #---------------------------------------------------------------------------------------------------------
   _open_file_db_in_ram: ( cfg ) ->
