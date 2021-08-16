@@ -591,3 +591,9 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
 ╰───────────────────────┴──────────────┴──────────┴───────╯
 
 ```
+
+* add export in ASCII/Unicode tabular format for overview
+* add automatic deletion of tables, views, indexes
+* add web server plugin
+
+
