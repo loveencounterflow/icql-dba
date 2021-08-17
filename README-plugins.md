@@ -18,6 +18,18 @@
   by default (i.e. `v_` is the default prefix)
 * when instantiating, *must* provide existing `Dba` instance and an option prefix (a string that will be
   prepended to the names of all DB objects that the plugin creates)
+  * This API detail may be conceptually compared to the way one instantiates typed arrays in JavaScript:
+
+    ```js
+    const sab = new SharedArrayBuffer(1024);
+    const ta = new Uint8Array(sab);
+    ```
+
+    Here, `sab` provides the underlying storage for data, while the `ta` (`TypedArray`) object defines the
+    particular formatting of the raw bytes. Similarly, `dba` provides the underlying infrastructure while
+    `foo = new Foo_plugin { dba, }` provides a specific structuring in terms of tables, views, UDFs, and API
+    calls.
+
 * When using ICQL/DBA plugins in one's own ICQL/DBA-consuming classes, it is probably a good idea to chain
   prefixes such that in addition to the prefix adopted by one's own class, each plugin gets its separate
   corner in the global namespace that is an SQLite database. Doling out separate prefixes minimizes the
