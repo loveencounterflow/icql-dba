@@ -33,15 +33,7 @@ new_bsqlt3_connection     = require 'better-sqlite3'
 PATH                      = require 'path'
 TMP                       = require 'tempy'
 { Import_export_mixin }   = require './import-export-mixin'
-def                       = Object.defineProperty
-def_oneoff                = ( object, name, method ) ->
-  def object, name,
-    enumerable:   true
-    configurable: true
-    get: ->
-      R = method()
-      def object, name, enumerable: false, configurable: false, value: R
-      return R
+guy                       = require 'guy'
 
 
 
@@ -54,9 +46,9 @@ class @Dba extends Import_export_mixin()
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
-    def @, 'types',       { enumerable: false, value: types, }
-    def @, '_statements', { enumerable: false, value: {}, }
-    def @, 'sql',         { enumerable: false, value: ( new ( require './sql' ).Sql() ), }
+    guy.props.def @, 'types',       { enumerable: false, value: types, }
+    guy.props.def @, '_statements', { enumerable: false, value: {}, }
+    guy.props.def @, 'sql',         { enumerable: false, value: ( new ( require './sql' ).Sql() ), }
     @_schemas     = freeze {}
     @cfg          = freeze { @types.defaults.dba_constructor_cfg..., cfg..., }
     validate.dba_constructor_cfg @cfg
@@ -72,7 +64,7 @@ class @Dba extends Import_export_mixin()
       # verbose:        ### TAINT to be done ###
     @_initialized = false
     #.......................................................................................................
-    def_oneoff @, 'sqlt', =>
+    guy.props.def_oneoff @, 'sqlt', {}, =>
       connection    = new_bsqlt3_connection '', @_bsqlt3_cfg
       @initialize_sqlt connection
       @_initialized = true
@@ -532,7 +524,7 @@ class @Dba extends Import_export_mixin()
       if schema is 'main'
         connection = new_bsqlt3_connection path, @_bsqlt3_cfg
         @initialize_sqlt connection
-        def @, 'sqlt', enumerable: false, configurable: false, value: connection
+        guy.props.def @, 'sqlt', enumerable: false, configurable: false, value: connection
         @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, } ### TAINT use API call ###
         return null
       ignore = @sqlt ### NOTE retrieve dynamic attribute for side effect, ignore its value ###
