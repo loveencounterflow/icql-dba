@@ -469,10 +469,13 @@ class @Dba extends Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   field_names_of: ( cfg ) ->
+    # try
     validate.dba_field_names_of_cfg ( cfg = { @types.defaults.dba_field_names_of_cfg..., cfg..., } )
     { name, schema, } = cfg
     schema_i          = @sql.I schema
     return ( d.name for d from @query SQL"select name from #{schema_i}.pragma_table_info( $name );", { name, } )
+    # catch error
+    #   throw new E.Dba_sqlite_error '^dba@111^', error
 
   #---------------------------------------------------------------------------------------------------------
   _dependencies_of: ( table, schema = 'main' ) ->
