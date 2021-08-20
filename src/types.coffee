@@ -250,6 +250,18 @@ Dba                       = null
   "@isa.nonempty_text x.name":              ( x ) -> @isa_optional.ic_name x.name
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_fields_of_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+  "@isa.nonempty_text x.name":              ( x ) -> @isa_optional.ic_name x.name
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_field_names_of_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+  "@isa.nonempty_text x.name":              ( x ) -> @isa_optional.ic_name x.name
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba', tests:
   "x instanceof Dba":                     ( x ) -> x instanceof ( Dba ?= ( require './main' ).Dba )
 
@@ -394,6 +406,14 @@ Dba                       = null
     csv:          'csv'
   #.........................................................................................................
   dba_type_of_cfg:
+    schema:       null
+    name:         null
+  #.........................................................................................................
+  dba_fields_of_cfg:
+    schema:       null
+    name:         null
+  #.........................................................................................................
+  dba_field_names_of_cfg:
     schema:       null
     name:         null
 

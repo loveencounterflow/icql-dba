@@ -451,13 +451,28 @@ class @Dba extends Import_export_mixin()
     return row.type
 
   #---------------------------------------------------------------------------------------------------------
-  column_types: ( table ) ->
-    R = {}
-    ### TAINT we apparently have to call the pragma in this roundabout fashion since SQLite refuses to
-    accept placeholders in that statement: ###
-    for row from @query @interpolate "pragma table_info( $table );", { table, }
-      R[ row.name ] = row.type
+  fields_of: ( cfg ) ->
+    validate.dba_fields_of_cfg ( cfg = { @types.defaults.dba_fields_of_cfg..., cfg..., } )
+    { name, schema, } = cfg
+    schema_i          = @sql.I schema
+    R                 = {}
+    for d from @query SQL"select * from #{schema_i}.pragma_table_info( $name );", { name, }
+      # { cid: 0, name: 'id', type: 'integer', notnull: 1, dflt_value: null, pk: 1 }
+      type = if d.type is '' then null else d.type
+      R[ d.name ] = {
+        idx:      d.cid
+        type:     type
+        optional: !d.notnull
+        default:  d.dflt_value
+        is_pk:    !!d.pk }
     return R
+
+  #---------------------------------------------------------------------------------------------------------
+  field_names_of: ( cfg ) ->
+    validate.dba_field_names_of_cfg ( cfg = { @types.defaults.dba_field_names_of_cfg..., cfg..., } )
+    { name, schema, } = cfg
+    schema_i          = @sql.I schema
+    return ( d.name for d from @query SQL"select name from #{schema_i}.pragma_table_info( $name );", { name, } )
 
   #---------------------------------------------------------------------------------------------------------
   _dependencies_of: ( table, schema = 'main' ) ->
