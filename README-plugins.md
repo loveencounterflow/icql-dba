@@ -8,6 +8,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Notes](#notes)
+- [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -53,6 +54,13 @@
 
 * plugins must never never depend on `icql-dba`, consumers must always 'bring their own'
 * plugins *may* extend class `Dba_plugins`
+
+# To Do
+
+* provide list of available plugins
+* use staggered object name prefixes in plugins to minimize danger of naming collisions
+* add web server plugin
+* add plugin to export in ASCII/Unicode tabular format for overview
 
 
 
