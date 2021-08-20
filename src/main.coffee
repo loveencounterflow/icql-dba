@@ -439,10 +439,17 @@ class @Dba extends Import_export_mixin()
     throw new E.Dba_schema_unknown '^dba@311^', schema
 
   #---------------------------------------------------------------------------------------------------------
-  type_of: ( name, schema = 'main' ) ->
-    for row from @catalog()
-      return row.type if row.name is name
-    return null
+  type_of: ( cfg ) ->
+    validate.dba_type_of_cfg ( cfg = { @types.defaults.dba_type_of_cfg..., cfg..., } )
+    { name, schema, } = cfg
+    if name in [ 'sqlite_schema', 'sqlite_master', ]
+      return 'table'
+    row = @first_row @query SQL"""
+      select type from #{@sql.I schema}.sqlite_schema
+      where name = $name
+      limit 1;""", { name, }
+    throw new E.Dba_object_unknown '^dba@311^', schema, name unless row?
+    return row.type
 
   #---------------------------------------------------------------------------------------------------------
   column_types: ( table ) ->

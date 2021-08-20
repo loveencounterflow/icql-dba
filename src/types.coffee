@@ -244,6 +244,12 @@ Dba                       = null
   "x._ordering is optionally 'drop'":       ( x ) -> ( not x._ordering? ) or ( x._ordering is 'drop' )
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_type_of_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+  "@isa.nonempty_text x.name":              ( x ) -> @isa_optional.ic_name x.name
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba', tests:
   "x instanceof Dba":                     ( x ) -> x instanceof ( Dba ?= ( require './main' ).Dba )
 
@@ -386,7 +392,10 @@ Dba                       = null
     txt:          'tsv'
     tsv:          'tsv'
     csv:          'csv'
-
+  #.........................................................................................................
+  dba_type_of_cfg:
+    schema:       null
+    name:         null
 
 #-----------------------------------------------------------------------------------------------------------
 @_import_formats = _import_formats = new Set Object.keys @defaults.extensions_and_formats

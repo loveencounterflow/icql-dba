@@ -29,6 +29,8 @@ class @Dba_schema_exists             extends @Dba_error
   constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} already exists"
 class @Dba_schema_unknown            extends @Dba_error
   constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} does not exist"
+class @Dba_object_unknown            extends @Dba_error
+  constructor: ( ref, schema, name )-> super ref, "object #{rpr schema + '.' + name} does not exist"
 class @Dba_schema_nonempty           extends @Dba_error
   constructor: ( ref, schema )      -> super ref, "schema #{rpr schema} isn't empty"
 class @Dba_schema_not_allowed        extends @Dba_error
