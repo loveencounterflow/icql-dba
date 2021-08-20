@@ -34,7 +34,7 @@ PATH                      = require 'path'
 TMP                       = require 'tempy'
 { Import_export_mixin }   = require './import-export-mixin'
 guy                       = require 'guy'
-
+SQL                       = String.raw
 
 
 
@@ -385,15 +385,15 @@ class @Dba extends Import_export_mixin()
     parts     = []
     #.......................................................................................................
     ### TAINT use API ###
-    for row from @query "select seq, name, file as path from pragma_database_list order by seq;"
+    for row from @query SQL"select seq, name, file as path from pragma_database_list order by seq;"
       schemas[ row.name ] = row
     #.......................................................................................................
     for schema, d of schemas
       schema_i    = @sql.I  schema
-      parts.push """select
       schema_l    = @sql.L  schema
+      parts.push SQL"""select
           #{d.seq} as seq,
-          #{schema_s} as schema,
+          #{schema_l} as schema,
           name  as name,
           type  as type,
           sql   as sql
