@@ -262,6 +262,21 @@ Dba                       = null
   "@isa.nonempty_text x.name":              ( x ) -> @isa_optional.ic_name x.name
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'sql_limit', ( x ) ->
+  return true unless x?
+  return true if @isa.nonempty_text x
+  return true if @isa.cardinal x
+  return false
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_dump_relation_cfg', tests:
+  "@isa.object x":                          ( x ) -> @isa.object x
+  "@isa.ic_schema x.schema":                ( x ) -> @isa.ic_schema x.schema
+  "@isa.nonempty_text x.name":              ( x ) -> @isa_optional.ic_name x.name
+  "@isa.nonempty_text x.order_by":          ( x ) -> @isa.nonempty_text x.order_by
+  "@isa.sql_limit x.limit":                 ( x ) -> @isa.sql_limit x.limit
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba', tests:
   "x instanceof Dba":                     ( x ) -> x instanceof ( Dba ?= ( require './main' ).Dba )
 
@@ -416,6 +431,12 @@ Dba                       = null
   dba_field_names_of_cfg:
     schema:       null
     name:         null
+  #.........................................................................................................
+  dba_dump_relation_cfg:
+    schema:       null
+    name:         null
+    order_by:     'random()'
+    limit:        10
 
 #-----------------------------------------------------------------------------------------------------------
 @_import_formats = _import_formats = new Set Object.keys @defaults.extensions_and_formats

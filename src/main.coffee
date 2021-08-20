@@ -478,6 +478,19 @@ class @Dba extends Import_export_mixin()
     #   throw new E.Dba_sqlite_error '^dba@111^', error
 
   #---------------------------------------------------------------------------------------------------------
+  dump_relation: ( cfg ) ->
+    validate.dba_dump_relation_cfg ( cfg = { @types.defaults.dba_dump_relation_cfg..., cfg..., } )
+    { schema
+      name
+      order_by
+      limit         } = cfg
+    schema_i          = @sql.I schema
+    qname_i         = schema_i + '.' + @sql.I name
+    limit           = if cfg.limit is null then 1e9 else cfg.limit
+    order_by       ?= 'random()'
+    return @query SQL"select * from #{qname_i} order by #{order_by} limit #{limit};"
+
+  #---------------------------------------------------------------------------------------------------------
   _dependencies_of: ( table, schema = 'main' ) ->
     return @query "pragma #{@sql.I schema}.foreign_key_list( #{@sql.I table} )"
 
