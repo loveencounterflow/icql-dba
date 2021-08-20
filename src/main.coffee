@@ -365,7 +365,6 @@ class @Dba extends Import_export_mixin()
     ordering    = cfg._ordering
     return @_walk_all_objects() unless schema?
     schema_i    = @sql.I  schema
-    schema_s    = @sql.L  schema
     ordering_x  = if ( ordering is 'drop' ) then 'desc' else 'asc'
     seq         = @first_value @query \
       @sql.SQL"select seq from pragma_database_list where name = #{@sql.L schema};"
@@ -391,8 +390,8 @@ class @Dba extends Import_export_mixin()
     #.......................................................................................................
     for schema, d of schemas
       schema_i    = @sql.I  schema
-      schema_s    = @sql.L  schema
       parts.push """select
+      schema_l    = @sql.L  schema
           #{d.seq} as seq,
           #{schema_s} as schema,
           name  as name,
