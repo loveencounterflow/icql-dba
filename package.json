@@ -33,6 +33,6 @@
     "letsfreezethat": "^3.1.0",
     "mysql-tokenizer": "^1.0.7",
     "n-readlines": "^1.0.1",
-    "tempy": "^2.0.0"
+    "tempy": "^1.0.1"
   }
 }
