@@ -403,7 +403,7 @@ around an SQLite database.)
 
 Right after a connection to an SQLite DB has been instantiated, an initialization method `@initialize_sqlt
 connection` is called. By overriding this method in a derived class, one can configure the connection e.g.
-by calling `better-sqlite3`'s `pragme()` method. When doing so, *observe that the call happens **before**
+by calling `better-sqlite3`'s `pragma()` method. When doing so, *observe that the call happens **before**
 the `dba.sqlt` attribute is set*, so *avoid to access the `dba` (`this`/`@`) instance*. You're on the safe
 side if you restrict yourself to accessing the first argument to `initialize_sqlt()`. The default
 implementation of the method looks like this:
