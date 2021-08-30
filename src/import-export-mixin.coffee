@@ -57,6 +57,13 @@ E                         = require './errors'
   _extension_from_path: ( path ) -> if ( R = PATH.extname path ) is '' then null else R[ 1 .. ]
   _format_from_path:    ( path ) -> @_formats[ @._extension_from_path path ] ? null
 
+  #---------------------------------------------------------------------------------------------------------
+  _is_sqlite3_db: ( path ) ->
+    # validate.nonempty_text path
+    buffer  = Buffer.alloc 16
+    fd      = FS.openSync path
+    FS.readSync fd, buffer
+    return ( buffer.toString 'utf-8' ) is 'SQLite format 3\x00'
 
   #---------------------------------------------------------------------------------------------------------
   _import_db: ( cfg ) ->
