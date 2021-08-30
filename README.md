@@ -594,6 +594,8 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
 
 * add automatic deletion of tables, views, indexes
 * consider to always use `dba.pragma SQL"journal_mode=memory"`, add `cfg` property
-
-
-
+* [ ] implement context handler `with_ram_db: ( f ) ->` that copies DB to RAM, calls `f()`, and finally
+  copies DB back to file.
+  * alternatively, `dba.do { ram: true, foreign_keys: false, unsafe: true, }, -> ...`
+* [X] set the allowable number of attached DBs to 125 (`SQLITE_MAX_ATTACHED=125` in `build-sqlite3`; also
+  see ["Maximum Number Of Attached Databases"](https://sqlite.org/limits.html))
