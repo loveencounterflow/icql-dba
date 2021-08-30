@@ -3,6 +3,8 @@
 # Below lines copied and adjusted from https://github.com/JoshuaWise/better-sqlite3, filee
 # `/deps/download.sh`:
 
+# for SQLITE_MAX_ATTACHED see https://sqlite.org/limits.html "Maximum Number Of Attached Databases"
+
 DEFINES="
 SQLITE_DQS=0
 SQLITE_LIKE_DOESNT_MATCH_BLOBS
@@ -39,6 +41,7 @@ HAVE_INT32_T=1
 HAVE_UINT8_T=1
 HAVE_UINT16_T=1
 HAVE_UINT32_T=1
+SQLITE_MAX_ATTACHED=125
 "
 
 export CFLAGS=`echo $(echo "$DEFINES" | sed -e "/^\s*$/d" -e "s/^/-D/")`
