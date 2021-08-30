@@ -606,5 +606,6 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
   see ["Maximum Number Of Attached Databases"](https://sqlite.org/limits.html))
 * [ ] enable to open directories that contain multiple file-based SQLite DBs; schemas could be named after
   (portions of) filenames
-
+* [X] detect format of SQLite3 files with `_is_sqlite3_db()`: [first 16 bytes should contain `SQLite format
+  3\000`](https://sqlite.org/fileformat.html)
 
