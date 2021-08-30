@@ -168,6 +168,11 @@ dba = new DBA.Dba()
 
 ### Create DB with `open()`
 
+`open()` uses the SQLite SQL `attach` extension. In many SQLite3 installations, the maximum number of
+attachable DBs (schemas) is limited to 10; however, the SQLite adapter that is shipped with ICQL-DBA allows
+to open up to 125 schemas. This upgraded number is intended to allow for a DB design where a data
+application is composed out of a fair number of schemas that each reside in a separate file.
+
 #### New or Existing File-Based DB with Continuous Persistency
 
 * `path` must be a string that is a valid file system path (up to the parent directory); its final component
@@ -599,3 +604,7 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
   * alternatively, `dba.do { ram: true, foreign_keys: false, unsafe: true, }, -> ...`
 * [X] set the allowable number of attached DBs to 125 (`SQLITE_MAX_ATTACHED=125` in `build-sqlite3`; also
   see ["Maximum Number Of Attached Databases"](https://sqlite.org/limits.html))
+* [ ] enable to open directories that contain multiple file-based SQLite DBs; schemas could be named after
+  (portions of) filenames
+
+
