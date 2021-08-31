@@ -684,8 +684,19 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
           call } = cfg
         # return function
       ```
+* [ ] *this item replaces the above*—implement
 
+  * `dba.create_with_transaction_do()` (a contextualizer)
+  * `dba.with_transaction_do()` (a context handler)
 
+  The contextualizer takes a function and returns a function that, when called, will be called with the
+  desired context (i.e. in this case a transaction that will be opened and afterwards committed). The
+  context handler uses the contextualizer to produce a one-off contextualized function that is then
+  immediately called. The contextualizer is implemented with `better-sqlite3`'s `transaction()` method.
 
+  Note that the `transaction()` method does not currently support async functions; therefore, we don't
+  support those, either; this restriction may be lifted in a future version.
+
+* [ ] remove references to `hollerith-codec`, `encode()`, `decode` (replaced by `icql-dba-hollerith`)
 
 
