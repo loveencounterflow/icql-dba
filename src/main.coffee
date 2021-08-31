@@ -57,12 +57,14 @@ class @Dba extends Functions_mixin Import_export_mixin()
       fileMustExist:  not @cfg.create
       timeout:        @cfg.timeout }
       # verbose:        ### TAINT to be done ###
-    @_initialized = false
+    @_state = freeze {
+      in_unsafe_mode:   false
+      initialized:      false }
     #.......................................................................................................
     guy.props.def_oneoff @, 'sqlt', {}, =>
       connection    = new_bsqlt3_connection '', @_bsqlt3_cfg
       @initialize_sqlt connection
-      @_initialized = true
+      @_state = lets @_state, ( d ) -> d.initialized = true
       return connection
     #.......................................................................................................
     return undefined
@@ -464,7 +466,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
     schema. Finally, detach the file schema. Ensure the `path` given is kept around as the `saveas`
     (implicit) path to be used for eventual persistency (`dba.save()`). ###
     ### TAINT validate? ###
-    schema_main_allowed = not @_initialized
+    schema_main_allowed = not @_state.initialized
     { path, schema, saveas, } = cfg
     return @_attach { schema, path, saveas, } if @types.isa.dba_ram_path path
     #.......................................................................................................
@@ -485,9 +487,9 @@ class @Dba extends Functions_mixin Import_export_mixin()
     `_attach()` will fail
       * if `schema` already exists, or
       * if the maximum number of schemas (10 by default) has already been attached, or
-      * if the schema name is `main` and the DBA is `@_initialized`.
+      * if the schema name is `main` and the DBA is `@_state.initialized`.
 
-    If `@_initialized` is `false`, then a new `better-sqlite3` instance with a `main` schema will be
+    If `@_state.initialized` is `false`, then a new `better-sqlite3` instance with a `main` schema will be
     created;
       * if the `schema` passed in is `main`, it will be opened from the `path` given.
       * If `schema` is not `main`, `main` will be opened as an empty RAM DB, and `schema` will be attached
@@ -496,7 +498,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
     @types.validate.dba_attach_cfg ( cfg = { @types.defaults.dba_attach_cfg..., cfg..., } )
     { path, schema, saveas, }   = cfg
     #.......................................................................................................
-    unless @_initialized
+    unless @_state.initialized
       if schema is 'main'
         connection = new_bsqlt3_connection path, @_bsqlt3_cfg
         @initialize_sqlt connection
