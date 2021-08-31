@@ -368,16 +368,7 @@ dba.export { schema: 'myschema', path, format, overwrite, }
 
 # API
 
-**TBD**
 
-* **`dba.do_unsafe: ( f ) ->`**—given a synchronous function `f`, set `unsafeMode` to `true`, call `f()`,
-  then set `unsafeMode` to `false`. Used judiciously, this allows e.g. to update rows in a table while
-  iterating over a result set. To ensure proper functioning with predictable results and avoiding endless
-  loops (caused by new rows being added to the result set), it is suggested to add a field `lck boolean not
-  null default false` (for 'locked') to tables for which concurrent updates are planned. Set `lck` of all or
-  a subset of rows to `true` and add `where lck` to your `select` statement; any inserted rows will then
-  have the default `lck = false` value and be cleanly separated from the result set.
-* **`dba.do_unsafe_async: ( f ) ->`**—Same as `dba.do_unsafe()` but for async functions.
 
 ## User-Defined Functions
 
@@ -407,13 +398,24 @@ around an SQLite database.)
 
 ## Contextualizers and Context Handlers
 
-* contextualizers:
+* contextualizer:
   * **`dba.create_with_transaction: ( cfg ) ->`**
-  * **`dba.create_with_unsafe_mode: ( cfg ) ->`**
-
-* context handlers:
+* context handler:
   * **`dba.with_transaction: ( cfg ) ->`**
-  * **`dba.with_unsafe_mode: ( cfg ) ->`**
+
+* contextualizer:
+  * **`dba.create_with_unsafe_mode: ( cfg ) ->`**
+* context handler:
+  * **`dba.with_unsafe_mode: ( cfg ) ->`** given a synchronous function as `{ call, }`, set `unsafeMode` to
+    `true`, call the function, then set `unsafeMode` to its previous value. Used judiciously, this allows
+    e.g. to update rows in a table while iterating over a result set. To ensure proper functioning with
+    predictable results and avoiding endless loops (caused by new rows being added to the result set), it is
+    suggested to add a field `lck boolean not null default false` (for 'locked') to tables for which
+    concurrent updates are planned. Set `lck` of all or a subset of rows to `true` and add `where lck` to
+    your `select` statement; any inserted rows will then have the default `lck = false` value and be cleanly
+    separated from the result set.
+
+    <!-- * **`dba.do_unsafe_async: ( f ) ->`**—Same as `dba.do_unsafe()` but for async functions. -->
 
 ## Connection Initialization
 
