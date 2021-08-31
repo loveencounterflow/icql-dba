@@ -33,6 +33,7 @@ new_bsqlt3_connection     = require 'better-sqlite3'
 PATH                      = require 'path'
 TMP                       = require 'tempy'
 { Import_export_mixin }   = require './import-export-mixin'
+{ Functions_mixin }       = require './functions-mixin'
 guy                       = require 'guy'
 SQL                       = String.raw
 
@@ -41,7 +42,7 @@ SQL                       = String.raw
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-class @Dba extends Import_export_mixin()
+class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
@@ -292,61 +293,6 @@ class @Dba extends Import_export_mixin()
   #---------------------------------------------------------------------------------------------------------
   do_unsafe:        ( f ) -> @sqlt.unsafeMode true; try return       f() finally @sqlt.unsafeMode false
   do_unsafe_async:  ( f ) -> @sqlt.unsafeMode true; try return await f() finally @sqlt.unsafeMode false
-
-
-  #=========================================================================================================
-  # USER-DEFINED FUNCTIONS
-  #---------------------------------------------------------------------------------------------------------
-  create_function: ( cfg ) ->
-    validate.dba_create_function_cfg ( cfg = { @types.defaults.dba_create_function_cfg..., cfg..., } )
-    { name
-      call
-      directOnly
-      deterministic
-      varargs }     = cfg
-    return @sqlt.function name, { deterministic, varargs, directOnly, }, call
-
-  #---------------------------------------------------------------------------------------------------------
-  create_aggregate_function: ( cfg ) ->
-    validate.dba_create_aggregate_function_cfg ( cfg = { @types.defaults.dba_create_aggregate_function_cfg..., cfg..., } )
-    { name
-      start
-      step
-      directOnly
-      deterministic
-      varargs }     = cfg
-    return @sqlt.aggregate name, { start, step, deterministic, varargs, directOnly, }
-
-  #---------------------------------------------------------------------------------------------------------
-  create_window_function: ( cfg ) ->
-    validate.dba_create_window_function_cfg ( cfg = { @types.defaults.dba_create_window_function_cfg..., cfg..., } )
-    { name
-      start
-      step
-      inverse
-      result
-      directOnly
-      deterministic
-      varargs }     = cfg
-    return @sqlt.aggregate name, { start, step, inverse, result, deterministic, varargs, directOnly, }
-
-  #---------------------------------------------------------------------------------------------------------
-  create_table_function: ( cfg ) ->
-    validate.dba_create_table_function_cfg ( cfg = { @types.defaults.dba_create_table_function_cfg..., cfg..., } )
-    { name
-      parameters
-      columns
-      rows
-      directOnly
-      deterministic
-      varargs }     = cfg
-    return @sqlt.table name, { parameters, columns, rows, deterministic, varargs, directOnly, }
-
-  #---------------------------------------------------------------------------------------------------------
-  create_virtual_table: ( cfg ) ->
-    validate.dba_create_virtual_table_cfg ( cfg = { @types.defaults.dba_create_virtual_table_cfg..., cfg..., } )
-    { name, create, } = cfg
-    return @sqlt.table name, create
 
 
   #=========================================================================================================
