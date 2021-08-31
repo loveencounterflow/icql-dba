@@ -18,12 +18,6 @@ FS                        = require 'fs'
 HOLLERITH                 = require 'hollerith-codec'
 #...........................................................................................................
 types                     = require './types'
-# { isa
-#   validate
-#   validate_optional
-#   declare
-#   size_of
-#   type_of }               = types
 { freeze
   lets }                  = require 'letsfreezethat'
 L                         = @
