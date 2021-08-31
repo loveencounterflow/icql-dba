@@ -417,6 +417,12 @@ around an SQLite database.)
 
     <!-- * **`dba.do_unsafe_async: ( f ) ->`**—Same as `dba.do_unsafe()` but for async functions. -->
 
+* contextualizer:
+  * **`create_with_foreign_keys_off: ( cfg ) ->`**
+* context handler:
+  * **`with_foreign_keys_off: ( cfg ) ->`** temporarily switch off foreign keys constraints so inserts to
+  tables with mutual references can be made.
+
 ## Connection Initialization
 
 Right after a connection to an SQLite DB has been instantiated, an initialization method `@initialize_sqlt
