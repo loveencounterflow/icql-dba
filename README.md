@@ -608,4 +608,44 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
   (portions of) filenames
 * [X] detect format of SQLite3 files with `_is_sqlite3_db()`: [first 16 bytes should contain `SQLite format
   3\000`](https://sqlite.org/fileformat.html)
+* [ ] should we implement a Python-style 'context-handler' to replace `do_unsafe()` with something more
+  general?
+    * like
+      ```coffee
+      dba.use unsafe: true, transaction: true, ram: true, call ->
+        # `unsafe`:      use unsafe mode to allow writing while reading
+        # `transaction`: use one transaction for this
+        # `ram`:         copy DB to ram for this, back to file when done
+        ...
+      log dba.is_unsafe() # false
+      ```
+    * `better-sqlite3` alread has a context manager, `sqlt.transaction( function ) -> function`:
+
+      > Creates a function that always runs inside a transaction. When the function is invoked, it will
+      > begin a new transaction. When the function returns, the transaction will be committed. If an
+      > exception is thrown, the transaction will be rolled back (and the exception will propagate as
+      > usual).
+
+      ```js
+      const insert = db.prepare('INSERT INTO cats (name, age) VALUES (@name, @age)');
+
+      const insertMany = db.transaction((cats) => {
+        for (const cat of cats) insert.run(cat);
+      });
+
+      insertMany([
+        { name: 'Joey', age: 2 },
+        { name: 'Sally', age: 4 },
+        { name: 'Junior', age: 1 },
+      ]);
+      ```
+
+      Maybe use
+        * `dba.with_transaction_do: ( f ) ->`
+        * `dba.with_unsafe_do: ( f ) ->`
+        * `dba.with_ramdb_do: ( f ) ->`
+
+
+
+
 
