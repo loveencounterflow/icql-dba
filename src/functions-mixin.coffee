@@ -97,4 +97,26 @@ E                         = require './errors'
       throw new E.Dba_not_implemented '^dbaf@314^', "calling `with_transaction { async: true, }`"
     return ( @sqlt.transaction call )()
 
+  #---------------------------------------------------------------------------------------------------------
+  create_with_unsafe_mode: ( cfg ) ->
+  # create_with_unsafe_mode: ( cfg, call = null ) ->
+    # debug '^4435-1^', cfg
+    # switch arity = arguments.length
+    #   when 1 then cfg = { call: cfg, } if @types.isa.callable cfg
+    #   when 2 then ( cfg ?= {} ).call ?= call
+    #   else throw new E.Dba_wrong_arity '^dbaf@313^', 'create_with_unsafe_mode', 1, 2, arity
+    # debug '^4435-1^', cfg
+    @types.validate.dba_create_with_unsafe_mode_cfg ( cfg = { @types.defaults.dba_create_with_unsafe_mode_cfg..., cfg..., } )
+    { call, async, } = cfg
+    if async
+      throw new E.Dba_not_implemented '^dbaf@313^', "calling `create_with_unsafe_mode { async: true, }`"
+    return ( P... ) =>
+      prv_in_unsafe_mode = @_state.in_unsafe_mode
+      @_set_unsafe_mode true
+      try R = call P... finally @_set_unsafe_mode prv_in_unsafe_mode
+      return R
+
+  #---------------------------------------------------------------------------------------------------------
+  with_unsafe_mode: ( P... ) -> ( @create_with_unsafe_mode P... )()
+
 

@@ -61,6 +61,8 @@ class @Dba_no_arguments_allowed      extends @Dba_error
   constructor: ( ref, name, arity ) -> super ref, "method #{name} doesn't take arguments, got #{arity}"
 class @Dba_argument_not_allowed      extends @Dba_error
   constructor: ( ref, name, value ) -> super ref, "argument #{name} not allowed, got #{rpr value}"
+class @Dba_wrong_arity               extends @Dba_error
+  constructor: ( ref, name, min, max, found ) -> super ref, "#{name} expected betwenn #{min} and #{max} arguments, got #{found}"
 class @Dba_empty_csv                 extends @Dba_error
   constructor: ( ref, path )        -> super ref, "no CSV records found in file #{path}"
 class @Dba_interpolation_format_unknown extends @Dba_error

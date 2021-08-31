@@ -286,8 +286,14 @@ class @Dba extends Functions_mixin Import_export_mixin()
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  do_unsafe:        ( f ) -> @sqlt.unsafeMode true; try return       f() finally @sqlt.unsafeMode false
-  do_unsafe_async:  ( f ) -> @sqlt.unsafeMode true; try return await f() finally @sqlt.unsafeMode false
+  _get_unsafe_mode: -> @_state.in_unsafe_mode
+
+  #---------------------------------------------------------------------------------------------------------
+  _set_unsafe_mode: ( onoff ) ->
+    @types.validate.boolean onoff
+    @sqlt.unsafeMode onoff
+    @_state = lets @_state, ( d ) -> d.in_unsafe_mode = onoff
+    return null
 
 
   #=========================================================================================================
