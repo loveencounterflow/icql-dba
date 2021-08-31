@@ -32,6 +32,7 @@
   - [CSV](#csv)
 - [API](#api)
   - [User-Defined Functions](#user-defined-functions)
+  - [Contextualizers and Context Handlers](#contextualizers-and-context-handlers)
   - [Connection Initialization](#connection-initialization)
 - [SQL Submodule](#sql-submodule)
 - [ICQL-DBA Plugins](#icql-dba-plugins)
@@ -403,6 +404,16 @@ around an SQLite database.)
 * **`dba.create_window_function: ( cfg ) ->`** window functions
 * **`dba.create_table_function: ( cfg ) ->`** table-valued functions
 * **`dba.create_virtual_table: ( cfg ) ->`** virtual tables
+
+## Contextualizers and Context Handlers
+
+* contextualizers:
+  * **`dba.create_with_transaction: ( cfg ) ->`**
+  * **`dba.create_with_unsafe_mode: ( cfg ) ->`**
+
+* context handlers:
+  * **`dba.with_transaction: ( cfg ) ->`**
+  * **`dba.with_unsafe_mode: ( cfg ) ->`**
 
 ## Connection Initialization
 
