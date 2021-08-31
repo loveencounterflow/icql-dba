@@ -138,6 +138,12 @@ Dba                       = null
 #   "@isa.boolean x.async":           ( x ) -> @isa.boolean x.async
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_create_with_foreign_keys_off_cfg', tests:
+  "@isa.object x":                  ( x ) -> @isa.object x
+  "@isa.function x.call":           ( x ) -> @isa.function x.call
+  "@isa.boolean x.async":           ( x ) -> @isa.boolean x.async
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg', tests:
   "@isa.object x":                                ( x ) -> @isa.object x
   "@isa.ic_not_temp_schema x.schema":             ( x ) -> @isa.ic_not_temp_schema x.schema
@@ -477,6 +483,10 @@ Dba                       = null
   # dba_with_unsafe_mode_cfg:
   #   async:      false
   #   call:       null
+  #.........................................................................................................
+  dba_create_with_foreign_keys_off_cfg:
+    async:      false
+    call:       null
 
 #-----------------------------------------------------------------------------------------------------------
 @_import_formats = _import_formats = new Set Object.keys @defaults.extensions_and_formats

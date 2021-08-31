@@ -119,4 +119,19 @@ E                         = require './errors'
   #---------------------------------------------------------------------------------------------------------
   with_unsafe_mode: ( P... ) -> ( @create_with_unsafe_mode P... )()
 
+  #---------------------------------------------------------------------------------------------------------
+  create_with_foreign_keys_off: ( cfg ) ->
+    @types.validate.dba_create_with_foreign_keys_off_cfg ( cfg = { @types.defaults.dba_create_with_foreign_keys_off_cfg..., cfg..., } )
+    { call, async, } = cfg
+    if async
+      throw new E.Dba_not_implemented '^dbaf@313^', "calling `create_with_foreign_keys_off { async: true, }`"
+    return ( P... ) =>
+      prv_in_foreign_keys_state = @_get_foreign_keys_state()
+      @_set_foreign_keys_state false
+      try R = call P... finally @_set_foreign_keys_state prv_in_foreign_keys_state
+      return R
+
+  #---------------------------------------------------------------------------------------------------------
+  with_foreign_keys_off: ( P... ) -> ( @create_with_foreign_keys_off P... )()
+
 
