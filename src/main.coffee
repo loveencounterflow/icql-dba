@@ -18,12 +18,12 @@ FS                        = require 'fs'
 HOLLERITH                 = require 'hollerith-codec'
 #...........................................................................................................
 types                     = require './types'
-{ isa
-  validate
-  validate_optional
-  declare
-  size_of
-  type_of }               = types
+# { isa
+#   validate
+#   validate_optional
+#   declare
+#   size_of
+#   type_of }               = types
 { freeze
   lets }                  = require 'letsfreezethat'
 L                         = @
@@ -52,7 +52,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
     guy.props.def @, 'sql',         { enumerable: false, value: ( new ( require './sql' ).Sql() ), }
     @_schemas     = freeze {}
     @cfg          = freeze { @types.defaults.dba_constructor_cfg..., cfg..., }
-    validate.dba_constructor_cfg @cfg
+    @types.validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
     @_formats     = freeze { @types.defaults.extensions_and_formats..., }
     throw new E.Dba_cfg_error '^dba@300^', "property `sqlt` not supported"   if @cfg.sqlt?
@@ -80,7 +80,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   open: ( cfg ) ->
-    validate.dba_open_cfg ( cfg = { @types.defaults.dba_open_cfg..., cfg..., } )
+    @types.validate.dba_open_cfg ( cfg = { @types.defaults.dba_open_cfg..., cfg..., } )
     { path, schema, ram, }  = cfg
     #.......................................................................................................
     ### TAINT troublesome logic with `path` and `saveas` ###
@@ -98,7 +98,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
   #---------------------------------------------------------------------------------------------------------
   save: ( cfg ) ->
     ### TAINT could implement prohibition of `path` in type `dba_save_cfg` ###
-    validate.dba_save_cfg ( cfg = { @types.defaults.dba_export_cfg..., cfg..., } )
+    @types.validate.dba_save_cfg ( cfg = { @types.defaults.dba_export_cfg..., cfg..., } )
     { schema
       path }    = cfg
     throw new E.Dba_argument_not_allowed '^dba@303^', 'path', path if path?
@@ -109,7 +109,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
   #---------------------------------------------------------------------------------------------------------
   export: ( cfg ) ->
     ### TAINT add boolean `cfg.overwrite` ###
-    validate.dba_export_cfg ( cfg = { @types.defaults.dba_export_cfg..., cfg..., } )
+    @types.validate.dba_export_cfg ( cfg = { @types.defaults.dba_export_cfg..., cfg..., } )
     { schema
       path
       format }  = cfg
@@ -123,7 +123,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   _vacuum_atomically: ( cfg ) ->
-    validate.dba_vacuum_atomically ( cfg = { @types.defaults.dba_vacuum_atomically..., cfg..., } )
+    @types.validate.dba_vacuum_atomically ( cfg = { @types.defaults.dba_vacuum_atomically..., cfg..., } )
     { schema
       path }  = cfg
     schema_i  = @sql.I schema
@@ -138,7 +138,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   is_ram_db: ( cfg ) ->
-    validate.dba_is_ram_db_cfg ( cfg = { @types.defaults.dba_is_ram_db_cfg..., cfg..., } )
+    @types.validate.dba_is_ram_db_cfg ( cfg = { @types.defaults.dba_is_ram_db_cfg..., cfg..., } )
     { schema } = cfg
     sql = "select file from pragma_database_list where name = ? limit 1;"
     try
@@ -286,7 +286,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   _set_foreign_key_state: ( onoff ) ->
-    validate.boolean onoff
+    @types.validate.boolean onoff
     @pragma "foreign_keys = #{onoff};"
     return null
 
@@ -306,7 +306,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   walk_objects: ( cfg ) ->
-    validate.dba_walk_objects_cfg ( cfg = { @types.defaults.dba_walk_objects_cfg..., cfg..., } )
+    @types.validate.dba_walk_objects_cfg ( cfg = { @types.defaults.dba_walk_objects_cfg..., cfg..., } )
     schema      = cfg.schema
     ordering    = cfg._ordering
     return @_walk_all_objects() unless schema?
@@ -353,7 +353,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   is_empty: ( cfg ) ->
-    validate.dba_is_empty_cfg ( cfg = { @types.defaults.dba_is_empty_cfg..., cfg..., } )
+    @types.validate.dba_is_empty_cfg ( cfg = { @types.defaults.dba_is_empty_cfg..., cfg..., } )
     return ( has_schema = @_is_empty_schema @sql.I cfg.schema ) unless name?
     throw new E.Dba_not_implemented '^dba@310^', "dba.is_empty() for anything but schemas (got #{rpr cfg})"
 
@@ -367,7 +367,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   has: ( cfg ) ->
-    validate.dba_has_cfg ( cfg = { @types.defaults.dba_has_cfg..., cfg..., } )
+    @types.validate.dba_has_cfg ( cfg = { @types.defaults.dba_has_cfg..., cfg..., } )
     return cfg.schema in @list_schema_names()
 
   #---------------------------------------------------------------------------------------------------------
@@ -385,7 +385,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   type_of: ( cfg ) ->
-    validate.dba_type_of_cfg ( cfg = { @types.defaults.dba_type_of_cfg..., cfg..., } )
+    @types.validate.dba_type_of_cfg ( cfg = { @types.defaults.dba_type_of_cfg..., cfg..., } )
     { name, schema, } = cfg
     if name in [ 'sqlite_schema', 'sqlite_master', ]
       return 'table'
@@ -398,7 +398,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   fields_of: ( cfg ) ->
-    validate.dba_fields_of_cfg ( cfg = { @types.defaults.dba_fields_of_cfg..., cfg..., } )
+    @types.validate.dba_fields_of_cfg ( cfg = { @types.defaults.dba_fields_of_cfg..., cfg..., } )
     { name, schema, } = cfg
     schema_i          = @sql.I schema
     R                 = {}
@@ -416,7 +416,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
   #---------------------------------------------------------------------------------------------------------
   field_names_of: ( cfg ) ->
     # try
-    validate.dba_field_names_of_cfg ( cfg = { @types.defaults.dba_field_names_of_cfg..., cfg..., } )
+    @types.validate.dba_field_names_of_cfg ( cfg = { @types.defaults.dba_field_names_of_cfg..., cfg..., } )
     { name, schema, } = cfg
     schema_i          = @sql.I schema
     return ( d.name for d from @query SQL"select name from #{schema_i}.pragma_table_info( $name );", { name, } )
@@ -425,7 +425,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   dump_relation: ( cfg ) ->
-    validate.dba_dump_relation_cfg ( cfg = { @types.defaults.dba_dump_relation_cfg..., cfg..., } )
+    @types.validate.dba_dump_relation_cfg ( cfg = { @types.defaults.dba_dump_relation_cfg..., cfg..., } )
     { schema
       name
       order_by
@@ -442,7 +442,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   dependencies_of:  ( table, schema = 'main' ) ->
-    validate.ic_schema schema
+    @types.validate.ic_schema schema
     return ( row.table for row from @_dependencies_of table )
 
 
@@ -451,7 +451,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
   #---------------------------------------------------------------------------------------------------------
   ### TAINT Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped ###
   clear: ( cfg ) ->
-    validate.dba_clear_cfg ( cfg = { @types.defaults.dba_clear_cfg..., cfg..., } )
+    @types.validate.dba_clear_cfg ( cfg = { @types.defaults.dba_clear_cfg..., cfg..., } )
     { schema, }   = cfg
     schema_i      = @sql.I schema
     R             = 0
@@ -500,7 +500,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
       * If `schema` is not `main`, `main` will be opened as an empty RAM DB, and `schema` will be attached
         from the file given.
     ###
-    validate.dba_attach_cfg ( cfg = { @types.defaults.dba_attach_cfg..., cfg..., } )
+    @types.validate.dba_attach_cfg ( cfg = { @types.defaults.dba_attach_cfg..., cfg..., } )
     { path, schema, saveas, }   = cfg
     #.......................................................................................................
     unless @_initialized
@@ -526,7 +526,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   _detach: ( cfg ) ->
-    validate.dba_detach_cfg ( cfg = { @types.defaults.dba_detach_cfg..., cfg..., } )
+    @types.validate.dba_detach_cfg ( cfg = { @types.defaults.dba_detach_cfg..., cfg..., } )
     @execute @sql.SQL"detach #{@sql.I cfg.schema};"
     @_schemas     = lets @_schemas, ( d ) => delete d[ cfg.schema ]
     return null
@@ -544,7 +544,7 @@ class @Dba extends Functions_mixin Import_export_mixin()
       return null unless detach_schema
       return @_detach { schema: from_schema, }
     #.......................................................................................................
-    validate.copy_or_move_schema_cfg ( cfg = { @types.defaults.copy_or_move_schema_cfg..., cfg..., } )
+    @types.validate.copy_or_move_schema_cfg ( cfg = { @types.defaults.copy_or_move_schema_cfg..., cfg..., } )
     { from_schema, to_schema, } = cfg
     #.......................................................................................................
     if from_schema is to_schema

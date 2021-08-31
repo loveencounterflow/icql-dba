@@ -28,7 +28,7 @@ E                         = require './errors'
   # USER-DEFINED FUNCTIONS
   #---------------------------------------------------------------------------------------------------------
   create_function: ( cfg ) ->
-    validate.dba_create_function_cfg ( cfg = { @types.defaults.dba_create_function_cfg..., cfg..., } )
+    @types.validate.dba_create_function_cfg ( cfg = { @types.defaults.dba_create_function_cfg..., cfg..., } )
     { name
       call
       directOnly
@@ -38,7 +38,7 @@ E                         = require './errors'
 
   #---------------------------------------------------------------------------------------------------------
   create_aggregate_function: ( cfg ) ->
-    validate.dba_create_aggregate_function_cfg ( cfg = { @types.defaults.dba_create_aggregate_function_cfg..., cfg..., } )
+    @types.validate.dba_create_aggregate_function_cfg ( cfg = { @types.defaults.dba_create_aggregate_function_cfg..., cfg..., } )
     { name
       start
       step
@@ -49,7 +49,7 @@ E                         = require './errors'
 
   #---------------------------------------------------------------------------------------------------------
   create_window_function: ( cfg ) ->
-    validate.dba_create_window_function_cfg ( cfg = { @types.defaults.dba_create_window_function_cfg..., cfg..., } )
+    @types.validate.dba_create_window_function_cfg ( cfg = { @types.defaults.dba_create_window_function_cfg..., cfg..., } )
     { name
       start
       step
@@ -62,7 +62,7 @@ E                         = require './errors'
 
   #---------------------------------------------------------------------------------------------------------
   create_table_function: ( cfg ) ->
-    validate.dba_create_table_function_cfg ( cfg = { @types.defaults.dba_create_table_function_cfg..., cfg..., } )
+    @types.validate.dba_create_table_function_cfg ( cfg = { @types.defaults.dba_create_table_function_cfg..., cfg..., } )
     { name
       parameters
       columns
@@ -74,7 +74,7 @@ E                         = require './errors'
 
   #---------------------------------------------------------------------------------------------------------
   create_virtual_table: ( cfg ) ->
-    validate.dba_create_virtual_table_cfg ( cfg = { @types.defaults.dba_create_virtual_table_cfg..., cfg..., } )
+    @types.validate.dba_create_virtual_table_cfg ( cfg = { @types.defaults.dba_create_virtual_table_cfg..., cfg..., } )
     { name, create, } = cfg
     return @sqlt.table name, create
 
