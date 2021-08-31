@@ -111,7 +111,7 @@ E                         = require './errors'
     if async
       throw new E.Dba_not_implemented '^dbaf@313^', "calling `create_with_unsafe_mode { async: true, }`"
     return ( P... ) =>
-      prv_in_unsafe_mode = @_state.in_unsafe_mode
+      prv_in_unsafe_mode = @_get_unsafe_mode()
       @_set_unsafe_mode true
       try R = call P... finally @_set_unsafe_mode prv_in_unsafe_mode
       return R
