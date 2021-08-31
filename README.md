@@ -641,9 +641,49 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
       ```
 
       Maybe use
+
         * `dba.with_transaction_do: ( f ) ->`
         * `dba.with_unsafe_do: ( f ) ->`
         * `dba.with_ramdb_do: ( f ) ->`
+
+      Unfortunately we need sync and async versions, and the ability to create a function-with-transaction
+      is neat; so either we have to accept additonal parameters, or the above API would balloon to
+
+        * `dba.with_transaction_do: ( f ) ->`
+        * `dba.with_unsafe_do: ( f ) ->`
+        * `dba.with_ramdb_do: ( f ) ->`
+        * `dba.with_transaction_do_async: ( f ) ->`
+        * `dba.with_unsafe_do_async: ( f ) ->`
+        * `dba.with_ramdb_do:_async ( f ) ->`
+        * `dba.create_with_transaction_do: ( f ) ->`
+        * `dba.create_with_unsafe_do: ( f ) ->`
+        * `dba.create_with_ramdb_do: ( f ) ->`
+        * `dba.create_with_transaction_do_async: ( f ) ->`
+        * `dba.create_with_unsafe_do_async: ( f ) ->`
+        * `dba.create_with_ramdb_do:_async ( f ) ->`
+
+      Ooops.
+
+      Another take:
+
+        * `dba.with_transaction_do: ( f ) ->`
+        * `dba.with_unsafe_do: ( f ) ->`
+        * `dba.with_ramdb_do: ( f ) ->`
+        * `dba.create_with_transaction_do: ( f ) ->`
+        * `dba.create_with_unsafe_do: ( f ) ->`
+        * `dba.create_with_ramdb_do: ( f ) ->`
+
+      ```coffee
+      defaults =
+        async:      false
+        call:       null
+
+      with_transaction_do: ( cfg ) ->
+        cfg = { defaults..., cfg..., }
+        { async
+          call } = cfg
+        # return function
+      ```
 
 
 
