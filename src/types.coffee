@@ -114,6 +114,18 @@ Dba                       = null
   "@isa.function x.create":           ( x ) -> @isa.function x.create
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_create_with_transaction_cfg', tests:
+  "@isa.object x":                  ( x ) -> @isa.object x
+  "@isa.function x.call":           ( x ) -> @isa.function x.call
+  "@isa.boolean x.async":           ( x ) -> @isa.boolean x.async
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'dba_with_transaction_cfg', tests:
+  "@isa.object x":                  ( x ) -> @isa.object x
+  "@isa.function x.call":           ( x ) -> @isa.function x.call
+  "@isa.boolean x.async":           ( x ) -> @isa.boolean x.async
+
+#-----------------------------------------------------------------------------------------------------------
 @declare 'dba_import_cfg', tests:
   "@isa.object x":                                ( x ) -> @isa.object x
   "@isa.ic_not_temp_schema x.schema":             ( x ) -> @isa.ic_not_temp_schema x.schema
@@ -437,6 +449,14 @@ Dba                       = null
     name:         null
     order_by:     'random()'
     limit:        10
+  #.........................................................................................................
+  dba_create_with_transaction_cfg:
+    async:      false
+    call:       null
+  #.........................................................................................................
+  dba_with_transaction_cfg:
+    async:      false
+    call:       null
 
 #-----------------------------------------------------------------------------------------------------------
 @_import_formats = _import_formats = new Set Object.keys @defaults.extensions_and_formats

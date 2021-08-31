@@ -82,6 +82,19 @@ E                         = require './errors'
   #=========================================================================================================
   # CONTEXT HANDLERS
   #---------------------------------------------------------------------------------------------------------
+  create_with_transaction: ( cfg ) ->
+    @types.validate.dba_create_with_transaction_cfg ( cfg = { @types.defaults.dba_create_with_transaction_cfg..., cfg..., } )
+    { call, async, } = cfg
+    if async
+      throw new E.Dba_not_implemented '^dbaf@313^', "calling `create_with_transaction { async: true, }`"
+    return @sqlt.transaction call
 
+  #---------------------------------------------------------------------------------------------------------
+  with_transaction: ( cfg ) ->
+    @types.validate.dba_with_transaction_cfg ( cfg = { @types.defaults.dba_with_transaction_cfg..., cfg..., } )
+    { call, async, } = cfg
+    if async
+      throw new E.Dba_not_implemented '^dbaf@314^', "calling `with_transaction { async: true, }`"
+    return ( @sqlt.transaction call )()
 
 
