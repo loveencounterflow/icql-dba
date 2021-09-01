@@ -401,17 +401,19 @@ around an SQLite database.)
 
 ## Contextualizers and Context Handlers
 
-`better-sqlite3` offers a 'contextualizer' method by the name of `transaction`. A contextualizer is a very
-handy device that does the following: it **(1)** accepts a function, `f`, and **(2)** returns another
-function, `cf`. When that 'contextualized' function `cf` gets called, it will **(3)** ensure some
-preconditions are met / some code gets executed; then **(4)** the underlying function `f` itself gets
-called; when it **(5)** terminates regularly, cleanup code will be run (commonly a re-set to the state of
-affairs found prior to entering). In the **(6)** case of `f` throwing an error, the some or different tasks
-may be run (e.g. for `with_transaction()`, an SQL `rollback;` instead of `commit;` is performed while for
-`with_unsafe_mode()` and `with_foreign_keys_off()`, the unhappy path is no different from the happy path).
-In any event, errors thrown inside the contextualized function will be re-thrown and not swallowed (although
-in the future specific conditions signalled by specific errors may instead be consumed instead of
-re-thrown).
+Context handlers (and their next-of-kin, 'contextualizers') have been popularized by
+[Python](https://docs.python.org/3/library/contextlib.html) under the moniker of 'context managers'.
+
+A 'contextualizer' is a very handy device that does the following: it **(1)** accepts a function, `f`, and
+**(2)** returns another function, `cf`. When that 'contextualized' function `cf` gets called, it will
+**(3)** ensure some preconditions are met / some code gets executed; then **(4)** the underlying function
+`f` itself gets called; when it **(5)** terminates regularly, cleanup code will be run (commonly a re-set to
+the state of affairs found prior to entering). In the **(6)** case of `f` throwing an error, the some or
+different tasks may be run (e.g. for `with_transaction()`, an SQL `rollback;` instead of `commit;` is
+performed while for `with_unsafe_mode()` and `with_foreign_keys_off()`, the unhappy path is no different
+from the happy path). In any event, errors thrown inside the contextualized function will be re-thrown and
+not swallowed (although in the future specific conditions signalled by specific errors may instead be
+consumed instead of re-thrown).
 
 For each contextualized concern, ICQL-DBA offers a pair of method: one is the 'contextualizer' whose name
 looks like `create_with_${name_of_concern}` because it returns a new, contextualized function for a plain
@@ -701,4 +703,6 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
 * [ ] `better-sqlite3` `transaction()` docs say: "The wrapped function will also have access to the same
   `this` binding as the transaction function."—see whether that makes sense to re-implement for the other
   context handlers.
-
+* [ ] consider to implement context managers in `guy` using the [callable-class
+  pattern](https://github.com/loveencounterflow/gaps-and-islands#callable-instances) and re-implement (and
+  also rename) contextualizers using `class With_transaction extends guy...Context_manager`
