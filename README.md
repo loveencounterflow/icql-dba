@@ -33,6 +33,9 @@
 - [API](#api)
   - [User-Defined Functions](#user-defined-functions)
   - [Contextualizers and Context Handlers](#contextualizers-and-context-handlers)
+    - [With Transactions](#with-transactions)
+    - [With Unsafe Mode](#with-unsafe-mode)
+    - [With Foreign Keys Off](#with-foreign-keys-off)
   - [Connection Initialization](#connection-initialization)
 - [SQL Submodule](#sql-submodule)
 - [ICQL-DBA Plugins](#icql-dba-plugins)
@@ -419,37 +422,63 @@ difference is that because a contextualizer returns a function you have to expli
 arguments to it that will then become arguments to the call to the underlying function `f`. A context
 handler, by contrast, is presented with an anonymous function that is called immediately without arguments.
 
-* contextualizer:
-  * **`dba.create_with_transaction: ( cfg ) ->`**
-* context handler:
-  * **`dba.with_transaction: ( cfg ) ->`**
+**Asynchronous Functions**—are currently *not allowed* in of context handlers, only synchronous ones. This
+is mainly due to the fact that `better-sqlite3`'s `transaction()` does not allow them, and for ease of
+implementation. A future version of ICQL-DBA may add support for these.
 
-* contextualizer:
-  * **`dba.create_with_unsafe_mode: ( cfg ) ->`**
-* context handler:
-  * **`dba.with_unsafe_mode: ( cfg ) ->`** given a synchronous function as `{ call, }`, set `unsafeMode` to
-    `true`, call the function, then set `unsafeMode` to its previous value. Used judiciously, this allows
-    e.g. to update rows in a table while iterating over a result set. To ensure proper functioning with
-    predictable results and avoiding endless loops (caused by new rows being added to the result set), it is
-    suggested to add a field `lck boolean not null default false` (for 'locked') to tables for which
-    concurrent updates are planned. Set `lck` of all or a subset of rows to `true` and add `where lck` to
-    your `select` statement; any inserted rows will then have the default `lck = false` value and be cleanly
-    separated from the result set.
+**Unstable API**—the context handler API should be reagarded as unstable; breaking changes are bound to
+occur.
 
-    <!-- * **`dba.do_unsafe_async: ( f ) ->`**—Same as `dba.do_unsafe()` but for async functions. -->
+### With Transactions
 
-* contextualizer:
-  * **`create_with_foreign_keys_off: ( cfg ) ->`**
-* context handler:
-  * **`with_foreign_keys_off: ( cfg ) ->`** temporarily switch off foreign keys constraints so inserts to
-    tables with mutual references can be made. In contradistinction to `with_unsafe_mode()`, this context
-    handler *does* track the actual state of affairs using `pragma foreign_keys;` so it's possible to use,
-    say, `dba.pragma 'foreign_keys = false'` in your code prior to calling `with_foreign_keys_off()`; the
-    context handler will then effectively do nothing but recording the foreign keys pragma state (being
-    `false`), set it to `false` (a no-op), and then, when your contextualized function finishes, re-set it
-    to its prior state—which would most often be `true` but is `false` in this case, so that's another
-    no-op. This is not the recommended way to go, though; it's probably better to stick to either using the
-    pragma or else the contextualizer / context handler, but not both.
+* **`dba.create_with_transaction: ( cfg ) ->`**
+* **`dba.with_transaction: ( cfg ) ->`**
+
+This is a shim over `better-sqlite3`'s `transaction()` method; to quote:
+
+> Creates [or creates and calls] a function that always runs inside a transaction. When the function is
+> invoked, it will begin a new transaction. When the function returns, the transaction will be committed. If
+> an exception is thrown, the transaction will be rolled back (and the exception will propagate as usual).
+>
+> [...]
+>
+> Transaction functions can be called from inside other transaction functions. When doing so, the inner
+> transaction becomes a savepoint.
+>
+> [...]
+>
+> Any arguments passed to the transaction function will be forwarded to the wrapped function, and any values
+> returned from the wrapped function will be returned from the transaction function. <del>The wrapped
+> function will also have access to the same `this` binding as the transaction function.</del>
+
+### With Unsafe Mode
+
+* **`dba.create_with_unsafe_mode: ( cfg ) ->`**
+* **`dba.with_unsafe_mode: ( cfg ) ->`**
+
+Given a synchronous function as `{ call, }`, set `unsafeMode` to `true`, call the function, then set
+`unsafeMode` to its previous value. Used judiciously, this allows e.g. to update rows in a table while
+iterating over a result set. To ensure proper functioning with predictable results and avoiding endless
+loops (caused by new rows being added to the result set), it is suggested to add a field `lck boolean not
+null default false` (for 'locked') to tables for which concurrent updates are planned. Set `lck` of all or a
+subset of rows to `true` and add `where lck` to your `select` statement; any inserted rows will then have
+the default `lck = false` value and be cleanly separated from the result set.
+
+<!-- * **`dba.do_unsafe_async: ( f ) ->`**—Same as `dba.do_unsafe()` but for async functions. -->
+
+### With Foreign Keys Off
+
+* **`create_with_foreign_keys_off: ( cfg ) ->`**
+* **`with_foreign_keys_off: ( cfg ) ->`**
+
+Temporarily switch off foreign keys constraints so inserts to tables with mutual references can be made. In
+contradistinction to `with_unsafe_mode()`, this context handler *does* track the actual state of affairs
+using `pragma foreign_keys;` so it's possible to use, say, `dba.pragma 'foreign_keys = false'` in your code
+prior to calling `with_foreign_keys_off()`; the context handler will then effectively do nothing but
+recording the foreign keys pragma state (being `false`), set it to `false` (a no-op), and then, when your
+contextualized function finishes, re-set it to its prior state—which would most often be `true` but is
+`false` in this case, so that's another no-op. This is not the recommended way to go, though; it's probably
+better to stick to either using the pragma or else the contextualizer / context handler, but not both.
 
 ## Connection Initialization
 
@@ -669,5 +698,7 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
   support those, either; this restriction may be lifted in a future version.
 
 * [ ] remove references to `hollerith-codec`, `encode()`, `decode` (replaced by `icql-dba-hollerith`)
-
+* [ ] `better-sqlite3` `transaction()` docs say: "The wrapped function will also have access to the same
+  `this` binding as the transaction function."—see whether that makes sense to re-implement for the other
+  context handlers.
 
