@@ -398,6 +398,27 @@ around an SQLite database.)
 
 ## Contextualizers and Context Handlers
 
+`better-sqlite3` offers a 'contextualizer' method by the name of `transaction`. A contextualizer is a very
+handy device that does the following: it **(1)** accepts a function, `f`, and **(2)** returns another
+function, `cf`. When that 'contextualized' function `cf` gets called, it will **(3)** ensure some
+preconditions are met / some code gets executed; then **(4)** the underlying function `f` itself gets
+called; when it **(5)** terminates regularly, cleanup code will be run (commonly a re-set to the state of
+affairs found prior to entering). In the **(6)** case of `f` throwing an error, the some or different tasks
+may be run (e.g. for `with_transaction()`, an SQL `rollback;` instead of `commit;` is performed while for
+`with_unsafe_mode()` and `with_foreign_keys_off()`, the unhappy path is no different from the happy path).
+In any event, errors thrown inside the contextualized function will be re-thrown and not swallowed (although
+in the future specific conditions signalled by specific errors may instead be consumed instead of
+re-thrown).
+
+For each contextualized concern, ICQL-DBA offers a pair of method: one is the 'contextualizer' whose name
+looks like `create_with_${name_of_concern}` because it returns a new, contextualized function for a plain
+function passed in. This contextualized function one can then call in one's code any number of times. Often
+though, it's handier to not keep the contextualized function around but to call it on the spot and be done;
+this is what 'context handlers' do, whose names look like `with_${name_of_concern}`. One important
+difference is that because a contextualizer returns a function you have to explicitly call, you can pass
+arguments to it that will then become arguments to the call to the underlying function `f`. A context
+handler, by contrast, is presented with an anonymous function that is called immediately without arguments.
+
 * contextualizer:
   * **`dba.create_with_transaction: ( cfg ) ->`**
 * context handler:
@@ -421,7 +442,14 @@ around an SQLite database.)
   * **`create_with_foreign_keys_off: ( cfg ) ->`**
 * context handler:
   * **`with_foreign_keys_off: ( cfg ) ->`** temporarily switch off foreign keys constraints so inserts to
-  tables with mutual references can be made.
+    tables with mutual references can be made. In contradistinction to `with_unsafe_mode()`, this context
+    handler *does* track the actual state of affairs using `pragma foreign_keys;` so it's possible to use,
+    say, `dba.pragma 'foreign_keys = false'` in your code prior to calling `with_foreign_keys_off()`; the
+    context handler will then effectively do nothing but recording the foreign keys pragma state (being
+    `false`), set it to `false` (a no-op), and then, when your contextualized function finishes, re-set it
+    to its prior state—which would most often be `true` but is `false` in this case, so that's another
+    no-op. This is not the recommended way to go, though; it's probably better to stick to either using the
+    pragma or else the contextualizer / context handler, but not both.
 
 ## Connection Initialization
 
