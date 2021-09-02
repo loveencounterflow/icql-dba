@@ -82,14 +82,6 @@ E                         = require './errors'
   #=========================================================================================================
   # CONTEXT HANDLERS
   #---------------------------------------------------------------------------------------------------------
-  create_with_transaction: ( cfg ) ->
-    @types.validate.dba_create_with_transaction_cfg ( cfg = { @types.defaults.dba_create_with_transaction_cfg..., cfg..., } )
-    { call, async, } = cfg
-    if async
-      throw new E.Dba_not_implemented '^dbaf@313^', "calling `create_with_transaction { async: true, }`"
-    return @sqlt.transaction call
-
-  #---------------------------------------------------------------------------------------------------------
   with_transaction: ( cfg ) ->
     @types.validate.dba_with_transaction_cfg ( cfg = { @types.defaults.dba_with_transaction_cfg..., cfg..., } )
     { call, async, } = cfg
@@ -98,40 +90,19 @@ E                         = require './errors'
     return ( @sqlt.transaction call )()
 
   #---------------------------------------------------------------------------------------------------------
-  create_with_unsafe_mode: ( cfg ) ->
-  # create_with_unsafe_mode: ( cfg, call = null ) ->
-    # debug '^4435-1^', cfg
-    # switch arity = arguments.length
-    #   when 1 then cfg = { call: cfg, } if @types.isa.callable cfg
-    #   when 2 then ( cfg ?= {} ).call ?= call
-    #   else throw new E.Dba_wrong_arity '^dbaf@313^', 'create_with_unsafe_mode', 1, 2, arity
-    # debug '^4435-1^', cfg
-    @types.validate.dba_create_with_unsafe_mode_cfg ( cfg = { @types.defaults.dba_create_with_unsafe_mode_cfg..., cfg..., } )
-    { call, async, } = cfg
-    if async
-      throw new E.Dba_not_implemented '^dbaf@313^', "calling `create_with_unsafe_mode { async: true, }`"
-    return ( P... ) =>
-      prv_in_unsafe_mode = @_get_unsafe_mode()
-      @_set_unsafe_mode true
-      try R = call P... finally @_set_unsafe_mode prv_in_unsafe_mode
-      return R
+  with_unsafe_mode: ( f ) ->
+    @types.validate.function f
+    prv_in_unsafe_mode = @_get_unsafe_mode()
+    @_set_unsafe_mode true
+    try R = f P... finally @_set_unsafe_mode prv_in_unsafe_mode
+    return R
 
   #---------------------------------------------------------------------------------------------------------
-  with_unsafe_mode: ( P... ) -> ( @create_with_unsafe_mode P... )()
-
-  #---------------------------------------------------------------------------------------------------------
-  create_with_foreign_keys_off: ( cfg ) ->
-    @types.validate.dba_create_with_foreign_keys_off_cfg ( cfg = { @types.defaults.dba_create_with_foreign_keys_off_cfg..., cfg..., } )
-    { call, async, } = cfg
-    if async
-      throw new E.Dba_not_implemented '^dbaf@313^', "calling `create_with_foreign_keys_off { async: true, }`"
-    return ( P... ) =>
-      prv_in_foreign_keys_state = @_get_foreign_keys_state()
-      @_set_foreign_keys_state false
-      try R = call P... finally @_set_foreign_keys_state prv_in_foreign_keys_state
-      return R
-
-  #---------------------------------------------------------------------------------------------------------
-  with_foreign_keys_off: ( P... ) -> ( @create_with_foreign_keys_off P... )()
+  with_foreign_keys_off: ( f ) ->
+    @types.validate.function f
+    prv_in_foreign_keys_state = @_get_foreign_keys_state()
+    @_set_foreign_keys_state false
+    try R = call P... finally @_set_foreign_keys_state prv_in_foreign_keys_state
+    return R
 
 
