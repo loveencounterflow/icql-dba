@@ -32,7 +32,7 @@
   - [CSV](#csv)
 - [API](#api)
   - [User-Defined Functions](#user-defined-functions)
-  - [Contextualizers and Context Handlers](#contextualizers-and-context-handlers)
+  - [Context Managers](#context-managers)
     - [With Transactions](#with-transactions)
     - [With Unsafe Mode](#with-unsafe-mode)
     - [With Foreign Keys Off](#with-foreign-keys-off)
@@ -399,79 +399,64 @@ around an SQLite database.)
 * **`dba.create_table_function: ( cfg ) ->`** table-valued functions
 * **`dba.create_virtual_table: ( cfg ) ->`** virtual tables
 
-## Contextualizers and Context Handlers
+## Context Managers
 
-Context handlers (and their next-of-kin, 'contextualizers') have been popularized by
-[Python](https://docs.python.org/3/library/contextlib.html) under the moniker of 'context managers'.
+Context managers are well known from [Python](https://docs.python.org/3/library/contextlib.html) and are
+used to ensure that a given piece of code is always run with certain pre- and post-conditions fulfilled and
+may also define their own error handling.
 
-A 'contextualizer' is a very handy device that does the following: it **(1)** accepts a function, `f`, and
-**(2)** returns another function, `cf`. When that 'contextualized' function `cf` gets called, it will
-**(3)** ensure some preconditions are met / some code gets executed; then **(4)** the underlying function
-`f` itself gets called; when it **(5)** terminates regularly, cleanup code will be run (commonly a re-set to
-the state of affairs found prior to entering). In the **(6)** case of `f` throwing an error, the some or
-different tasks may be run (e.g. for `with_transaction()`, an SQL `rollback;` instead of `commit;` is
-performed while for `with_unsafe_mode()` and `with_foreign_keys_off()`, the unhappy path is no different
-from the happy path). In any event, errors thrown inside the contextualized function will be re-thrown and
-not swallowed (although in the future specific conditions signalled by specific errors may instead be
-consumed instead of re-thrown).
+While JavaScript does not have syntactic support for context managers (à la `with cxm( 'foo' ) as frob:
+...`), it's still straightforward to implement them as plain functions. ICQL-DBA currently offers three
+context managers: `dba.with_transaction()`, `dba.with_unsafe_mode()`, and `dba.with_foreign_keys_off()`. All
+three allow to pass in any number of custom arguments and a required named or anonymous function that must
+come last.
 
-For each contextualized concern, ICQL-DBA offers a pair of method: one is the 'contextualizer' whose name
-looks like `create_with_${name_of_concern}` because it returns a new, contextualized function for a plain
-function passed in. This contextualized function one can then call in one's code any number of times. Often
-though, it's handier to not keep the contextualized function around but to call it on the spot and be done;
-this is what 'context handlers' do, whose names look like `with_${name_of_concern}`. One important
-difference is that because a contextualizer returns a function you have to explicitly call, you can pass
-arguments to it that will then become arguments to the call to the underlying function `f`. A context
-handler, by contrast, is presented with an anonymous function that is called immediately without arguments.
-
-**Asynchronous Functions**—are currently *not allowed* in of context handlers, only synchronous ones. This
-is mainly due to the fact that `better-sqlite3`'s `transaction()` does not allow them, and for ease of
+Asynchronous functions are currently *not allowed* in of context handlers, only synchronous ones. This is
+mainly due to the fact that `better-sqlite3`'s `transaction()` does not allow them, and for ease of
 implementation. A future version of ICQL-DBA may add support for these.
 
-**Unstable API**—the context handler API should be reagarded as unstable; breaking changes are bound to
-occur.
 
 ### With Transactions
 
-* **`dba.create_with_transaction: ( cfg ) ->`**
-* **`dba.with_transaction: ( cfg ) ->`**
+* **`dba.with_transaction: ( P..., f ) ->`**
 
-This is a shim over `better-sqlite3`'s `transaction()` method; to quote:
+This is a shim over `better-sqlite3`'s `transaction()` method; the following is a more or less verbatim
+quote from the [original documentation of
+`sqlt.transaction()`](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#transactionfunction---function):
 
-> Creates [or creates and calls] a function that always runs inside a transaction. When the function is
-> invoked, it will begin a new transaction. When the function returns, the transaction will be committed. If
-> an exception is thrown, the transaction will be rolled back (and the exception will propagate as usual).
->
-> [...]
->
-> Transaction functions can be called from inside other transaction functions. When doing so, the inner
-> transaction becomes a savepoint.
->
-> [...]
->
-> Any arguments passed to the transaction function will be forwarded to the wrapped function, and any values
-> returned from the wrapped function will be returned from the transaction function. <del>The wrapped
-> function will also have access to the same `this` binding as the transaction function.</del>
+`dba.with_transaction()` creates and calls a function that always runs inside a transaction. When the
+function is invoked, it will begin a new transaction. When the function returns, the transaction will be
+committed. If an exception is thrown, the transaction will be rolled back (and the exception will propagate
+as usual).
+
+Transaction functions can be called from inside other transaction functions. When doing so, the inner
+transaction becomes a savepoint.
+
+Any arguments passed to the transaction function will be forwarded to the wrapped function, and any values
+returned from the wrapped function will be returned from the transaction function.
 
 ### With Unsafe Mode
 
-* **`dba.create_with_unsafe_mode: ( cfg ) ->`**
-* **`dba.with_unsafe_mode: ( cfg ) ->`**
+* **`dba.with_unsafe_mode: ( P..., f ) ->`**
 
-Given a synchronous function as `{ call, }`, set `unsafeMode` to `true`, call the function, then set
-`unsafeMode` to its previous value. Used judiciously, this allows e.g. to update rows in a table while
-iterating over a result set. To ensure proper functioning with predictable results and avoiding endless
-loops (caused by new rows being added to the result set), it is suggested to add a field `lck boolean not
-null default false` (for 'locked') to tables for which concurrent updates are planned. Set `lck` of all or a
-subset of rows to `true` and add `where lck` to your `select` statement; any inserted rows will then have
-the default `lck = false` value and be cleanly separated from the result set.
+Given any number of custom arguments `P...` and a (synchronous) function `f`:
 
-<!-- * **`dba.do_unsafe_async: ( f ) ->`**—Same as `dba.do_unsafe()` but for async functions. -->
+* remember the current status of unsafe mode,
+* set `unsafeMode` to `true`,
+* call the function as `f P...`, then
+* set `unsafeMode` to its previous value.
+
+Used judiciously, this allows e.g. to update rows in a table while iterating over a result set. To ensure
+proper functioning with predictable results and avoiding endless loops (caused by new rows being added to
+the result set), it is suggested to add a field `lck boolean not null default false` (for 'locked') to
+tables for which concurrent updates are planned. Set `lck` of all or a subset of rows to `true` and add
+`where lck` to your `select` statement; any inserted rows will then have the default `lck = false` value and
+be cleanly separated from the result set.
+
 
 ### With Foreign Keys Off
 
-* **`create_with_foreign_keys_off: ( cfg ) ->`**
-* **`with_foreign_keys_off: ( cfg ) ->`**
+* **`dba.with_foreign_keys_off: ( P..., f ) ->`**
 
 Temporarily switch off foreign keys constraints so inserts to tables with mutual references can be made. In
 contradistinction to `with_unsafe_mode()`, this context handler *does* track the actual state of affairs
