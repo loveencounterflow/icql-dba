@@ -82,15 +82,12 @@ E                         = require './errors'
   #=========================================================================================================
   # CONTEXT HANDLERS
   #---------------------------------------------------------------------------------------------------------
-  with_transaction: ( cfg ) ->
-    @types.validate.dba_with_transaction_cfg ( cfg = { @types.defaults.dba_with_transaction_cfg..., cfg..., } )
-    { call, async, } = cfg
-    if async
-      throw new E.Dba_not_implemented '^dbaf@314^', "calling `with_transaction { async: true, }`"
-    return ( @sqlt.transaction call )()
+  with_transaction: ( P..., f ) ->
+    @types.validate.function f
+    return ( @sqlt.transaction f ) P...
 
   #---------------------------------------------------------------------------------------------------------
-  with_unsafe_mode: ( f ) ->
+  with_unsafe_mode: ( P..., f ) ->
     @types.validate.function f
     prv_in_unsafe_mode = @_get_unsafe_mode()
     @_set_unsafe_mode true
@@ -98,11 +95,11 @@ E                         = require './errors'
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  with_foreign_keys_off: ( f ) ->
+  with_foreign_keys_off: ( P..., f ) ->
     @types.validate.function f
     prv_in_foreign_keys_state = @_get_foreign_keys_state()
     @_set_foreign_keys_state false
-    try R = call P... finally @_set_foreign_keys_state prv_in_foreign_keys_state
+    try R = f P... finally @_set_foreign_keys_state prv_in_foreign_keys_state
     return R
 
 
