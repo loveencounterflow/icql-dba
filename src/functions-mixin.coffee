@@ -18,6 +18,7 @@ PATH                      = require 'path'
 FS                        = require 'fs'
 E                         = require './errors'
 { misfit }                = require './common'
+SQL                       = String.raw
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -84,7 +85,19 @@ E                         = require './errors'
   #---------------------------------------------------------------------------------------------------------
   with_transaction: ( P..., f ) ->
     @types.validate.function f
-    return ( @sqlt.transaction f ) P...
+    # return ( @sqlt.transaction f ) P...
+    throw new E.Dba_no_nested_transactions '^dba-functions@901^' if @sqlt.inTransaction
+    @execute SQL"begin transaction;"
+    error = null
+    try
+      R = f P...
+    catch error
+      debug '^35458-catch^', CND.reverse 'rollback'
+      @execute SQL"rollback;"
+      throw error
+    finally
+      debug '^35458-finally^', CND.reverse 'rollback', error
+    @execute SQL"commit;"
 
   #---------------------------------------------------------------------------------------------------------
   with_unsafe_mode: ( P..., f ) ->

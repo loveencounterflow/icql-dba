@@ -67,6 +67,9 @@ class @Dba_empty_csv                 extends @Dba_error
   constructor: ( ref, path )        -> super ref, "no CSV records found in file #{path}"
 class @Dba_interpolation_format_unknown extends @Dba_error
   constructor: ( ref, format )       -> super ref, "unknown interpolation format #{rpr format}"
+  constructor: ( ref, format )      -> super ref, "unknown interpolation format #{rpr format}"
+class @Dba_no_nested_transactions    extends @Dba_error
+  constructor: ( ref )              -> super ref, "cannot start a transaction within a transaction"
 
 ### TAINT replace with more specific error, like below ###
 class @Dba_format_unknown extends @Dba_error
