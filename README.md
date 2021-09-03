@@ -712,6 +712,8 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
     ```
 * [ ] implement `dba.check_foreign_keys()` using `dba.pragma SQL"foreign_key_check;"`
 * [ ] implement `dba.check_integrity()` using `dba.pragma SQL"integrity_check;"`
-* [ ] implement `dba.quick_check()` using `dba.pragma SQL"quick_check;"`
+* [ ] implement `dba.check_quick()` using `dba.pragma SQL"quick_check;"`
+* [ ] implement `dba.get_foreign_keys_deferred()` using `dba.pragma SQL"defer_foreign_keys;"`
+* [ ] implement `dba.set_foreign_keys_deferred()` using `dba.pragma SQL"defer_foreign_keys;"`
 
 
