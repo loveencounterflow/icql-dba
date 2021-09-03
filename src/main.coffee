@@ -28,6 +28,7 @@ PATH                      = require 'path'
 TMP                       = require 'tempy'
 { Import_export_mixin }   = require './import-export-mixin'
 { Functions_mixin }       = require './functions-mixin'
+{ Checks_mixin }          = require './checks-mixin'
 guy                       = require 'guy'
 SQL                       = String.raw
 
@@ -36,7 +37,7 @@ SQL                       = String.raw
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-class @Dba extends Functions_mixin Import_export_mixin()
+class @Dba extends Checks_mixin Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
@@ -275,25 +276,6 @@ class @Dba extends Functions_mixin Import_export_mixin()
   read:           ( path  ) -> @sqlt.exec FS.readFileSync path, { encoding: 'utf-8', }
   load_extension: ( P...  ) -> @sqlt.loadExtension    P...
   pragma:         ( P...  ) -> @sqlt.pragma           P...
-
-  #---------------------------------------------------------------------------------------------------------
-  _get_foreign_keys_state: -> not not ( @pragma "foreign_keys;" )[ 0 ].foreign_keys
-
-  #---------------------------------------------------------------------------------------------------------
-  _set_foreign_keys_state: ( onoff ) ->
-    @types.validate.boolean onoff
-    @pragma "foreign_keys = #{onoff};"
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  _get_unsafe_mode: -> @_state.in_unsafe_mode
-
-  #---------------------------------------------------------------------------------------------------------
-  _set_unsafe_mode: ( onoff ) ->
-    @types.validate.boolean onoff
-    @sqlt.unsafeMode onoff
-    @_state = lets @_state, ( d ) -> d.in_unsafe_mode = onoff
-    return null
 
 
   #=========================================================================================================
