@@ -406,10 +406,9 @@ used to ensure that a given piece of code is always run with certain pre- and po
 may also define their own error handling.
 
 While JavaScript does not have syntactic support for context managers (à la `with cxm( 'foo' ) as frob:
-...`), it's still straightforward to implement them as plain functions. ICQL-DBA currently offers three
-context managers: `dba.with_transaction()`, `dba.with_unsafe_mode()`, and `dba.with_foreign_keys_off()`. All
-three allow to pass in any number of custom arguments and a required named or anonymous function that must
-come last.
+...`), it's still straightforward to implement them as plain functions. Context managers in ICQL-DBA include
+`dba.with_transaction()`, `dba.with_unsafe_mode()`, and `dba.with_foreign_keys_off()`. All three allow to
+pass in any number of custom arguments and a required named or anonymous function that must come last.
 
 Asynchronous functions are currently *not allowed* in of context handlers, only synchronous ones. This is
 mainly due to the fact that `better-sqlite3`'s `transaction()` does not allow them, and for ease of
@@ -465,7 +464,10 @@ prior to calling `with_foreign_keys_off()`; the context handler will then effect
 recording the foreign keys pragma state (being `false`), set it to `false` (a no-op), and then, when your
 contextualized function finishes, re-set it to its prior state—which would most often be `true` but is
 `false` in this case, so that's another no-op. This is not the recommended way to go, though; it's probably
-better to stick to either using the pragma or else the contextualizer / context handler, but not both.
+better to stick to either using the pragma or else the context manager, but not both.
+
+Note that the `dba.with_foreign_keys_off()` context handler will *not* check for foreign keys violations;
+this part has to be done seperately by client code.
 
 ## Connection Initialization
 
@@ -691,3 +693,25 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
 * [ ] consider to implement context managers in `guy` using the [callable-class
   pattern](https://github.com/loveencounterflow/gaps-and-islands#callable-instances) and re-implement (and
   also rename) contextualizers using `class With_transaction extends guy...Context_manager`
+<del>* [ ] ensure that foreign keys are checked when `dba.with_foreign_keys_off()` is about to exit</del>
+* [ ] implement `dba.with_foreign_keys_deferred()` using [`pragma
+  defer_foreign_keys`](https://www.sqlite.org/pragma.html#pragma_defer_foreign_keys)
+
+* [ ] implement explicit foreign keys checks with `pragma schema.foreign_key_check;`, `pragma
+  schema.foreign_key_check(table-name);`
+* [ ] implement `dba.within_transaction` using `dba.sqlt.inTransaction`
+* [ ] consider to scrap RTAs in context handlers; these can always be accomplished by using a wrapper
+  function or closures. Instead use all context manager arguments to configure the context manager itself.
+  * [ ] use the above change to implement [transaction
+    flavors](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#transactionfunction---function):
+
+    ```js insertMany(cats); // uses "BEGIN"
+    insertMany.deferred(cats); // uses "BEGIN DEFERRED"
+    insertMany.immediate(cats); // uses "BEGIN IMMEDIATE"
+    insertMany.exclusive(cats); // uses "BEGIN EXCLUSIVE"
+    ```
+* [ ] implement `dba.check_foreign_keys()` using `dba.pragma SQL"foreign_key_check;"`
+* [ ] implement `dba.check_integrity()` using `dba.pragma SQL"integrity_check;"`
+* [ ] implement `dba.quick_check()` using `dba.pragma SQL"quick_check;"`
+
+
