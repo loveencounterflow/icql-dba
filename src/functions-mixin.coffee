@@ -115,4 +115,30 @@ SQL                       = String.raw
     try R = f P... finally @_set_foreign_keys_state prv_in_foreign_keys_state
     return R
 
+  #---------------------------------------------------------------------------------------------------------
+  with_foreign_keys_deferred: ( P..., f ) ->
+    @types.validate.function f
+    R             = null
+    throw new E.Dba_no_deferred_fks_in_tx '^dba-functions@901^' if @sqlt.inTransaction
+    @with_transaction =>
+      @sqlt.pragma SQL"defer_foreign_keys=true"
+      R = f P...
+    return R
+
+  # #---------------------------------------------------------------------------------------------------------
+  # with_foreign_keys_deferred: ( P..., f ) ->
+  #   @types.validate.function f
+  #   R             = null
+  #   throw new E.Dba_no_deferred_fks_in_tx '^dba-functions@901^' if @sqlt.inTransaction
+  #   @execute SQL"begin transaction;"
+  #   @sqlt.pragma SQL"defer_foreign_keys=true"
+  #   try
+  #     R = f P...
+  #   catch error
+  #     @execute SQL"rollback;"
+  #     throw error
+  #   # finally
+  #   #   @sqlt.pragma SQL"defer_foreign_keys=0"
+  #   @execute SQL"commit;"
+  #   return R
 
