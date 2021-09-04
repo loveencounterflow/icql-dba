@@ -45,7 +45,7 @@ SQL                       = String.raw
 
   #---------------------------------------------------------------------------------------------------------
   set_foreign_keys_deferred: ( onoff ) -> @types.validate.boolean onoff; @pragma SQL"defer_foreign_keys=#{onoff};"
-  get_foreign_keys_deferred: -> @pragma SQL"defer_foreign_keys;"
+  get_foreign_keys_deferred: -> not not ( @pragma SQL"defer_foreign_keys;" )?[ 0 ]?.defer_foreign_keys
 
   #=========================================================================================================
   # UNSAFE MODE
