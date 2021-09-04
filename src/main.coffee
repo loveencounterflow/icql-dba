@@ -15,7 +15,6 @@ whisper                   = CND.get_logger 'whisper',   badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
 FS                        = require 'fs'
-HOLLERITH                 = require 'hollerith-codec'
 #...........................................................................................................
 types                     = require './types'
 { freeze
@@ -576,14 +575,5 @@ class @Dba extends Checks_mixin Functions_mixin Import_export_mixin()
     @pragma "#{@sql.I to_schema}.foreign_key_check;" if fk_state
     return detach_from_schema()
 
-
-
-
-
-  #=========================================================================================================
-  # SORTABLE LISTS
-  #---------------------------------------------------------------------------------------------------------
-  as_hollerith:   ( x ) -> HOLLERITH.encode x
-  from_hollerith: ( x ) -> HOLLERITH.decode x
 
 
