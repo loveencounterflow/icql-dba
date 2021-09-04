@@ -125,20 +125,4 @@ SQL                       = String.raw
       R = f P...
     return R
 
-  # #---------------------------------------------------------------------------------------------------------
-  # with_foreign_keys_deferred: ( P..., f ) ->
-  #   @types.validate.function f
-  #   R             = null
-  #   throw new E.Dba_no_deferred_fks_in_tx '^dba-functions@901^' if @sqlt.inTransaction
-  #   @execute SQL"begin transaction;"
-  #   @sqlt.pragma SQL"defer_foreign_keys=true"
-  #   try
-  #     R = f P...
-  #   catch error
-  #     @execute SQL"rollback;"
-  #     throw error
-  #   # finally
-  #   #   @sqlt.pragma SQL"defer_foreign_keys=0"
-  #   @execute SQL"commit;"
-  #   return R
 
