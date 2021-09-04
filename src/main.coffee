@@ -438,13 +438,13 @@ class @Dba extends Checks_mixin Functions_mixin Import_export_mixin()
     { schema, }   = cfg
     schema_i      = @sql.I schema
     R             = 0
-    fk_state      = @_get_foreign_keys_state()
-    @_set_foreign_keys_state off
+    fk_state      = @get_foreign_keys_state()
+    @set_foreign_keys_state off
     for { type, name, } in @list @walk_objects { schema, _ordering: 'drop', }
       statement = "drop #{type} if exists #{@sql.I name};"
       @execute statement
       R += +1
-    @_set_foreign_keys_state fk_state
+    @set_foreign_keys_state fk_state
     return R
 
   #---------------------------------------------------------------------------------------------------------
@@ -547,8 +547,8 @@ class @Dba extends Checks_mixin Functions_mixin Import_export_mixin()
     to_schema_x   = @sql.I to_schema
     from_schema_x = @sql.I from_schema
     inserts       = []
-    fk_state      = @_get_foreign_keys_state()
-    @_set_foreign_keys_state off
+    fk_state      = @get_foreign_keys_state()
+    @set_foreign_keys_state off
     #.......................................................................................................
     for d in from_schema_objects
       continue if ( not d.sql? ) or ( d.sql is '' )
@@ -570,7 +570,7 @@ class @Dba extends Checks_mixin Functions_mixin Import_export_mixin()
         inserts.push "insert into #{to_schema_x}.#{name_x} select * from #{from_schema_x}.#{name_x};"
     #.......................................................................................................
     @execute sql for sql in inserts
-    @_set_foreign_keys_state fk_state
+    @set_foreign_keys_state fk_state
     @pragma "#{@sql.I to_schema}.foreign_key_check;" if fk_state
     return detach_from_schema()
 

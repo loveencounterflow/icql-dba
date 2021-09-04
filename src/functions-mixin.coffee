@@ -106,17 +106,17 @@ SQL                       = String.raw
   #---------------------------------------------------------------------------------------------------------
   with_unsafe_mode: ( P..., f ) ->
     @types.validate.function f
-    prv_in_unsafe_mode = @_get_unsafe_mode()
-    @_set_unsafe_mode true
-    try R = f P... finally @_set_unsafe_mode prv_in_unsafe_mode
+    prv_in_unsafe_mode = @get_unsafe_mode()
+    @set_unsafe_mode true
+    try R = f P... finally @set_unsafe_mode prv_in_unsafe_mode
     return R
 
   #---------------------------------------------------------------------------------------------------------
   with_foreign_keys_off: ( P..., f ) ->
     @types.validate.function f
-    prv_in_foreign_keys_state = @_get_foreign_keys_state()
-    @_set_foreign_keys_state false
-    try R = f P... finally @_set_foreign_keys_state prv_in_foreign_keys_state
+    prv_in_foreign_keys_state = @get_foreign_keys_state()
+    @set_foreign_keys_state false
+    try R = f P... finally @set_foreign_keys_state prv_in_foreign_keys_state
     return R
 
   #---------------------------------------------------------------------------------------------------------

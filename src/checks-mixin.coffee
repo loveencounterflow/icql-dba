@@ -78,9 +78,4 @@ SQL                       = String.raw
   check_quick:        -> @pragma SQL"quick_check;"
 
 
-  ### LEGACY ###
-  _get_foreign_keys_state: -> @get_foreign_keys_state()
-  _set_foreign_keys_state: ( onoff ) -> @set_foreign_keys_state onoff
-  _get_unsafe_mode: -> @get_unsafe_mode()
-  _set_unsafe_mode: ( onoff ) -> @set_unsafe_mode onoff
 
