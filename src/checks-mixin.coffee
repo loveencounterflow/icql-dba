@@ -63,7 +63,7 @@ SQL                       = String.raw
   #=========================================================================================================
   # TRANSACTIONS
   #---------------------------------------------------------------------------------------------------------
-  within_transaction:   -> not not dba.sqlt.inTransaction()
+  within_transaction:   -> @sqlt.inTransaction
   begin_transaction:    -> throw new @Dba_not_implemented '^dba/checks@1^', "tx_begin"
   commit_transaction:   -> throw new @Dba_not_implemented '^dba/checks@1^', "tx_commit"
   rollback_transaction: -> throw new @Dba_not_implemented '^dba/checks@1^', "tx_rollback"
