@@ -33,8 +33,9 @@
 - [API](#api)
   - [User-Defined Functions](#user-defined-functions)
   - [Context Managers](#context-managers)
-    - [With Transactions](#with-transactions)
+    - [With Transaction](#with-transaction)
     - [With Unsafe Mode](#with-unsafe-mode)
+    - [With Foreign Keys Deferred](#with-foreign-keys-deferred)
     - [With Foreign Keys Off](#with-foreign-keys-off)
   - [Connection Initialization](#connection-initialization)
 - [SQL Submodule](#sql-submodule)
@@ -415,7 +416,7 @@ mainly due to the fact that `better-sqlite3`'s `transaction()` does not allow th
 implementation. A future version of ICQL-DBA may add support for these.
 
 
-### With Transactions
+### With Transaction
 
 * **`dba.with_transaction: ( P..., f ) ->`**
 
@@ -425,20 +426,6 @@ error, issue SQL `rollback` to undo changes (to the extent SQLite3 undoes DB cha
 to `better-sqlite3`'s `transaction()` method, do not allow nested calls to `dba.with_transaction()`; an
 attempt to do so will cause a `Dba_no_nested_transactions` error to be thrown.
 
-> <del>This is a shim over `better-sqlite3`'s `transaction()` method; the following is a more or less
-> verbatim quote from the [original documentation of
-> `sqlt.transaction()`](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#transactionfunction---function):
->
-> `dba.with_transaction()` creates and calls a function that always runs inside a transaction. When the
-> function is invoked, it will begin a new transaction. When the function returns, the transaction will be
-> committed. If an exception is thrown, the transaction will be rolled back (and the exception will
-> propagate as usual).
->
-> Transaction functions can be called from inside other transaction functions. When doing so, the inner
-> transaction becomes a savepoint.
->
-> Any arguments passed to the transaction function will be forwarded to the wrapped function, and any values
-> returned from the wrapped function will be returned from the transaction function.</del>
 
 ### With Unsafe Mode
 
@@ -459,6 +446,17 @@ tables for which concurrent updates are planned. Set `lck` of all or a subset of
 be cleanly separated from the result set.
 
 <del>
+
+### With Foreign Keys Deferred
+
+* **`dba.with_foreign_keys_deferred: ( P..., f ) ->`**
+
+Given a function `f`, start a transaction, issue SQL `pragma defer_foreign_keys=true`, and call `f()`. When
+`f()` has terminated successfully, commit the transaction, thereby implicitly switching foreign keys
+deferral off and checking for foreign key integrity. Since `dba.with_foreign_keys_deferred()` implicitly
+runs in a transaction, it can itself neither be called inside a transaction, nor can a transaction be
+started by `f()`. Should `f()` throw an error, SQL `rollback` will be issued as described for
+[`dba.with_transaction()`](#with-transaction)
 
 ### With Foreign Keys Off
 
@@ -493,8 +491,11 @@ initialize_sqlt: ( sqlt ) ->
   return null
 ```
 
-In your own implementation, **do not forget to call `super sqlt` to get the default configuration for the
-connection**.
+In your own implementation,
+
+* do not forget to call `super sqlt` to get the default configuration for the connection.
+* do NOT use any instance methods like `@pragma()` in the initializer as this will lead to infinite regress
+  b/c of the way the dynamic attribute `@sqlt` has been implemented.
 
 
 # SQL Submodule
