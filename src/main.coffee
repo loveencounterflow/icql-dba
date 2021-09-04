@@ -72,7 +72,7 @@ class @Dba extends Checks_mixin Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   initialize_sqlt: ( sqlt ) ->
-    sqlt.pragma "foreign_keys = true;"
+    @set_foreign_keys_state true
     return null
 
   #---------------------------------------------------------------------------------------------------------
