@@ -92,12 +92,16 @@ SQL                       = String.raw
     try
       R = f P...
     catch error
-      debug '^35458-catch^', CND.reverse 'rollback'
+      # debug '^35458-catch^', CND.reverse 'rollback'
       @execute SQL"rollback;"
       throw error
-    finally
-      debug '^35458-finally^', CND.reverse 'rollback', error
-    @execute SQL"commit;"
+    # finally
+    #   debug '^35458-finally^', CND.reverse 'rollback', error
+    try
+      @execute SQL"commit;"
+    catch error
+      @execute SQL"rollback;"
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   with_unsafe_mode: ( P..., f ) ->
