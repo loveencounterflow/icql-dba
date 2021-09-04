@@ -281,6 +281,12 @@ Dba                       = null
   "x instanceof Dba":                     ( x ) -> x instanceof ( Dba ?= ( require './main' ).Dba )
 
 #-----------------------------------------------------------------------------------------------------------
+@declare 'dba_with_transaction_cfg', tests:
+  "@isa.object x":                                    ( x ) -> @isa.object x
+  "x.mode in [ 'deferred', 'immediate', 'exclusive', ]": \
+    ( x ) -> x.mode in [ 'deferred', 'immediate', 'exclusive', ]
+
+#-----------------------------------------------------------------------------------------------------------
 @defaults =
   #.........................................................................................................
   dba_constructor_cfg:
@@ -437,6 +443,9 @@ Dba                       = null
     name:         null
     order_by:     'random()'
     limit:        10
+  #.........................................................................................................
+  dba_with_transaction_cfg:
+    mode:         'deferred'
 
 #-----------------------------------------------------------------------------------------------------------
 @_import_formats = _import_formats = new Set Object.keys @defaults.extensions_and_formats

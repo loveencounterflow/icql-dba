@@ -83,10 +83,15 @@ SQL                       = String.raw
   #=========================================================================================================
   # CONTEXT HANDLERS
   #---------------------------------------------------------------------------------------------------------
-  with_transaction: ( f ) ->
+  with_transaction: ( cfg, f ) ->
+    switch arity = arguments.length
+      when 1 then [ cfg, f, ] = [ null, cfg, ]
+      when 2 then null
+      else throw new E.Dba_wrong_arity '^dba-functions@901^', 'with_transaction()', 1, 2, arity
+    @types.validate.dba_with_transaction_cfg ( cfg = { @types.defaults.dba_with_transaction_cfg..., cfg..., } )
     @types.validate.function f
     throw new E.Dba_no_nested_transactions '^dba-functions@901^' if @sqlt.inTransaction
-    @execute SQL"begin transaction;"
+    @execute SQL"begin #{cfg.mode} transaction;"
     error = null
     try
       R = f()
