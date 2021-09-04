@@ -19,6 +19,8 @@ FS                        = require 'fs'
 E                         = require './errors'
 { misfit }                = require './common'
 SQL                       = String.raw
+{ lets
+  freeze }                = require 'letsfreezethat'
 
 
 #===========================================================================================================
