@@ -401,22 +401,25 @@ around an SQLite database.)
 
 ## Context Managers
 
-Context managers are well known from [Python](https://docs.python.org/3/library/contextlib.html) and are
-used to ensure that a given piece of code is always run with certain pre- and post-conditions fulfilled and
-may also define their own error handling.
+Context managers are well known from [Python](https://docs.python.org/3/library/contextlib.html) (e.g. `with
+open( path ) as myfile: ...`) where they are used to ensure that a given piece of code is always run with
+certain pre- and post-conditions fulfilled. Typically the implementation of a context manager will use a
+`try` / `catch` / `finally` clause to ensure some kind of cleanup action will be performed even in the
+presence of exceptions.
 
-While JavaScript does not have syntactic support for context managers (à la `with cxm( 'foo' ) as frob:
-...`), it's still straightforward to implement them as plain functions. Context managers in ICQL-DBA include
-`dba.with_transaction()`, `dba.with_unsafe_mode()`, and `dba.with_foreign_keys_off()`. All three allow to
-pass in any number of custom arguments and a required named or anonymous function that must come last.
+While JavaScript does not have syntactic support for context managers, it's straightforward to implement
+them as plain functions. Context managers in ICQL-DBA include `dba.with_transaction()`,
+`dba.with_unsafe_mode()`, and `dba.with_foreign_keys_deferred()`. All three require as their last or only
+argument a (named or anonymous) function which will be executed with the implemented pre- and
+post-conditions.
 
-Asynchronous functions are currently *not allowed* in of context handlers, only synchronous ones. This is
-mainly due to the fact that `better-sqlite3`'s `transaction()` does not allow them, and for ease of
-implementation. A future version of ICQL-DBA may add support for these.
+Asynchronous functions are currently *not allowed* in of context handlers, though a future version may add
+support for them.
 
 
 ### With Transaction
 
+* **`dba.with_transaction: ( cfg, f ) ->`**
 * **`dba.with_transaction: ( f ) ->`**
 
 Given a function `f`, issue SQL `begin transaction;`, call the function, and, when it finishes successfully,
@@ -424,6 +427,10 @@ issue `commit;` to make data changes permanent. Should either the function call 
 error, issue SQL `rollback` to undo changes (to the extent SQLite3 undoes DB changes). In contradistinction
 to `better-sqlite3`'s `transaction()` method, do not allow nested calls to `dba.with_transaction()`; an
 attempt to do so will cause a `Dba_no_nested_transactions` error to be thrown.
+
+Optionally, `dba.with_transaction()` may be called with an additional `cfg` object whose sole member `mode`
+can be set to one of `'deferred'` (the default), `'immediate'`, or `'exclusive'` to set the [behavior of the
+transaction](https://www.sqlite.org/lang_transaction.html).
 
 
 ### With Unsafe Mode
@@ -657,7 +664,7 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
 * [X] detect format of SQLite3 files with `_is_sqlite3_db()`: [first 16 bytes should contain `SQLite format
   3\000`](https://sqlite.org/fileformat.html)
 * [ ] remove references to `hollerith-codec`, `encode()`, `decode` (replaced by `icql-dba-hollerith`)
-* [ ] consider to scrap RTAs in context handlers; these can always be accomplished by using a wrapper
+* [X] consider to scrap RTAs in context handlers; these can always be accomplished by using a wrapper
   function or closures. Instead use all context manager arguments to configure the context manager itself.
   * [ ] use the above change to implement [transaction
     flavors](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#transactionfunction---function):
@@ -685,4 +692,9 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
   * [ ] could allow within transaction?
 * [ ] implement context manager `with_ram_db: ( f ) ->` that copies DB to RAM, calls `f()`, and finally
   copies DB back to file.
+* [ ] consider to reserve the `main` schema for DBA and plugins; this could help to avoid the bespoke
+  treatment of `main` when `open()`ing RAM, file DBs; also, would obliterate the need for the one-off
+  treatment of `dba.sqlt`.
+
+
 
