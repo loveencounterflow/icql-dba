@@ -417,7 +417,7 @@ implementation. A future version of ICQL-DBA may add support for these.
 
 ### With Transaction
 
-* **`dba.with_transaction: ( P..., f ) ->`**
+* **`dba.with_transaction: ( f ) ->`**
 
 Given a function `f`, issue SQL `begin transaction;`, call the function, and, when it finishes successfully,
 issue `commit;` to make data changes permanent. Should either the function call or the `commit` throw an
@@ -428,32 +428,27 @@ attempt to do so will cause a `Dba_no_nested_transactions` error to be thrown.
 
 ### With Unsafe Mode
 
-* **`dba.with_unsafe_mode: ( P..., f ) ->`**
+* **`dba.with_unsafe_mode: ( f ) ->`**
 
-Given any number of custom arguments `P...` and a (synchronous) function `f`:
-
-* remember the current status of unsafe mode,
-* set `unsafeMode` to `true`,
-* call the function as `f P...`, then
-* set `unsafeMode` to its previous value.
+Given a function `f`, take note of the current status of unsafe mode, switch unsafe mode on, call the `f()`,
+and, finally, set unsafe mode to its previous value.
 
 Used judiciously, this allows e.g. to update rows in a table while iterating over a result set. To ensure
 proper functioning with predictable results and avoiding endless loops (caused by new rows being added to
-the result set), it is suggested to add a field `lck boolean not null default false` (for 'locked') to
-tables for which concurrent updates are planned. Set `lck` of all or a subset of rows to `true` and add
-`where lck` to your `select` statement; any inserted rows will then have the default `lck = false` value and
-be cleanly separated from the result set.
+the result set), one could e.g. use a dedicated field (say, `is_new`) in the affected table that is `false`
+for all pre-existing rows and `true` for all newly inserted ones.
 
 
 ### With Foreign Keys Deferred
 
-* **`dba.with_foreign_keys_deferred: ( P..., f ) ->`**
+* **`dba.with_foreign_keys_deferred: ( f ) ->`**
 
-Given a function `f`, start a transaction, issue SQL `pragma defer_foreign_keys=true`, and call `f()`. When
-`f()` has terminated successfully, commit the transaction, thereby implicitly switching foreign keys
-deferral off and checking for foreign key integrity. Since `dba.with_foreign_keys_deferred()` implicitly
-runs in a transaction, it can itself neither be called inside a transaction, nor can a transaction be
-started by `f()`. Should `f()` throw an error, SQL `rollback` will be issued as described for
+Given a function `f`, start a transaction, issue SQL `pragma defer_foreign_keys=true`, and call `f()`. While
+`f()` is executing, rows may now be inserted, modified or deleted without foreign keys constraints being
+checked. When `f()` has terminated successfully, commit the transaction, thereby implicitly switching
+foreign keys deferral off and checking for foreign key integrity. Since `dba.with_foreign_keys_deferred()`
+implicitly runs in a transaction, it can itself neither be called inside a transaction, nor can a
+transaction be started by `f()`. Should `f()` throw an error, SQL `rollback` will be issued as described for
 [`dba.with_transaction()`](#with-transaction)
 
 
