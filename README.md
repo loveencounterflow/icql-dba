@@ -419,20 +419,26 @@ implementation. A future version of ICQL-DBA may add support for these.
 
 * **`dba.with_transaction: ( P..., f ) ->`**
 
-This is a shim over `better-sqlite3`'s `transaction()` method; the following is a more or less verbatim
-quote from the [original documentation of
-`sqlt.transaction()`](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#transactionfunction---function):
+Given a function `f`, issue SQL `begin transaction;`, call the function, and, when it finishes successfully,
+issue `commit;` to make data changes permanent. Should either the function call or the `commit` throw an
+error, issue SQL `rollback` to undo changes (to the extent SQLite3 undoes DB changes). In contradistinction
+to `better-sqlite3`'s `transaction()` method, do not allow nested calls to `dba.with_transaction()`; an
+attempt to do so will cause a `Dba_no_nested_transactions` error to be thrown.
 
-`dba.with_transaction()` creates and calls a function that always runs inside a transaction. When the
-function is invoked, it will begin a new transaction. When the function returns, the transaction will be
-committed. If an exception is thrown, the transaction will be rolled back (and the exception will propagate
-as usual).
-
-Transaction functions can be called from inside other transaction functions. When doing so, the inner
-transaction becomes a savepoint.
-
-Any arguments passed to the transaction function will be forwarded to the wrapped function, and any values
-returned from the wrapped function will be returned from the transaction function.
+> <del>This is a shim over `better-sqlite3`'s `transaction()` method; the following is a more or less
+> verbatim quote from the [original documentation of
+> `sqlt.transaction()`](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#transactionfunction---function):
+>
+> `dba.with_transaction()` creates and calls a function that always runs inside a transaction. When the
+> function is invoked, it will begin a new transaction. When the function returns, the transaction will be
+> committed. If an exception is thrown, the transaction will be rolled back (and the exception will
+> propagate as usual).
+>
+> Transaction functions can be called from inside other transaction functions. When doing so, the inner
+> transaction becomes a savepoint.
+>
+> Any arguments passed to the transaction function will be forwarded to the wrapped function, and any values
+> returned from the wrapped function will be returned from the transaction function.</del>
 
 ### With Unsafe Mode
 
@@ -452,6 +458,7 @@ tables for which concurrent updates are planned. Set `lck` of all or a subset of
 `where lck` to your `select` statement; any inserted rows will then have the default `lck = false` value and
 be cleanly separated from the result set.
 
+<del>
 
 ### With Foreign Keys Off
 
@@ -469,14 +476,16 @@ better to stick to either using the pragma or else the context manager, but not 
 Note that the `dba.with_foreign_keys_off()` context handler will *not* check for foreign keys violations;
 this part has to be done seperately by client code.
 
+</del>
+
 ## Connection Initialization
 
-Right after a connection to an SQLite DB has been instantiated, an initialization method `@initialize_sqlt
-connection` is called. By overriding this method in a derived class, one can configure the connection e.g.
-by calling `better-sqlite3`'s `pragma()` method. When doing so, *observe that the call happens **before**
-the `dba.sqlt` attribute is set*, so *avoid to access the `dba` (`this`/`@`) instance*. You're on the safe
-side if you restrict yourself to accessing the first argument to `initialize_sqlt()`. The default
-implementation of the method looks like this:
+Right after a connection to an SQLite DB has been instantiated, an initialization method `@initialize_sqlt`
+is called with the `better-sqlite3` DB object as sole argument is called. By overriding this method in a
+derived class, one can configure the connection e.g. by calling `better-sqlite3`'s `pragma()` method. When
+doing so, *observe that the call happens **before** the `dba.sqlt` attribute is set*, so *avoid to access
+the `dba` (`this`/`@`) instance*. You're on the safe side if you restrict yourself to accessing the first
+argument to `initialize_sqlt()`. The default implementation of the method looks like this:
 
 ```coffee
 initialize_sqlt: ( sqlt ) ->
@@ -664,42 +673,13 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
 
 * add automatic deletion of tables, views, indexes
 * consider to always use `dba.pragma SQL"journal_mode=memory"`, add `cfg` property
-* [ ] implement context handler `with_ram_db: ( f ) ->` that copies DB to RAM, calls `f()`, and finally
-  copies DB back to file.
-  * alternatively, `dba.do { ram: true, foreign_keys: false, unsafe: true, }, -> ...`
 * [X] set the allowable number of attached DBs to 125 (`SQLITE_MAX_ATTACHED=125` in `build-sqlite3`; also
   see ["Maximum Number Of Attached Databases"](https://sqlite.org/limits.html))
 * [ ] enable to open directories that contain multiple file-based SQLite DBs; schemas could be named after
   (portions of) filenames
 * [X] detect format of SQLite3 files with `_is_sqlite3_db()`: [first 16 bytes should contain `SQLite format
   3\000`](https://sqlite.org/fileformat.html)
-* [X] implement
-
-  * `dba.create_with_transaction()` (a contextualizer)
-  * `dba.with_transaction()` (a context handler)
-
-  The contextualizer takes a function and returns a function that, when called, will be called with the
-  desired context (i.e. in this case a transaction that will be opened and afterwards committed). The
-  context handler uses the contextualizer to produce a one-off contextualized function that is then
-  immediately called. The contextualizer is implemented with `better-sqlite3`'s `transaction()` method.
-
-  Note that the `transaction()` method does not currently support async functions; therefore, we don't
-  support those, either; this restriction may be lifted in a future version.
-
 * [ ] remove references to `hollerith-codec`, `encode()`, `decode` (replaced by `icql-dba-hollerith`)
-* [ ] `better-sqlite3` `transaction()` docs say: "The wrapped function will also have access to the same
-  `this` binding as the transaction function."—see whether that makes sense to re-implement for the other
-  context handlers.
-* [ ] consider to implement context managers in `guy` using the [callable-class
-  pattern](https://github.com/loveencounterflow/gaps-and-islands#callable-instances) and re-implement (and
-  also rename) contextualizers using `class With_transaction extends guy...Context_manager`
-<del>* [ ] ensure that foreign keys are checked when `dba.with_foreign_keys_off()` is about to exit</del>
-* [ ] implement `dba.with_foreign_keys_deferred()` using [`pragma
-  defer_foreign_keys`](https://www.sqlite.org/pragma.html#pragma_defer_foreign_keys)
-
-* [ ] implement explicit foreign keys checks with `pragma schema.foreign_key_check;`, `pragma
-  schema.foreign_key_check(table-name);`
-* [ ] implement `dba.within_transaction` using `dba.sqlt.inTransaction`
 * [ ] consider to scrap RTAs in context handlers; these can always be accomplished by using a wrapper
   function or closures. Instead use all context manager arguments to configure the context manager itself.
   * [ ] use the above change to implement [transaction
@@ -710,10 +690,22 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
     insertMany.immediate(cats); // uses "BEGIN IMMEDIATE"
     insertMany.exclusive(cats); // uses "BEGIN EXCLUSIVE"
     ```
-* [ ] implement `dba.check_foreign_keys()` using `dba.pragma SQL"foreign_key_check;"`
-* [ ] implement `dba.check_integrity()` using `dba.pragma SQL"integrity_check;"`
-* [ ] implement `dba.check_quick()` using `dba.pragma SQL"quick_check;"`
-* [ ] implement `dba.get_foreign_keys_deferred()` using `dba.pragma SQL"defer_foreign_keys;"`
-* [ ] implement `dba.set_foreign_keys_deferred()` using `dba.pragma SQL"defer_foreign_keys;"`
-
+* [X] implement `dba.check_foreign_keys()` using `dba.pragma SQL"foreign_key_check;"`
+  * [ ] add schema, table_name; currently only works for main(?)
+* [X] implement `dba.check_integrity()` using `dba.pragma SQL"integrity_check;"`
+* [X] implement `dba.check_quick()` using `dba.pragma SQL"quick_check;"`
+* [X] implement `dba.get_foreign_keys_deferred()` using `dba.pragma SQL"defer_foreign_keys;"`
+* [X] implement `dba.set_foreign_keys_deferred()` using `dba.pragma SQL"defer_foreign_keys;"`
+* [X] implement `dba.with_transaction()`
+  * [ ] implement `deferred`, `immediate`, and `exclusive` modes; default is `deferred`.
+  * [ ] `better-sqlite3` `transaction()` docs say: "The wrapped function will also have access to the same
+    `this` binding as the transaction function."—see whether that makes sense to re-implement for the other
+    context handlers.
+* [X] implement `dba.within_transaction` using `dba.sqlt.inTransaction`
+* [X] implement `dba.with_foreign_keys_off()`
+* [X] implement `dba.with_foreign_keys_deferred()` using [`pragma
+  defer_foreign_keys`](https://www.sqlite.org/pragma.html#pragma_defer_foreign_keys)
+  * [ ] could allow within transaction?
+* [ ] implement context manager `with_ram_db: ( f ) ->` that copies DB to RAM, calls `f()`, and finally
+  copies DB back to file.
 
