@@ -1,6 +1,6 @@
 {
   "name": "icql-dba",
-  "version": "9.0.0",
+  "version": "10.0.0",
   "description": "An SQLite DB Adapter built with BetterSQLite3",
   "main": "lib/main.js",
   "scripts": {
