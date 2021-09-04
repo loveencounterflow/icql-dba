@@ -72,7 +72,9 @@ class @Dba extends Checks_mixin Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   initialize_sqlt: ( sqlt ) ->
-    @set_foreign_keys_state true
+    ### NOTE do NOT use any instance methods in the initializer as this will lead to infinite regress b/c of
+    the way the dynamic attribute `@sqlt` has been implemented. ###
+    sqlt.pragma "foreign_keys = true;"
     return null
 
   #---------------------------------------------------------------------------------------------------------
