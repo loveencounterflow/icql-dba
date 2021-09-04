@@ -111,13 +111,13 @@ SQL                       = String.raw
     try R = f P... finally @set_unsafe_mode prv_in_unsafe_mode
     return R
 
-  #---------------------------------------------------------------------------------------------------------
-  with_foreign_keys_off: ( P..., f ) ->
-    @types.validate.function f
-    prv_in_foreign_keys_state = @get_foreign_keys_state()
-    @set_foreign_keys_state false
-    try R = f P... finally @set_foreign_keys_state prv_in_foreign_keys_state
-    return R
+  # #---------------------------------------------------------------------------------------------------------
+  # with_foreign_keys_off: ( P..., f ) ->
+  #   @types.validate.function f
+  #   prv_in_foreign_keys_state = @get_foreign_keys_state()
+  #   @set_foreign_keys_state false
+  #   try R = f P... finally @set_foreign_keys_state prv_in_foreign_keys_state
+  #   return R
 
   #---------------------------------------------------------------------------------------------------------
   with_foreign_keys_deferred: ( P..., f ) ->
