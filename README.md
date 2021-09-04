@@ -36,7 +36,6 @@
     - [With Transaction](#with-transaction)
     - [With Unsafe Mode](#with-unsafe-mode)
     - [With Foreign Keys Deferred](#with-foreign-keys-deferred)
-    - [With Foreign Keys Off](#with-foreign-keys-off)
   - [Connection Initialization](#connection-initialization)
 - [SQL Submodule](#sql-submodule)
 - [ICQL-DBA Plugins](#icql-dba-plugins)
@@ -458,23 +457,6 @@ runs in a transaction, it can itself neither be called inside a transaction, nor
 started by `f()`. Should `f()` throw an error, SQL `rollback` will be issued as described for
 [`dba.with_transaction()`](#with-transaction)
 
-### With Foreign Keys Off
-
-* **`dba.with_foreign_keys_off: ( P..., f ) ->`**
-
-Temporarily switch off foreign keys constraints so inserts to tables with mutual references can be made. In
-contradistinction to `with_unsafe_mode()`, this context handler *does* track the actual state of affairs
-using `pragma foreign_keys;` so it's possible to use, say, `dba.pragma 'foreign_keys = false'` in your code
-prior to calling `with_foreign_keys_off()`; the context handler will then effectively do nothing but
-recording the foreign keys pragma state (being `false`), set it to `false` (a no-op), and then, when your
-contextualized function finishes, re-set it to its prior state—which would most often be `true` but is
-`false` in this case, so that's another no-op. This is not the recommended way to go, though; it's probably
-better to stick to either using the pragma or else the context manager, but not both.
-
-Note that the `dba.with_foreign_keys_off()` context handler will *not* check for foreign keys violations;
-this part has to be done seperately by client code.
-
-</del>
 
 ## Connection Initialization
 
