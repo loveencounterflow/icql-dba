@@ -444,7 +444,6 @@ tables for which concurrent updates are planned. Set `lck` of all or a subset of
 `where lck` to your `select` statement; any inserted rows will then have the default `lck = false` value and
 be cleanly separated from the result set.
 
-<del>
 
 ### With Foreign Keys Deferred
 
