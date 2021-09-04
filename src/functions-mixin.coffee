@@ -83,20 +83,16 @@ SQL                       = String.raw
   #=========================================================================================================
   # CONTEXT HANDLERS
   #---------------------------------------------------------------------------------------------------------
-  with_transaction: ( P..., f ) ->
+  with_transaction: ( f ) ->
     @types.validate.function f
-    # return ( @sqlt.transaction f ) P...
     throw new E.Dba_no_nested_transactions '^dba-functions@901^' if @sqlt.inTransaction
     @execute SQL"begin transaction;"
     error = null
     try
-      R = f P...
+      R = f()
     catch error
-      # debug '^35458-catch^', CND.reverse 'rollback'
       @execute SQL"rollback;"
       throw error
-    # finally
-    #   debug '^35458-finally^', CND.reverse 'rollback', error
     try
       @execute SQL"commit;"
     catch error
@@ -104,29 +100,24 @@ SQL                       = String.raw
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  with_unsafe_mode: ( P..., f ) ->
+  with_unsafe_mode: ( f ) ->
     @types.validate.function f
-    prv_in_unsafe_mode = @get_unsafe_mode()
+    unsafe_mode_state = @get_unsafe_mode()
     @set_unsafe_mode true
-    try R = f P... finally @set_unsafe_mode prv_in_unsafe_mode
+    try
+      R = f()
+    finally
+      @set_unsafe_mode unsafe_mode_state
     return R
 
-  # #---------------------------------------------------------------------------------------------------------
-  # with_foreign_keys_off: ( P..., f ) ->
-  #   @types.validate.function f
-  #   prv_in_foreign_keys_state = @get_foreign_keys_state()
-  #   @set_foreign_keys_state false
-  #   try R = f P... finally @set_foreign_keys_state prv_in_foreign_keys_state
-  #   return R
-
   #---------------------------------------------------------------------------------------------------------
-  with_foreign_keys_deferred: ( P..., f ) ->
+  with_foreign_keys_deferred: ( f ) ->
     @types.validate.function f
-    R             = null
+    R = null
     throw new E.Dba_no_deferred_fks_in_tx '^dba-functions@901^' if @sqlt.inTransaction
     @with_transaction =>
       @sqlt.pragma SQL"defer_foreign_keys=true"
-      R = f P...
+      R = f()
     return R
 
 
