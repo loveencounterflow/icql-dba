@@ -695,6 +695,12 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
 * [ ] consider to reserve the `main` schema for DBA and plugins; this could help to avoid the bespoke
   treatment of `main` when `open()`ing RAM, file DBs; also, would obliterate the need for the one-off
   treatment of `dba.sqlt`.
-
-
+* [ ] consider to change the default DB's name using `SQLITE_DBCONFIG_MAINDBNAME` (`sqlite3.c#2524`) (maybe
+  to `icql`) and use it only for internal purposes. Users can still have a `main` schema but it's not the
+  default one anymore.
+  * contra—this would not solve the problem of statements like `create table x ( ... );` being applied to
+    the 'main' schema even if it's not called `main`. `select from x ...;` statements are another matter;
+    they'll pick the first relation named `x` from any schema, in order of creation. In short, one would
+    have to require users to always prefix all their object names with a schema, which is a no-go; adjusting
+    all names in all statements is similarly no way to go.
 
