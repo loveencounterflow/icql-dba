@@ -60,6 +60,7 @@ class @Dba extends Checks_mixin Functions_mixin Import_export_mixin()
     @_state = freeze {
       in_unsafe_mode:   false
       initialized:      false }
+    @_catalog = freeze {} ### NOTE: will hold data on user-defined functions, virtual tables ###
     #.......................................................................................................
     guy.props.def_oneoff @, 'sqlt', {}, =>
       connection    = new_bsqlt3_connection '', @_bsqlt3_cfg

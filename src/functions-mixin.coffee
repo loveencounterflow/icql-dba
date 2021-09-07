@@ -19,11 +19,32 @@ FS                        = require 'fs'
 E                         = require './errors'
 { misfit }                = require './common'
 SQL                       = String.raw
+{ lets
+  freeze }                = require 'letsfreezethat'
 
 
 #-----------------------------------------------------------------------------------------------------------
 @Functions_mixin = ( clasz = Object ) => class extends clasz
 
+  #---------------------------------------------------------------------------------------------------------
+  _register_udf: ( udf_type, cfg ) ->
+    ### TAINT validate more thoroughly, especially cfg._dba_udf_type ###
+    ### TAINT consider to use (virtual?) table for this ###
+    @types.validate.nonempty_text udf_type
+    @types.validate.object cfg
+    @types.validate.nonempty_text cfg.name
+    { name, } = cfg
+    switch udf_type
+      when 'single_valued'
+        entry =
+          name:   name
+          arity:  cfg.call.length ### TAINT respect varargs ###
+      else
+        entry =
+          name:   name
+          cfg:    cfg
+    @_catalog = lets @_catalog, ( d ) -> d[ cfg.name ] = entry
+    return null
 
   #=========================================================================================================
   # USER-DEFINED FUNCTIONS
@@ -35,7 +56,9 @@ SQL                       = String.raw
       directOnly
       deterministic
       varargs }     = cfg
-    return @sqlt.function name, { deterministic, varargs, directOnly, }, call
+    @sqlt.function name, { deterministic, varargs, directOnly, }, call
+    @_register_udf 'single_valued', cfg
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   create_aggregate_function: ( cfg ) ->
@@ -46,7 +69,9 @@ SQL                       = String.raw
       directOnly
       deterministic
       varargs }     = cfg
-    return @sqlt.aggregate name, { start, step, deterministic, varargs, directOnly, }
+    @sqlt.aggregate name, { start, step, deterministic, varargs, directOnly, }
+    @_register_udf 'aggregate', cfg
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   create_window_function: ( cfg ) ->
@@ -59,7 +84,9 @@ SQL                       = String.raw
       directOnly
       deterministic
       varargs }     = cfg
-    return @sqlt.aggregate name, { start, step, inverse, result, deterministic, varargs, directOnly, }
+    @sqlt.aggregate name, { start, step, inverse, result, deterministic, varargs, directOnly, }
+    @_register_udf 'window', cfg
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   create_table_function: ( cfg ) ->
@@ -71,13 +98,17 @@ SQL                       = String.raw
       directOnly
       deterministic
       varargs }     = cfg
-    return @sqlt.table name, { parameters, columns, rows, deterministic, varargs, directOnly, }
+    @sqlt.table name, { parameters, columns, rows, deterministic, varargs, directOnly, }
+    @_register_udf 'table_function', cfg
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   create_virtual_table: ( cfg ) ->
     @types.validate.dba_create_virtual_table_cfg ( cfg = { @types.defaults.dba_create_virtual_table_cfg..., cfg..., } )
     { name, create, } = cfg
-    return @sqlt.table name, create
+    @sqlt.table name, create
+    @_register_udf 'virtual_table', cfg
+    return null
 
 
   #=========================================================================================================
