@@ -28,6 +28,7 @@ TMP                       = require 'tempy'
 { Import_export_mixin }   = require './import-export-mixin'
 { Functions_mixin }       = require './functions-mixin'
 { Checks_mixin }          = require './checks-mixin'
+{ Stdlib_mixin }          = require './stdlib'
 guy                       = require 'guy'
 SQL                       = String.raw
 
@@ -36,7 +37,7 @@ SQL                       = String.raw
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-class @Dba extends Checks_mixin Functions_mixin Import_export_mixin()
+class @Dba extends Stdlib_mixin Checks_mixin Functions_mixin Import_export_mixin()
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
