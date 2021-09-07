@@ -55,6 +55,11 @@ Dba                       = null
   "x is an object":                       ( x ) -> @isa.object          x
   "x._temp_prefix is a ic_schema":        ( x ) -> @isa.ic_schema       x._temp_prefix
   # "@isa_optional.nonempty_text x.path":   ( x ) -> @isa_optional.nonempty_text x.path
+  "@isa.boolean x.readonly":        ( x ) -> @isa.boolean x.readonly
+  "@isa.boolean x.create":        ( x ) -> @isa.boolean x.create
+  "@isa.boolean x.overwrite":        ( x ) -> @isa.boolean x.overwrite
+  ### TAINT possibly `timout: 0` could be valid ###
+  "@isa.positive_float x.timeout":        ( x ) -> @isa.positive_float x.timeout
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_open_cfg', tests:
@@ -102,7 +107,7 @@ Dba                       = null
   "@isa.nonempty_text x.name":        ( x ) -> @isa.nonempty_text x.name
   "@isa_optional.list x.columns":     ( x ) -> @isa_optional.list x.columns
   "@isa_optional.list x.parameters":  ( x ) -> @isa_optional.list x.parameters
-  "@isa.(generator)function x.rows":  ( x ) -> ( @isa.function x.rows ) or ( @isa.generatorfunction x.rows )
+  "@isa.generatorfunction x.rows":    ( x ) -> @isa.generatorfunction x.rows
   "@isa.boolean x.deterministic":     ( x ) -> @isa.boolean x.deterministic
   "@isa.boolean x.varargs":           ( x ) -> @isa.boolean x.varargs
   "@isa.boolean x.directOnly":        ( x ) -> @isa.boolean x.directOnly
