@@ -58,15 +58,16 @@ class @Dba extends Stdlib_mixin Checks_mixin Functions_mixin Import_export_mixin
       fileMustExist:  not @cfg.create
       timeout:        @cfg.timeout }
       # verbose:        ### TAINT to be done ###
-    @_state = freeze {
+    @_state = {
       in_unsafe_mode:   false
-      initialized:      false }
+      initialized:      false
+      stdlib_created:   false }
     @_catalog = freeze {} ### NOTE: will hold data on user-defined functions, virtual tables ###
     #.......................................................................................................
     guy.props.def_oneoff @, 'sqlt', {}, =>
-      connection    = new_bsqlt3_connection '', @_bsqlt3_cfg
+      connection          = new_bsqlt3_connection '', @_bsqlt3_cfg
       @initialize_sqlt connection
-      @_state = lets @_state, ( d ) -> d.initialized = true
+      @_state.initialized = true
       return connection
     #.......................................................................................................
     return undefined
