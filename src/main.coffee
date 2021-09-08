@@ -493,10 +493,12 @@ class @Dba extends Stdlib_mixin Checks_mixin Functions_mixin Import_export_mixin
     unless @_state.initialized
       if schema is 'main'
         ### TAINT code duplication from oneoff handler ###
-        connection = new_bsqlt3_connection path, @_bsqlt3_cfg
+        connection          = new_bsqlt3_connection path, @_bsqlt3_cfg
         @initialize_sqlt connection
         guy.props.def @, 'sqlt', enumerable: false, configurable: false, value: connection
-        @_schemas = lets @_schemas, ( d ) => d[ schema ] = { path: saveas, } ### TAINT use API call ###
+        @_state.initialized = true
+        @_schemas           = lets @_schemas, ( d ) =>
+          d[ schema ] = { path: saveas, } ### TAINT use API call ###
         return null
       ignore = @sqlt ### NOTE retrieve dynamic attribute for side effect, ignore its value ###
     #.......................................................................................................
