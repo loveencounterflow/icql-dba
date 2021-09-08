@@ -28,7 +28,7 @@ TMP                       = require 'tempy'
 { Import_export_mixin }   = require './import-export-mixin'
 { Functions_mixin }       = require './functions-mixin'
 { Checks_mixin }          = require './checks-mixin'
-{ Stdlib_mixin }          = require './stdlib'
+{ Stdlib_mixin }          = require './stdlib-mixin'
 guy                       = require 'guy'
 SQL                       = String.raw
 
