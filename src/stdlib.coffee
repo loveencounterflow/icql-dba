@@ -22,21 +22,21 @@ echo                      = CND.echo.bind CND
 
     #-------------------------------------------------------------------------------------------------------
     @create_function
-      name:           cfg.prefix + 'str_reverse'
+      name:           prefix + 'str_reverse'
       deterministic:  true
       varargs:        false
       call:           ( s ) -> ( Array.from s ).reverse().join ''
 
     #-------------------------------------------------------------------------------------------------------
     @create_function
-      name:           cfg.prefix + 'str_join'
+      name:           prefix + 'str_join'
       deterministic:  true
       varargs:        true
       call:           ( joiner, P... ) -> P.join joiner
 
     #-------------------------------------------------------------------------------------------------------
     @create_table_function
-      name:           cfg.prefix + 'str_split_first'
+      name:           prefix + 'str_split_first'
       columns:        [ 'prefix', 'suffix', ]
       parameters:     [ 'text', 'splitter', ]
       deterministic:  true
@@ -49,7 +49,7 @@ echo                      = CND.echo.bind CND
 
     #-------------------------------------------------------------------------------------------------------
     @create_table_function
-      name:           cfg.prefix + 'generate_series'
+      name:           prefix + 'generate_series'
       columns:        [ 'value', ]
       parameters:     [ 'start', 'stop', 'step', ]
       varargs:        true
