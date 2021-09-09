@@ -705,3 +705,16 @@ icql-dba@7.2.0 (63 deps, 14.36mb, 687 files)
     have to require users to always prefix all their object names with a schema, which is a no-go; adjusting
     all names in all statements is similarly no way to go.
 
+* [ ] try to circumvent the problem with UDFs that perform DB queries by
+  * [ ] opening an issue @ `better-sqlite3`
+  * [ ] creating a second connection as `sqlt2`; this must always co-perform
+    * [ ] all `attach` statements
+    * [ ] all `dettach` statements
+    * [ ] all pragmas that affect the connection properties (as opposed to DB properties)
+  * [ ] this is best done *after* reverting the earlier change that parameters to `dba.open()` cannot be
+    passed to the constructor; after the change, they *must* be assed to the constructor to open the `main`
+    schema. This is more in line how `better-sqlite3` and SQLite work, so should overall simplify / clarify
+    things.
+    * [ ] consider to re-name `dba.open()`, `dba.close()` to `dba.attach()`, `dba.detach()`
+
+
