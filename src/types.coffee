@@ -54,12 +54,14 @@ Dba                       = null
 @declare 'dba_constructor_cfg', tests:
   "x is an object":                       ( x ) -> @isa.object          x
   "x._temp_prefix is a ic_schema":        ( x ) -> @isa.ic_schema       x._temp_prefix
-  # "@isa_optional.nonempty_text x.path":   ( x ) -> @isa_optional.nonempty_text x.path
-  "@isa.boolean x.readonly":        ( x ) -> @isa.boolean x.readonly
-  "@isa.boolean x.create":        ( x ) -> @isa.boolean x.create
-  "@isa.boolean x.overwrite":        ( x ) -> @isa.boolean x.overwrite
+  "@isa.boolean x.readonly":              ( x ) -> @isa.boolean x.readonly
+  "@isa.boolean x.create":                ( x ) -> @isa.boolean x.create
+  "@isa.boolean x.overwrite":             ( x ) -> @isa.boolean x.overwrite
   ### TAINT possibly `timout: 0` could be valid ###
   "@isa.positive_float x.timeout":        ( x ) -> @isa.positive_float x.timeout
+  # "@isa.ic_not_temp_schema x.schema":     ( x ) -> @isa.ic_not_temp_schema x.schema
+  "@isa_optional.ic_path x.path":         ( x ) -> @isa_optional.ic_path x.path
+  "@isa.boolean x.ram":                   ( x ) -> @isa.boolean x.ram
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'dba_open_cfg', tests:
@@ -305,7 +307,9 @@ Dba                       = null
     create:       true
     overwrite:    false
     timeout:      5000
-    # path:         null
+    # schema:       'main'
+    path:         null
+    ram:          false
   #.........................................................................................................
   dba_attach_cfg:
     schema:     null
