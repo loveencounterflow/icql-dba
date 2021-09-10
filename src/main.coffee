@@ -592,5 +592,29 @@ class @Dba extends Stdlib_mixin Checks_mixin Functions_mixin Import_export_mixin
     @pragma "#{@sql.I to_schema}.foreign_key_check;" if fk_state
     return detach_from_schema()
 
+  #=========================================================================================================
+  # RANDOM NUMBER GENERATION
+  # seedable for testing purposes
+  #---------------------------------------------------------------------------------------------------------
+  ### To obtain a class with a seedable PRNG that emits repeatable sequences, define class property
+  `@_rnd_int_cfg: { seed, delta, }` where both seed and delta can be arbitrary finite numbers. **NOTE**
+  very small `delta` values (like 1e-10) may cause adjacent numbers to be close together or even repeat. To
+  use default values for both parameters, set `@_rnd_int_cfg: true`.###
+  @_rnd_int_cfg = null
+  guy.props.def_oneoff @, '_rnd_int', { enumerable: true, }, ->
+    debug '^33343^', Dbax._rnd_int_cfg
+    return CND.random_integer.bind CND unless Dbax._rnd_int_cfg?
+    return CND.get_rnd_int ( Dbax._rnd_int_cfg.seed ? 12.34 ), ( Dbax._rnd_int_cfg.delta ? 1 )
+
+  #---------------------------------------------------------------------------------------------------------
+  _get_connection_url: ( name = null ) =>
+    ### Given an optional `name`, return an object with the `name` and the `url` for a new SQLite
+    connection. The url will look like `'file:your_name_here?mode=memory&cache=shared` so multiple
+    connections to the same RAM DB can be opened. When `name` is not given, a random name like
+    `_icql_6200294332` will be chosen (prefix `_icql_`, suffix ten decimal digits). For testing, setting
+    class property `@_rnd_int_cfg` can be used to obtain repeatable series of random names. ###
+    name ?= "_icql_#{@constructor._rnd_int 1_000_000_000, 9_999_999_999}"
+    url   = "file:#{name}?mode=memory&cache=shared"
+    return { url, name, }
 
 
