@@ -603,10 +603,14 @@ class @Dba extends Stdlib_mixin Checks_mixin Functions_mixin Import_export_mixin
   use default values for both parameters, set `@_rnd_int_cfg: true`.###
   @_rnd_int_cfg: null
   _initialize_prng: ->
-    guy.props.def_oneoff @, '_rnd_int', { enumerable: true, }, ->
-      clasz = @constructor
-      return CND.random_integer.bind CND unless clasz._rnd_int_cfg?
-      return CND.get_rnd_int ( clasz._rnd_int_cfg.seed ? 12.34 ), ( clasz._rnd_int_cfg.delta ? 1 )
+    clasz = @constructor
+    if clasz._rnd_int_cfg?
+      seed      = clasz._rnd_int_cfg.seed   ? 12.34
+      delta     = clasz._rnd_int_cfg.delta  ? 1
+      @_rnd_int = CND.get_rnd_int seed, delta
+    else
+      @_rnd_int = CND.random_integer.bind CND
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   _get_connection_url: ( name = null ) =>
