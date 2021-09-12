@@ -50,8 +50,9 @@ class @Dba extends Stdlib_mixin Checks_mixin Functions_mixin Import_export_mixin
     @types.validate.dba_constructor_cfg @cfg
     @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
     @_formats     = freeze { @types.defaults.extensions_and_formats..., }
-    # throw new E.Dba_cfg_error '^dba@300^', "property `sqlt` not supported"   if @cfg.sqlt?
-    throw new E.Dba_cfg_error '^dba@300^', "property `schema` not supported"   if @cfg.schema?
+    throw new E.Dba_cfg_error '^dba@300^', "property `sqlt` not supported"   if @cfg.sqlt?
+    throw new E.Dba_cfg_error '^dba@301^', "property `schema` not supported" if @cfg.schema?
+    throw new E.Dba_cfg_error '^dba@302^', "property `path` not supported"   if @cfg.path?
     @_bsqlt3_cfg  = freeze {
       readonly:       @cfg.readonly
       fileMustExist:  not @cfg.create
@@ -62,27 +63,63 @@ class @Dba extends Stdlib_mixin Checks_mixin Functions_mixin Import_export_mixin
       initialized:      false
       stdlib_created:   false }
     @_catalog = freeze {} ### NOTE: will hold data on user-defined functions, virtual tables ###
-    @_state.initialized = true ### TAINT remove ###
-    @_initialize_prng()
     #.......................................................................................................
-    debug '^3453^', @cfg
-    { ram, path, } = @cfg
-    if ram
-      ### formulate connection string à la 'file:memdb1?mode=memory&cache=shared' ###
-      if path?
-        ### File DB, Eventual Persistency; opened from file (may get created), mirror to RAM ###
-        null
-      else
-        ### RAM DB, No Persistency, starts empty ###
-        null
-    else
-      ### File DB, Continuous Persistency ###
-      null
-    @sqlt               = new_bsqlt3_connection path, @_bsqlt3_cfg
-    @sqlt2              = new_bsqlt3_connection path, @_bsqlt3_cfg
-    @initialize_sqlt @sqlt
+    guy.props.def_oneoff @, 'sqlt', {}, =>
+      connection          = new_bsqlt3_connection '', @_bsqlt3_cfg
+      @initialize_sqlt connection
+      @_state.initialized = true
+      return connection
     #.......................................................................................................
     return undefined
+
+  # #---------------------------------------------------------------------------------------------------------
+  # constructor: ( cfg ) ->
+  #   super()
+  #   guy.props.def @, 'types',       { enumerable: false, value: types, }
+  #   guy.props.def @, '_statements', { enumerable: false, value: {}, }
+  #   guy.props.def @, 'sql',         { enumerable: false, value: ( new ( require './sql' ).Sql() ), }
+  #   @_schemas     = freeze {}
+  #   @cfg          = freeze { @types.defaults.dba_constructor_cfg..., cfg..., }
+  #   @types.validate.dba_constructor_cfg @cfg
+  #   @_dbg         = { debug: @cfg.debug, echo: @cfg.echo, }
+  #   @_formats     = freeze { @types.defaults.extensions_and_formats..., }
+  #   # throw new E.Dba_cfg_error '^dba@300^', "property `sqlt` not supported"   if @cfg.sqlt?
+  #   throw new E.Dba_cfg_error '^dba@300^', "property `schema` not supported"   if @cfg.schema?
+  #   @_bsqlt3_cfg  = freeze {
+  #     readonly:       @cfg.readonly
+  #     fileMustExist:  not @cfg.create
+  #     timeout:        @cfg.timeout }
+  #     # verbose:        ### TAINT to be done ###
+  #   @_state = {
+  #     in_unsafe_mode:   false
+  #     initialized:      false
+  #     stdlib_created:   false }
+  #   @_catalog = freeze {} ### NOTE: will hold data on user-defined functions, virtual tables ###
+  #   @_state.initialized = true ### TAINT remove ###
+  #   @_initialize_prng()
+  #   #.......................................................................................................
+  #   { ram
+  #     name
+  #     path } = @cfg
+  #   if ram
+  #     ### formulate connection string à la 'file:memdb1?mode=memory&cache=shared' ###
+  #     { url
+  #       name } = dba._get_connection_url name ? null
+  #     debug '^3443^', name, url
+  #     if path?
+  #       ### File DB, Eventual Persistency; opened from file (may get created), mirror to RAM ###
+  #       null
+  #     else
+  #       ### RAM DB, No Persistency, starts empty ###
+  #       null
+  #   else
+  #     ### File DB, Continuous Persistency ###
+  #     null
+  #   @sqlt               = new_bsqlt3_connection path, @_bsqlt3_cfg
+  #   @sqlt2              = new_bsqlt3_connection path, @_bsqlt3_cfg
+  #   @initialize_sqlt @sqlt
+  #   #.......................................................................................................
+  #   return undefined
 
   #---------------------------------------------------------------------------------------------------------
   initialize_sqlt: ( sqlt ) ->
