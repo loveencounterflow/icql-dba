@@ -613,15 +613,15 @@ class @Dba extends Stdlib_mixin Checks_mixin Functions_mixin Import_export_mixin
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _get_connection_url: ( name = null ) =>
-    ### TAINT rename `name` to `dbnick` ###
-    ### Given an optional `name`, return an object with the `name` and the `url` for a new SQLite
+  _get_connection_url: ( dbnick = null ) =>
+    ### TAINT rename `dbnick` to `dbnick` ###
+    ### Given an optional `dbnick`, return an object with the `dbnick` and the `url` for a new SQLite
     connection. The url will look like `'file:your_name_here?mode=memory&cache=shared` so multiple
-    connections to the same RAM DB can be opened. When `name` is not given, a random name like
+    connections to the same RAM DB can be opened. When `dbnick` is not given, a random dbnick like
     `_icql_6200294332` will be chosen (prefix `_icql_`, suffix ten decimal digits). For testing, setting
     class property `@_rnd_int_cfg` can be used to obtain repeatable series of random names. ###
-    name ?= "_icql_#{@_rnd_int 1_000_000_000, 9_999_999_999}"
-    url   = "file:#{name}?mode=memory&cache=shared"
-    return { url, name, }
+    dbnick ?= "_icql_#{@_rnd_int 1_000_000_000, 9_999_999_999}"
+    url     = "file:#{dbnick}?mode=memory&cache=shared"
+    return { url, dbnick, }
 
 
