@@ -68,4 +68,15 @@ echo                      = CND.echo.bind CND
         return null
 
     #-------------------------------------------------------------------------------------------------------
+    @create_table_function
+      name:         prefix + 're_matches'
+      columns:      [ 'match', 'capture', ]
+      parameters:   [ 'text', 'pattern', ]
+      rows: ( text, pattern ) ->
+        regex = new RegExp pattern, 'g'
+        while ( match = regex.exec text )?
+          yield [ match[ 0 ], ( match[ 1 ] ? null ), ]
+        return null
+
+    #-------------------------------------------------------------------------------------------------------
     return null
